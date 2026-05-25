@@ -1,0 +1,43 @@
+{
+  "$schema": "https://developer.microsoft.com/en-us/json-schemas/teams/v1.15/MicrosoftTeams.schema.json",
+  "manifestVersion": "1.15",
+  "version": "1.0.0",
+  "id": "3964b181-a946-4afd-a8c1-07f863182796",
+  "packageName": "com.manifest.contract",
+  "developer": {
+    "name": "Chokchey Finance PLC",
+    "websiteUrl": "https://captivity-rumbling-skirmish.ngrok-free.dev/",
+    "privacyUrl": "https://captivity-rumbling-skirmish.ngrok-free.dev//privacy",
+    "termsOfUseUrl": "https://captivity-rumbling-skirmish.ngrok-free.dev//terms"
+  },
+  "name": {
+    "short": "Contract Management",
+    "full": "Contract Management System"
+  },
+  "description": {
+    "short": "Manage contracts inside Teams",
+    "full": "Full contract management system integrated into Microsoft Teams"
+  },
+  "icons": {
+    "color": "color.png",
+    "outline": "outline.png"
+  },
+  "accentColor": "#0078D7",
+  "staticTabs": [
+    {
+      "entityId": "contractsTab",
+      "name": "Contracts",
+      "contentUrl": "https://captivity-rumbling-skirmish.ngrok-free.dev//teams-tab",
+      "websiteUrl": "https://captivity-rumbling-skirmish.ngrok-free.dev/",
+      "scopes": ["personal", "team"]
+    }
+  ],
+  "permissions": ["identity"],
+  "validDomains": [
+    "captivity-rumbling-skirmish.ngrok-free.dev"
+  ],
+  "webApplicationInfo": {
+    "id": "3964b181-a946-4afd-a8c1-07f863182796",
+    "resource":"api://captivity-rumbling-skirmish.ngrok-free.dev/3964b181-a946-4afd-a8c1-07f863182796"
+  }
+}
