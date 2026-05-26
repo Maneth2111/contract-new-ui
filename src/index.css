@@ -18,22 +18,22 @@ input[type="password"]::-webkit-strong-password-auto-fill-button {
   display: block !important;
   width: 100%;
 }
-
+/* 
 .react-datepicker__month-select,
 .react-datepicker__year-select {
   @apply px-2 py-1 border border-gray-300 rounded-md bg-white text-sm outline-none focus:ring-1 focus:ring-primary;
   cursor: pointer;
-}
+} */
 
-.react-datepicker__header__dropdown {
+/* .react-datepicker__header__dropdown {
   @apply py-2 flex justify-center gap-2 bg-gray-50 border-b border-gray-200;
 }
 
 .react-datepicker__day--in-range {
-  @apply !rounded-none !bg-primary/10 !text-brand-navy;
+  @apply !rounded-none bg-primary/10! text-brand-navy!;
 }
 
 .react-datepicker__day--range-start,
 .react-datepicker__day--range-end {
   @apply !rounded-full !bg-primary !text-white;
-}
+} */
