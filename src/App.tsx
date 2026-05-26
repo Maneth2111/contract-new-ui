@@ -7,13 +7,14 @@ import { NotificationCenter } from './components/NotificationCenter';
 import { ReportDashboard } from './components/ReportDashboard';
 import { UserManagement } from './components/UserManagement';
 import Cookies from "js-cookie";
-import { LayoutDashboard, FileText, Eye, Bell, BarChart3, User as UserIcon, Users, LogOut, Loader2, ServerCrash } from 'lucide-react';
+import { LayoutDashboard, FileText, Bell, BarChart3, User as UserIcon, Users, LogOut, Loader2, ServerCrash } from 'lucide-react';
 import { getCurrentUser, UserProfile } from './services/userService';
 import { titleCase } from "text-case";
 import toast, { Toaster } from 'react-hot-toast';
 import { ConfirmDialog } from './components/ConfirmationDialog';
 import { useContracts } from './hook/useContracts';
 import { ContractDetails } from './components/ContractDetails';
+import { UserDetails } from './components/UserDetails';
 import { useNotifications } from './hook/useNotification';
 import api from './api/axios';
 import { useTeamsSSO } from './hook/useTeamSSO';
@@ -38,7 +39,7 @@ import {
 } from './utils/contractDetailRoute';
 
 
-type Tab = 'dashboard' | 'contracts' | 'contract-details' | 'notifications' | 'reports' | 'users';
+type Tab = 'dashboard' | 'contracts' | 'notifications' | 'reports' | 'users';
 
 export default function App() {
   const [teamsAccountMissing, setTeamsAccountMissing] = useState<{
@@ -122,6 +123,8 @@ export default function App() {
   }, [])
 
   const [contractDetailsFormMode, setContractDetailsFormMode] = useState<'view' | 'edit' | 'renew'>('view');
+  const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
+  const [userDetailsFormMode, setUserDetailsFormMode] = useState<'view' | 'edit'>('view');
   const [user, setCurrentUser] = useState<UserProfile | null>(null);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [selectedContractId, setSelectedContractId] = useState<number | null>(null);
@@ -129,15 +132,28 @@ export default function App() {
   const [contractDetailTab, setContractDetailTab] = useState<ContractDetailTab>('details');
   const [activeTab, setActiveTab] = useState<Tab>(() => {
     const savedTab = Cookies.get("activeTab");
-    if (savedTab === 'register') return 'contracts';
+    if (savedTab === 'register' || savedTab === 'contract-details') return 'contracts';
     return (savedTab as Tab) || "dashboard";
   });
+
+  const closeUserDetails = useCallback(() => {
+    setSelectedUserId(null);
+    setUserDetailsFormMode('view');
+  }, []);
+
+  const openUserDetails = useCallback((
+    userId: number,
+    formMode: 'view' | 'edit' = 'view'
+  ) => {
+    setUserDetailsFormMode(formMode);
+    setSelectedUserId(userId);
+  }, []);
 
   const closeContractDetails = useCallback(() => {
     setSelectedContractId(null);
     setContractDetailsHideRenew(false);
     setContractDetailTab('details');
-    setActiveTab('contracts');
+    setContractDetailsFormMode('view');
     if (parseContractDetailPath(window.location.pathname)) {
       window.history.pushState({}, '', '/');
     }
@@ -156,7 +172,6 @@ export default function App() {
     setContractDetailsFormMode(options?.formMode ?? 'view');
     setSelectedContractId(contractId);
     setContractDetailTab(tab);
-    setActiveTab('contract-details');
     window.history.pushState({}, '', buildContractDetailPath(contractId));
   }, []);
   const [isLoggedIn, setIsLoggedIn] = useState(() => {
@@ -269,7 +284,6 @@ export default function App() {
     setSelectedContractId(parsed.contractId);
     setContractDetailTab(parsed.tab);
     setContractDetailsHideRenew(false);
-    setActiveTab('contract-details');
   }, [isLoggedIn]);
 
   useEffect(() => {
@@ -277,7 +291,6 @@ export default function App() {
     const onPopState = () => {
       const parsed = parseContractDetailPath(window.location.pathname)
       if (parsed) {
-        setActiveTab('contract-details');
         setSelectedContractId(parsed.contractId);
         setContractDetailTab(parsed.tab);
         setContractDetailsHideRenew(false);
@@ -286,7 +299,7 @@ export default function App() {
       setSelectedContractId(null);
       setContractDetailsHideRenew(false);
       setContractDetailTab('details');
-      setActiveTab('contracts');
+      setContractDetailsFormMode('view');
     };
     window.addEventListener('popstate', onPopState);
     return () => window.removeEventListener('popstate', onPopState);
@@ -335,6 +348,7 @@ export default function App() {
   };
 
   const contractRefetchRef = useRef<() => void>(() => { });
+  const userRefetchRef = useRef<() => void>(() => { });
 
   // Update User
   const handleUpdateUser = (updatedUser: User) => {
@@ -388,7 +402,7 @@ export default function App() {
                   setServerDown(false)
                   window.location.reload()
                 }}
-                className="px-5 py-2.5 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 transition-colors cursor-pointer shadow-sm"
+                className="px-5 py-2.5 rounded-lg bg-primary text-white text-sm font-medium hover:bg-primary/90 transition-colors cursor-pointer shadow-sm"
               >
                 Try Again
               </button>
@@ -416,14 +430,14 @@ export default function App() {
     if (isLoggingIn) {
       return (
         <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center px-6 gap-3">
-          <Loader2 className="h-9 w-9 text-blue-600 animate-spin" aria-hidden />
+          <Loader2 className="h-9 w-9 text-primary animate-spin" aria-hidden />
         </div>
       )
     }
     if (isTeamsApp && (teamsLoading || teamsProfileCheckPending)) {
       return (
         <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center px-6 gap-3">
-          <Loader2 className="h-9 w-9 text-blue-600 animate-spin" aria-hidden />
+          <Loader2 className="h-9 w-9 text-primary animate-spin" aria-hidden />
         </div>
       )
     }
@@ -431,6 +445,7 @@ export default function App() {
       <MicrosoftTeamsLoginScreen
         onTeamsLogin={handleTeamsBrowserLogin}
       />
+      
     )
   }
 
@@ -439,56 +454,43 @@ export default function App() {
       <Toaster position="top-center" toastOptions={{ duration: 4000 }} />
       {/* Header with tab navigation */}
       <header className="bg-white border-b border-gray-200 sticky top-0 z-40">
-        <div className="max-w-350 mx-auto px-6">
-          <div className="flex items-stretch justify-between gap-4 min-h-14">
-            <nav className="flex flex-1 min-w-0 gap-1 overflow-x-auto" aria-label="Main navigation">
+        <div className="max-w-350 mx-auto px-8 lg:px-10">
+          <div className="flex items-stretch justify-between gap-6 min-h-16">
+            <nav className="flex flex-1 min-w-0 gap-2 overflow-x-auto" aria-label="Main navigation">
               <button
                 type="button"
                 onClick={() => setActiveTab('dashboard')}
-                className={`flex shrink-0 items-center gap-2 px-4 py-3 border-b-2 text-sm font-medium transition-colors cursor-pointer ${activeTab === 'dashboard'
-                  ? 'border-blue-600 text-blue-600'
+                className={`flex shrink-0 items-center gap-2.5 px-6 py-4 border-b-2 text-base font-medium transition-colors cursor-pointer ${activeTab === 'dashboard'
+                  ? 'border-primary text-primary'
                   : 'border-transparent text-gray-600 hover:text-gray-900'
                   }`}
               >
-                <LayoutDashboard className="w-4 h-4" />
+                <LayoutDashboard className="w-5 h-5" />
                 Dashboard
               </button>
               <button
                 type="button"
                 onClick={() => setActiveTab('contracts')}
-                className={`flex shrink-0 items-center gap-2 px-4 py-3 border-b-2 text-sm font-medium transition-colors cursor-pointer ${activeTab === 'contracts'
-                  ? 'border-blue-600 text-blue-600'
+                className={`flex shrink-0 items-center gap-2.5 px-6 py-4 border-b-2 text-base font-medium transition-colors cursor-pointer ${activeTab === 'contracts'
+                  ? 'border-primary text-primary'
                   : 'border-transparent text-gray-600 hover:text-gray-900'
                   }`}
               >
-                <FileText className="w-4 h-4" />
+                <FileText className="w-5 h-5" />
                 Contract Management{total > 0 ? ` (${total})` : ''}
               </button>
-              {selectedContractId !== null && (
-                <button
-                  type="button"
-                  onClick={() => setActiveTab('contract-details')}
-                  className={`flex shrink-0 items-center gap-2 px-4 py-3 border-b-2 text-sm font-medium transition-colors cursor-pointer ${activeTab === 'contract-details'
-                    ? 'border-blue-600 text-blue-600'
-                    : 'border-transparent text-gray-600 hover:text-gray-900'
-                    }`}
-                >
-                  <Eye className="w-4 h-4" />
-                  Contract Details
-                </button>
-              )}
               <button
                 type="button"
                 onClick={() => setActiveTab('notifications')}
-                className={`relative flex shrink-0 items-center gap-2 px-4 py-3 border-b-2 text-sm font-medium transition-colors cursor-pointer ${activeTab === 'notifications'
-                  ? 'border-blue-600 text-blue-600'
+                className={`relative flex shrink-0 items-center gap-2.5 px-6 py-4 border-b-2 text-base font-medium transition-colors cursor-pointer ${activeTab === 'notifications'
+                  ? 'border-primary text-primary'
                   : 'border-transparent text-gray-600 hover:text-gray-900'
                   }`}
               >
-                <Bell className="w-4 h-4" />
+                <Bell className="w-5 h-5" />
                 Notifications
                 {notificationCount > 0 && (
-                  <span className="absolute top-1.5 right-1 bg-red-500 text-white text-xs rounded-full min-w-5 h-5 px-1 flex items-center justify-center">
+                  <span className="absolute top-2 right-2 bg-red-500 text-white text-xs rounded-full min-w-5 h-5 px-1 flex items-center justify-center">
                     {notificationCount}
                   </span>
                 )}
@@ -496,35 +498,46 @@ export default function App() {
               <button
                 type="button"
                 onClick={() => setActiveTab('reports')}
-                className={`flex shrink-0 items-center gap-2 px-4 py-3 border-b-2 text-sm font-medium transition-colors cursor-pointer ${activeTab === 'reports'
-                  ? 'border-blue-600 text-blue-600'
+                className={`flex shrink-0 items-center gap-2.5 px-6 py-4 border-b-2 text-base font-medium transition-colors cursor-pointer ${activeTab === 'reports'
+                  ? 'border-primary text-primary'
                   : 'border-transparent text-gray-600 hover:text-gray-900'
                   }`}
               >
-                <BarChart3 className="w-4 h-4" />
+                <BarChart3 className="w-5 h-5" />
                 Reports
               </button>
               {permissions.userRead && (
                 <button
                   type="button"
                   onClick={() => setActiveTab('users')}
-                  className={`flex shrink-0 items-center gap-2 px-4 py-3 border-b-2 text-sm font-medium transition-colors cursor-pointer ${activeTab === 'users'
-                    ? 'border-blue-600 text-blue-600'
+                  className={`flex shrink-0 items-center gap-2.5 px-6 py-4 border-b-2 text-base font-medium transition-colors cursor-pointer ${activeTab === 'users'
+                    ? 'border-primary text-primary'
                     : 'border-transparent text-gray-600 hover:text-gray-900'
                     }`}
                 >
-                  <Users className="w-4 h-4" />
+                  <Users className="w-5 h-5" />
                   User Management
                 </button>
               )}
             </nav>
-            <div className="flex shrink-0 items-center gap-4 py-2  pl-4">
-              <div className="text-right hidden sm:block">
-                <div className="flex items-center justify-end gap-2">
-                  <UserIcon className="w-4 h-4 text-gray-500" />
-                  <span className="text-sm text-gray-900">{user?.fullName ?? 'N/A'}</span>
+            <div className="flex shrink-0 items-center gap-5 py-2 pl-6">
+              <button
+                type="button"
+                disabled={!user?.id}
+                onClick={() => {
+                  if (!user?.id) return
+                  if (selectedContractId !== null) closeContractDetails()
+                  openUserDetails(user.id, 'view')
+                }}
+                className="text-right hidden sm:block rounded-lg px-2 py-1 -mr-2 hover:bg-gray-100 transition-colors cursor-pointer disabled:cursor-default disabled:hover:bg-transparent"
+                aria-label="View my profile"
+                title="View my profile"
+              >
+                <div className="flex items-center justify-end gap-2.5">
+                  <UserIcon className="w-5 h-5 text-gray-500" />
+                  <span className="text-base text-gray-900">{user?.fullName ?? 'N/A'}</span>
                 </div>
-                <p className="text-xs text-gray-600">
+                <p className="text-sm text-gray-600">
                   {(() => {
                     const roleName = user?.roles?.[0]?.name ?? ''
                     return roleName.includes('ROLE_')
@@ -532,14 +545,14 @@ export default function App() {
                       : roleName
                   })()}
                 </p>
-              </div>
+              </button>
               {!isTeamsApp && (
                 <button
                   type="button"
                   onClick={() => setShowLogoutConfirm(true)}
-                  className="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer"
+                  className="flex items-center gap-2.5 px-4 py-2.5 text-base text-gray-700 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer"
                 >
-                  <LogOut className="w-4 h-4" />
+                  <LogOut className="w-5 h-5" />
                   <span className="hidden md:inline">Logout</span>
                 </button>
               )}
@@ -549,7 +562,7 @@ export default function App() {
       </header>
 
       {/* Main Content */}
-      <main className="max-w-350 mx-auto px-6 py-8">
+      <main className="max-w-350 mx-auto px-8 lg:px-10 py-8">
         {activeTab === 'dashboard' && <Dashboard />}
         {activeTab === 'contracts' && (
           <ContractList
@@ -566,32 +579,6 @@ export default function App() {
             }}
             onSelectContract={(contract, formMode = 'view') => {
               openContractDetails(contract.contractId, 'details', { formMode });
-            }}
-          />
-        )}
-        {activeTab === 'contract-details' && selectedContractId !== null && (
-          <ContractDetails
-            key={selectedContractId}
-            variant="page"
-            contract={{ contractId: selectedContractId } as Contract}
-            initialTab={contractDetailTab}
-            onUrlTabChange={(tab) => {
-              setContractDetailTab(tab);
-              window.history.replaceState(
-                {},
-                '',
-                buildContractDetailPath(selectedContractId),
-              );
-            }}
-            hideRenewContract={contractDetailsHideRenew}
-            canRenew={Boolean(permissions.contractUpdate)}
-            canEdit={Boolean(permissions.contractUpdate)}
-            initialFormMode={contractDetailsFormMode}
-            currentUser={user}
-            onClose={closeContractDetails}
-            onUpdate={() => {
-              void refetchTotal();
-              contractRefetchRef.current();
             }}
           />
         )}
@@ -613,10 +600,55 @@ export default function App() {
               update: Boolean(permissions.userUpdate),
               inactive: Boolean(permissions.userDelete)
             }}
-            onUpdateUser={handleUpdateUser}
+            onRefetchReady={(fn) => { userRefetchRef.current = fn; }}
+            onSelectUser={(selectedUser, formMode = 'view') => {
+              openUserDetails(Number(selectedUser.id), formMode);
+            }}
           />
         )}
       </main>
+
+      {selectedUserId !== null && (
+        <UserDetails
+          key={selectedUserId}
+          userId={selectedUserId}
+          initialFormMode={userDetailsFormMode}
+          currentUser={user}
+          canEdit={Boolean(permissions.userUpdate)}
+          onClose={closeUserDetails}
+          onUpdateUser={handleUpdateUser}
+          onUpdate={() => {
+            userRefetchRef.current();
+          }}
+        />
+      )}
+
+      {selectedContractId !== null && (
+        <ContractDetails
+          key={selectedContractId}
+          variant="fullscreen"
+          contract={{ contractId: selectedContractId } as Contract}
+          initialTab={contractDetailTab}
+          onUrlTabChange={(tab) => {
+            setContractDetailTab(tab);
+            window.history.replaceState(
+              {},
+              '',
+              buildContractDetailPath(selectedContractId),
+            );
+          }}
+          hideRenewContract={contractDetailsHideRenew}
+          canRenew={Boolean(permissions.contractUpdate)}
+          canEdit={Boolean(permissions.contractUpdate)}
+          initialFormMode={contractDetailsFormMode}
+          currentUser={user}
+          onClose={closeContractDetails}
+          onUpdate={() => {
+            void refetchTotal();
+            contractRefetchRef.current();
+          }}
+        />
+      )}
 
       <ConfirmDialog
         isOpen={showLogoutConfirm}
@@ -631,7 +663,7 @@ export default function App() {
 
       {/* Footer */}
       <footer className="bg-white border-t border-gray-200 mt-12">
-        <div className="max-w-350 mx-auto px-6 py-6">
+        <div className="max-w-350 mx-auto px-8 lg:px-10 py-6">
           <div className="flex items-center justify-between text-gray-600">
             <p>© 2026 Contract Management System. All rights reserved.</p>
             <p>Last updated: {new Date().toLocaleDateString()}</p>

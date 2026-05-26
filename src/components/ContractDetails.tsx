@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Contract, ContractStatus } from '../types/contract';
 import { calculateDaysRemaining } from '../utils/contractUtils';
-import { Clock, RefreshCw, Edit2 } from 'lucide-react';
+import { ArrowLeft, Clock, RefreshCw, Edit2 } from 'lucide-react';
 import { useContractDetail, useContractHistory } from '../hook/useContracts';
 import { useContractFiles } from '../hook/useContractFiles';
 import { useContractFormData } from '../hook/useContactByDepartment';
@@ -16,6 +16,7 @@ import {
   buildContractPartnersPayload,
   calculateRenewalFrequencyMonths,
   formatContractApiError,
+  resolveContractFileUploadedByName,
   resolveDepartmentAndContractType,
 } from '../utils/contractFormHelpers';
 import {
@@ -37,7 +38,7 @@ interface ContractDetailsProps {
   canEdit?: boolean;
   initialTab?: ContractDetailTab;
   onUrlTabChange?: (tab: ContractDetailTab) => void;
-  variant?: 'page' | 'modal';
+  variant?: 'page' | 'modal' | 'fullscreen';
   initialFormMode?: ContractDetailsFormMode;
   currentUser?: UserProfile | null;
 }
@@ -46,13 +47,14 @@ type ViewTab = 'details' | 'history';
 
 export function ContractDetails({
   contract,
+  onClose,
   onUpdate,
   hideRenewContract = false,
   canRenew = false,
   canEdit = false,
   initialTab,
   onUrlTabChange,
-  variant = 'modal',
+  variant = 'fullscreen',
   initialFormMode = 'view',
   currentUser,
 }: ContractDetailsProps) {
@@ -84,9 +86,13 @@ export function ContractDetails({
         id: `existing-${f.fileId}`,
         fileId: f.fileId,
         displaySize: f.fileSize,
+        uploadedAt: f.uploadedAt,
+        uploadedByName: resolveContractFileUploadedByName(f, currentUser, {
+          preferCurrentUser: formMode === 'view',
+        }),
       }))
     );
-  }, [apiFiles]);
+  }, [apiFiles, currentUser, formMode]);
 
   const editDefaults = useMemo(
     () => (detail ? mapContractDetailToEditFormValues(detail) : undefined),
@@ -245,11 +251,15 @@ export function ContractDetails({
         await uploadContractFiles(c.contractId, newFiles);
       }
       toast.success(`Contract "${data.title}" has been updated successfully!`);
-      setFormMode('view');
-      setFormKey((k) => k + 1);
       await refetchDetail();
       refetchFiles();
       onUpdate();
+      if (initialFormMode === 'edit') {
+        onClose();
+        return;
+      }
+      setFormMode('view');
+      setFormKey((k) => k + 1);
     } catch (error: unknown) {
       console.error('Failed to update contract:', error);
       toast.error(formatContractApiError(error, 'Failed to update contract'));
@@ -297,6 +307,10 @@ export function ContractDetails({
   };
 
   const exitFormMode = () => {
+    if (initialFormMode === 'edit' && formMode === 'edit') {
+      onClose();
+      return;
+    }
     setFormMode('view');
     setFormKey((k) => k + 1);
     if (apiFiles.length > 0) {
@@ -306,6 +320,10 @@ export function ContractDetails({
           id: `existing-${f.fileId}`,
           fileId: f.fileId,
           displaySize: f.fileSize,
+          uploadedAt: f.uploadedAt,
+          uploadedByName: resolveContractFileUploadedByName(f, currentUser, {
+            preferCurrentUser: true,
+          }),
         }))
       );
     }
@@ -320,8 +338,26 @@ export function ContractDetails({
     onUrlTabChange?.(tab);
   };
 
+  const isFullscreen = variant === 'fullscreen';
   const isPage = variant === 'page';
   const isFormActive = formMode === 'edit' || formMode === 'renew';
+
+  const handleBack = () => {
+    if (isFormActive) {
+      exitFormMode();
+      return;
+    }
+    onClose();
+  };
+
+  useEffect(() => {
+    if (!isFullscreen) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [isFullscreen]);
   const formDefaults = formMode === 'renew' ? renewDefaults : editDefaults;
   const detailsFormId = `contract-details-form-${c.contractId}-${formMode}`;
 
@@ -334,7 +370,7 @@ export function ContractDetails({
         <ContractForm
           key={`view-${formKey}`}
           readOnly
-          insideModal={!isPage}
+          insideModal={!isPage && !isFullscreen}
           defaultValues={editDefaults}
           viewMeta={viewMeta}
           onSubmit={async () => {}}
@@ -374,38 +410,47 @@ export function ContractDetails({
     ? 'max-h-[calc(100vh-10rem)] min-h-[24rem]'
     : 'max-h-[calc(100vh-4rem)]'
 
-  const useInnerScroll = isFormActive
+  const useInnerScroll = isFullscreen || isFormActive
+
+  const panelShellClass = isFullscreen
+    ? 'flex flex-col h-full min-h-0 bg-white'
+    : `bg-white rounded-lg flex flex-col ${useInnerScroll ? `min-h-0 ${panelHeightClass}` : ''} ${isPage ? 'border border-gray-200' : `w-full max-w-4xl mx-4 ${useInnerScroll ? panelHeightClass : ''}`}`
 
   const panel = (
-    <div
-      className={`bg-white rounded-lg flex flex-col ${useInnerScroll ? `min-h-0 ${panelHeightClass}` : ''} ${isPage ? 'border border-gray-200' : `w-full max-w-4xl mx-4 ${useInnerScroll ? panelHeightClass : ''}`}`}
-    >
-      {/* Fixed: title + action buttons + tab bar (sticky on view — page scrolls below) */}
-      <div
-        className={`shrink-0 bg-white border-b border-gray-200 ${isPage && !useInnerScroll ? 'sticky top-14 z-30' : ''}`}
-      >
-        <div className="px-6 pt-6 pb-4">
+    <div className={panelShellClass}>
+      <div className="shrink-0 bg-white border-b border-gray-200">
+        <div className={`px-4 sm:px-6 pt-4 pb-4 ${isFullscreen ? ' w-full' : ''}`}>
           <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-4 items-center">
-            <div className="min-w-0">
-              <h2 className="font-medium text-xl">
-                {isFormActive
-                  ? formMode === 'renew'
-                    ? 'Renew Contract'
-                    : 'Edit Contract'
-                  : isPage
-                    ? 'Contract Details'
-                    : c.title}
-              </h2>
-              <p className="text-gray-600 truncate">{c.title} · {c.id}</p>
+            <div className="flex items-start gap-6 min-w-0">
+              {(isFullscreen || variant === 'modal') && (
+                <button
+                  type="button"
+                  onClick={handleBack}
+                  className="shrink-0 flex items-center justify-center w-10 h-10 rounded-lg text-gray-700 hover:bg-gray-100 cursor-pointer"
+                  aria-label="Back"
+                >
+                  <ArrowLeft className="w-8 h-5" />
+                </button>
+              )}
+              <div className="min-w-0 flex-1">
+                <h2 className="font-medium text-xl">
+                  {isFormActive
+                    ? formMode === 'renew'
+                      ? 'Renew Contract'
+                      : 'Edit Contract'
+                    : 'Contract Details'}
+                </h2>
+                <p className="text-gray-600 truncate">{c.title} · {c.id}</p>
+              </div>
             </div>
 
-            <div className="flex flex-wrap items-center justify-end gap-2 min-w-0">
+            <div className="flex flex-wrap items-center justify-end gap-2 mr-10 min-w-0">
               {isFormActive ? (
                 <>
                   <button
                     type="submit"
                     form={detailsFormId}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 cursor-pointer text-sm"
+                    className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 cursor-pointer text-sm"
                   >
                     {formMode === 'renew' ? 'Renew Contract' : 'Save Changes'}
                   </button>
@@ -426,7 +471,7 @@ export function ContractDetails({
                         setFormMode('edit');
                         setActiveTab('details');
                       }}
-                      className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 cursor-pointer text-sm"
+                      className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 cursor-pointer text-sm"
                     >
                       <Edit2 className="w-4 h-4" />
                       Edit Contract
@@ -452,7 +497,7 @@ export function ContractDetails({
         </div>
 
         {!isFormActive && (
-          <div className="px-6">
+          <div className={`px-4 sm:px-6 ${isFullscreen ? 'max-w-350 mx-auto w-full' : ''}`}>
             <div className="flex gap-1">
               {(['details', 'history'] as const).map((tab) => (
                 <button
@@ -460,7 +505,7 @@ export function ContractDetails({
                   type="button"
                   onClick={() => setTab(tab)}
                   className={`px-4 py-2 border-b-2 text-sm font-medium transition-colors cursor-pointer capitalize ${activeTab === tab
-                    ? 'border-blue-600 text-blue-600'
+                    ? 'border-primary text-primary'
                     : 'border-transparent text-gray-600 hover:text-gray-900'
                     }`}
                 >
@@ -472,7 +517,13 @@ export function ContractDetails({
         )}
       </div>
 
-      <div className={useInnerScroll ? 'flex-1 min-h-0 overflow-y-auto px-6 py-4' : 'px-6 py-4'}>
+      <div
+        className={
+          useInnerScroll
+            ? `flex-1 min-h-0 overflow-y-auto px-4 sm:px-6 py-4 ${isFullscreen ? 'max-w-350 mx-auto w-full' : ''}`
+            : `px-4 sm:px-6 py-4 ${isFullscreen ? 'max-w-350 mx-auto w-full' : ''}`
+        }
+      >
         {isFormActive || activeTab === 'details' ? (
           renderForm()
         ) : (
@@ -483,7 +534,7 @@ export function ContractDetails({
               historyItems.map((item) => {
                 const changes = getChangedFields(item.oldValue, item.newValue);
                 return (
-                  <div key={item.historyId} className="border-l-4 border-blue-500 pl-4 py-2">
+                  <div key={item.historyId} className="border-l-4 border-primary pl-4 py-2">
                     <div className="flex items-start gap-3">
                       <Clock className="w-5 h-5 text-gray-400 mt-0.5 shrink-0" />
                       <div className="flex-1">
@@ -492,7 +543,7 @@ export function ContractDetails({
                             className={`px-2 py-0.5 text-xs rounded font-medium ${item.actionType === 'CREATED'
                               ? 'bg-green-100 text-green-800'
                               : item.actionType === 'MODIFIED'
-                                ? 'bg-blue-100 text-blue-800'
+                                ? 'bg-primary/10 text-brand-navy'
                                 : 'bg-red-100 text-red-800'
                               }`}
                           >
@@ -527,6 +578,14 @@ export function ContractDetails({
       </div>
     </div>
   )
+
+  if (isFullscreen) {
+    return (
+      <div className="fixed inset-0 z-50 bg-white flex flex-col h-dvh">
+        {panel}
+      </div>
+    );
+  }
 
   if (isPage) {
     return panel;

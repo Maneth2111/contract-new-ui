@@ -22,7 +22,7 @@
     "color": "color.png",
     "outline": "outline.png"
   },
-  "accentColor": "#0078D7",
+  "accentColor": "#0FBAB5",
   "staticTabs": [
     {
       "entityId": "contractsTab",

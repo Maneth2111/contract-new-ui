@@ -61,49 +61,6 @@ export function NotificationCenter({ onSelectContract, isLoggedIn }: Notificatio
 
   return (
     <div className="space-y-6">
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-red-50 border border-red-200 p-6 rounded-lg">
-          <div className="flex items-center gap-3">
-            <AlertTriangle className="w-8 h-8 text-red-600" />
-            <div>
-              <p className="text-red-900">Overdue Contract{pluralS(overdueCount)}</p>
-              <p className="text-red-600">{overdueCount}</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-red-50 border border-red-200 p-6 rounded-lg">
-          <div className="flex items-center gap-3">
-            <Clock className="w-8 h-8 text-red-600" />
-            <div>
-              <p className="text-red-900">30-Day Warning</p>
-              <p className="text-red-600">{summary?.expire30}</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-orange-50 border border-orange-200 p-6 rounded-lg">
-          <div className="flex items-center gap-3">
-            <Clock className="w-8 h-8 text-orange-600" />
-            <div>
-              <p className="text-orange-900">60-Day Warning</p>
-              <p className="text-orange-600">{summary?.expire60}</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-yellow-50 border border-yellow-200 p-6 rounded-lg">
-          <div className="flex items-center gap-3">
-            <Clock className="w-8 h-8 text-yellow-600" />
-            <div>
-              <p className="text-yellow-900">90-Day Warning</p>
-              <p className="text-yellow-600">{summary?.expire90}</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* Overdue Contracts */}
       {overdueContracts.length > 0 && (
         <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
@@ -126,7 +83,7 @@ export function NotificationCenter({ onSelectContract, isLoggedIn }: Notificatio
                         <span className="px-3 py-1 bg-red-100 text-red-800 rounded-full text-sm">
                           {contract.contractCode}
                         </span>
-                        {/* <h4 className="text-red-900">{contract.contractTitle}</h4> */}
+                        <h4 className="text-red-900">{contract.contractTitle}</h4>
                         <span className="px-3 py-1 rounded-full border text-sm text-red-600 bg-red-50 border-red-200">
                           Overdue
                         </span>
@@ -195,7 +152,7 @@ export function NotificationCenter({ onSelectContract, isLoggedIn }: Notificatio
                         <span className="px-3 py-1 bg-gray-100 text-gray-800 rounded-full text-sm">
                           {contract.contractCode}
                         </span>
-                        {/* <h4 className="text-sm sm:text-base">{contract.contractTitle}</h4> */}
+                        <h4 className="text-sm sm:text-base">{contract.contractTitle}</h4>
                         <span className={`px-3 py-1 rounded-full border text-sm ${warning.color}`}>
                           {warning.label}
                         </span>

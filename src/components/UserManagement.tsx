@@ -1,20 +1,20 @@
 import React, { useState, type ChangeEvent } from 'react';
 import { User } from '../types/user';
 import { Search, Eye, Edit2, UserX, Plus, ChevronDown, Users } from 'lucide-react';
-import { UserDetails } from './UserDetails';
-import { EditUser } from './EditUser';
 import { CreateUser } from './CreateUser';
 import { titleCase } from "text-case";
 import { useDepartments } from '../hook/useDepartment';
 import { useRoles } from '../hook/useRoles';
-import { useUserDetail, useUsers } from '../hook/useUser';
+import { useUsers } from '../hook/useUser';
 import { useUserActions, useUserStatus } from '../hook/useStatus';
 import { usePagination } from '../hook/usePagination';
 import { ConfirmDialog } from './ConfirmationDialog';
 import { PaginationBar } from './PaginationBar';
-import { mapApiUserToUser, UserProfile } from '../services/userService';
+import { UserProfile } from '../services/userService';
 import { getAllowedDepartments } from '../utils/departmentAccess';
-
+import { userTableSortAccessors } from '../utils/userTableSort';
+import { useTableSort } from '../hook/useTableSort';
+import { SortableTableHead } from './SortableTableHead';
 
 interface UserManagementProps {
   currentUser?: UserProfile | null;
@@ -24,10 +24,11 @@ interface UserManagementProps {
     update: boolean;
     inactive: boolean;
   };
-  onUpdateUser: (user: User) => void;
+  onSelectUser?: (user: User, formMode?: 'view' | 'edit') => void;
+  onRefetchReady?: (refetch: () => void) => void;
 }
 
-export function UserManagement({ currentUser, userPermission, onUpdateUser }: UserManagementProps) {
+export function UserManagement({ currentUser, userPermission, onSelectUser, onRefetchReady }: UserManagementProps) {
   const [searchText, setSearchText] = useState('');
   const { departmentList } = useDepartments();
   const {
@@ -38,12 +39,9 @@ export function UserManagement({ currentUser, userPermission, onUpdateUser }: Us
   const [selectedDepartmentId, setSelectedDepartmentId] = useState<number | undefined>(() => defaultDepartmentId);
   const [selectedRoleName, setSelectedRoleName] = useState<string | undefined>(undefined);
   const [selectedStatusKey, setSelectedStatusKey] = useState<string | undefined>(undefined);
-  const [editingUser, setEditingUser] = useState<User | null>(null);
   const [showCreateUser, setShowCreateUser] = useState(false);
   const { roles } = useRoles();
   const { userStatus } = useUserStatus();
-  const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
-  const { user: userDetail } = useUserDetail(selectedUserId);
   const { pagination, goToPage, setSize } = usePagination(10);
   const [deactivateTarget, setDeactivateTarget] = useState<User | null>(null);
 
@@ -57,6 +55,15 @@ export function UserManagement({ currentUser, userPermission, onUpdateUser }: Us
   });
   const { handleDelete } = useUserActions(refetch);
 
+  const { sortKey, sortDirection, toggleSort, sortedItems: sortedUsers } = useTableSort(
+    users,
+    userTableSortAccessors
+  );
+
+  React.useEffect(() => {
+    onRefetchReady?.(refetch);
+  }, [refetch, onRefetchReady]);
+
   React.useEffect(() => {
     if (isSingleDepartment && defaultDepartmentId != null) {
       if (selectedDepartmentId === defaultDepartmentId) return
@@ -65,7 +72,6 @@ export function UserManagement({ currentUser, userPermission, onUpdateUser }: Us
     }
   }, [defaultDepartmentId, isSingleDepartment, goToPage, selectedDepartmentId])
 
-  // Reset to page 0 when filters change
   const handleSearchChange = (e: ChangeEvent<HTMLInputElement>) => {
     setSearchText(e.target.value);
     goToPage(1);
@@ -89,13 +95,18 @@ export function UserManagement({ currentUser, userPermission, onUpdateUser }: Us
     }
   };
 
+  const handleViewUserDetails = (user: User, formMode: 'view' | 'edit' = 'view') => {
+    if (formMode === 'view' && !userPermission.view) return
+    if (formMode === 'edit' && !userPermission.update) return
+    onSelectUser?.(user, formMode)
+  }
+
   return (
     <div className="space-y-6">
-      {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="bg-white p-6 rounded-lg border border-gray-200">
           <div className="flex items-center gap-3">
-            <span><Users className="w-10 h-10 text-blue-600" /></span>
+            <span><Users className="w-10 h-10 text-primary" /></span>
             <div>
               <p className="text-gray-600">Total Users</p>
               <p className="mt-1">{summary?.total_users ?? 0}</p>
@@ -131,14 +142,14 @@ export function UserManagement({ currentUser, userPermission, onUpdateUser }: Us
         </div>
       </div>
 
-      {/* Filters and Create Button */}
       <div className="bg-white p-4 rounded-lg border border-gray-200">
         <div className="flex items-center justify-between mb-4">
-          <h2>User Management</h2>
+          <h2 className="text-2xl font-medium">User Management</h2>
           {userPermission.create && (
             <button
+              type="button"
               onClick={() => setShowCreateUser(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 cursor-pointer"
+              className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 cursor-pointer"
             >
               <Plus className="w-4 h-4" />
               Create User
@@ -147,7 +158,6 @@ export function UserManagement({ currentUser, userPermission, onUpdateUser }: Us
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          {/* Search */}
           <div>
             <label className="block text-gray-700 mb-2">Search Users</label>
             <div className="relative">
@@ -162,7 +172,6 @@ export function UserManagement({ currentUser, userPermission, onUpdateUser }: Us
             </div>
           </div>
 
-          {/* Department Filter */}
           <div>
             <label className="block text-gray-700 mb-2">Department</label>
             <div className="relative">
@@ -183,7 +192,6 @@ export function UserManagement({ currentUser, userPermission, onUpdateUser }: Us
             </div>
           </div>
 
-          {/* Role Filter */}
           <div>
             <label className="block text-gray-700 mb-2">Role</label>
             <div className="relative">
@@ -201,7 +209,6 @@ export function UserManagement({ currentUser, userPermission, onUpdateUser }: Us
             </div>
           </div>
 
-          {/* Status Filter */}
           <div>
             <label className="block text-gray-700 mb-2">Status</label>
             <div className="relative">
@@ -213,9 +220,7 @@ export function UserManagement({ currentUser, userPermission, onUpdateUser }: Us
                 <option value="">All Status</option>
                 {userStatus.map(status => (
                   <option key={status.key} value={status.key}>{titleCase(status.label)}</option>
-                ))
-
-                }
+                ))}
               </select>
               <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
             </div>
@@ -223,36 +228,39 @@ export function UserManagement({ currentUser, userPermission, onUpdateUser }: Us
         </div>
       </div>
 
-      {/* User Table */}
       <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
         <div
           className={[
             'overflow-x-auto',
-            users.length > 10 ? 'overflow-y-auto max-h-[70vh]' : '',
+            sortedUsers.length > 10 ? 'overflow-y-auto max-h-[70vh]' : '',
           ].join(' ').trim()}
         >
           <table className="w-full">
             <thead className="sticky top-0 z-10 bg-gray-50">
               <tr>
-                <th className="px-4 py-3 text-left text-gray-700">Employee ID</th>
-                <th className="px-4 py-3 text-left text-gray-700">Full Name</th>
-                <th className="px-4 py-3 text-left text-gray-700">Email</th>
-                <th className="px-4 py-3 text-left text-gray-700">Department</th>
-                <th className="px-4 py-3 text-left text-gray-700">Role</th>
-                <th className="px-4 py-3 text-left text-gray-700">Status</th>
-                <th className="px-4 py-3 text-left text-gray-700">Actions</th>
+                <SortableTableHead label="Employee ID" columnKey="employeeId" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="px-4 py-3" />
+                <SortableTableHead label="Full Name" columnKey="fullName" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="px-4 py-3" />
+                <SortableTableHead label="Email" columnKey="email" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="px-4 py-3" />
+                <SortableTableHead label="Department" columnKey="department" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="px-4 py-3" />
+                <SortableTableHead label="Role" columnKey="role" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="px-4 py-3" />
+                <SortableTableHead label="Status" columnKey="status" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="px-4 py-3" />
+                <th className="px-4 py-3 text-left text-gray-700 font-medium">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
-              {users.length === 0 ? (
+              {sortedUsers.length === 0 ? (
                 <tr>
                   <td colSpan={7} className="px-4 py-8 text-center text-gray-500">
                     No users found
                   </td>
                 </tr>
               ) : (
-                users.map((user: User) => (
-                  <tr key={user.id} className="hover:bg-gray-50">
+                sortedUsers.map((user: User) => (
+                  <tr
+                    key={user.id}
+                    onClick={() => userPermission.view && handleViewUserDetails(user)}
+                    className={`hover:bg-gray-50 transition-colors ${userPermission.view ? 'cursor-pointer' : ''}`}
+                  >
                     <td className="px-4 py-3">{user.employeeId}</td>
                     <td className="px-4 py-3">{user.fullName}</td>
                     <td className="px-4 py-3">{user.email}</td>
@@ -267,8 +275,12 @@ export function UserManagement({ currentUser, userPermission, onUpdateUser }: Us
                       <div className="flex items-center gap-2">
                         {userPermission.view && (
                           <button
-                            onClick={() => setSelectedUserId(Number(user.id))}
-                            className="p-2 hover:bg-gray-100 rounded-lg text-blue-600 cursor-pointer"
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              handleViewUserDetails(user)
+                            }}
+                            className="p-2 hover:bg-gray-100 rounded-lg text-primary cursor-pointer"
                             title="View"
                           >
                             <Eye className="w-4 h-4" />
@@ -276,8 +288,12 @@ export function UserManagement({ currentUser, userPermission, onUpdateUser }: Us
                         )}
                         {userPermission.update && (
                           <button
-                            onClick={() => setEditingUser(user)}
-                            className="p-2 hover:bg-gray-100 rounded-lg text-blue-600 cursor-pointer"
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              handleViewUserDetails(user, 'edit')
+                            }}
+                            className="p-2 hover:bg-gray-100 rounded-lg text-primary cursor-pointer"
                             title="Edit"
                           >
                             <Edit2 className="w-4 h-4" />
@@ -285,7 +301,11 @@ export function UserManagement({ currentUser, userPermission, onUpdateUser }: Us
                         )}
                         {userPermission.inactive && user.status === 'Active' && Number(user.id) !== Number(currentUser?.id) && (
                           <button
-                            onClick={() => setDeactivateTarget(user)}
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              setDeactivateTarget(user)
+                            }}
                             className="p-2 hover:bg-gray-100 rounded-lg text-red-600 cursor-pointer"
                             title="Inactive"
                           >
@@ -302,7 +322,6 @@ export function UserManagement({ currentUser, userPermission, onUpdateUser }: Us
         </div>
       </div>
 
-      {/* Results count */}
       <div className="flex flex-col sm:flex-row justify-between w-full items-start sm:items-center gap-3 sm:gap-0">
         <div className="text-gray-600 text-sm sm:text-base whitespace-nowrap">
           Showing {users.length} of {total} users
@@ -328,41 +347,17 @@ export function UserManagement({ currentUser, userPermission, onUpdateUser }: Us
         </div>
       </div>
 
-      {/* User Details Modal */}
-      {selectedUserId && userDetail && (
-        <UserDetails
-          user={mapApiUserToUser(userDetail)}
-          onClose={() => setSelectedUserId(null)}
-          canEdit={userPermission.update}
-          onEdit={(user) => {
-            setSelectedUserId(null);
-            setEditingUser(user);
-          }}
-        />
-      )}
-
-      {/* Edit User Modal */}
-      {editingUser && (
-        <EditUser
-          user={editingUser}
-          currentUser={currentUser}
-          onUpdate={onUpdateUser}
-          onCancel={() => setEditingUser(null)}
-          onSuccess={refetch}
-        />
-      )}
-
-      {/* Create User Modal */}
       {showCreateUser && (
         <CreateUser
           currentUser={currentUser}
           onCancel={() => setShowCreateUser(false)}
-          onSuccess={refetch}
+          onSuccess={() => {
+            setShowCreateUser(false)
+            void refetch()
+          }}
         />
-
       )}
 
-      {/*  Confirm form deactivete user */}
       <ConfirmDialog
         isOpen={!!deactivateTarget}
         title="Inactivate User"

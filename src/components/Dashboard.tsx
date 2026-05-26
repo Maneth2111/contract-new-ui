@@ -1,6 +1,6 @@
 import { formatCurrency, pluralS } from '../utils/contractUtils';
 import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { FileText, DollarSign, CheckCircle, AlertTriangle, Clock } from 'lucide-react';
+import { FileText, DollarSign, CheckCircle, AlertTriangle, Clock, Building2 } from 'lucide-react';
 import { useContractsByDepartment, useDashboardSummary, useStatusDistribution, useUpcomingExprirations } from '../hook/useDashboard';
 
 export function Dashboard() {
@@ -19,10 +19,13 @@ export function Dashboard() {
 
   const activePercentage = formatPercent(activeContracts, totalContracts);
 
-  const departmentData = DepartmentCounts?.map(d => ({
+  const departmentData = (DepartmentCounts?.map(d => ({
     name: d.department,
-    count: d.contractCount,
-  })) ?? [];
+    count: Number(d.contractCount) || 0,
+  })) ?? [])
+    .sort((a, b) => b.count - a.count)
+
+  const maxDepartmentCount = Math.max(...departmentData.map((d) => d.count), 1)
 
   // Convert API object to array 
   const statusData = statusDistrabution ? [
@@ -36,6 +39,16 @@ export function Dashboard() {
   const statusTotal = statusData.reduce((sum, d) => sum + d.value, 0);
 
   const COLORS = ['#22c55e', '#eab308', '#f97316', '#ef4444', '#6b7280'];
+
+  const BRAND_COLORS = ['#0fbab5', '#052744', '#de6ea0'] as const;
+
+  function getDepartmentBarColor (departmentName: string): string {
+    let hash = 0
+    for (let i = 0; i < departmentName.length; i++) {
+      hash = departmentName.charCodeAt(i) + ((hash << 5) - hash)
+    }
+    return BRAND_COLORS[Math.abs(hash) % BRAND_COLORS.length]
+  }
 
   // Format date 
   function formatApiMonth(apiMonth: string): string {
@@ -108,7 +121,7 @@ export function Dashboard() {
               <p className="text-gray-500">Total Contract{pluralS(totalContracts)}</p>
               <p className="mt-2">{totalContracts}</p>
             </div>
-            <FileText className="w-8 h-8 text-blue-500" />
+            <FileText className="w-8 h-8 text-primary" />
           </div>
         </div>
 
@@ -137,17 +150,51 @@ export function Dashboard() {
       {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Contracts by Department */}
-        <div className="bg-white p-6 rounded-lg border border-gray-200">
-          <h3 className="mb-4">Contracts by Department</h3>
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={departmentData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name" angle={-45} textAnchor="end" height={120} interval={0} style={{ fontSize: '12px' }} />
-              <YAxis />
-              <Tooltip />
-              <Bar dataKey="count" fill="#3b82f6" />
-            </BarChart>
-          </ResponsiveContainer>
+        <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
+          <div className="flex items-center justify-between gap-4 mb-6">
+            <h3 className="font-medium text-gray-900">Contracts by Department</h3>
+            <span className="text-sm text-gray-500 shrink-0">By contract count</span>
+          </div>
+          {departmentData.length === 0 ? (
+            <p className="text-center text-gray-500 py-16">No department data available</p>
+          ) : (
+            <ul className="space-y-6 min-h-65">
+              {departmentData.map((dept) => {
+                const barWidth = (dept.count / maxDepartmentCount) * 100
+                const barColor = getDepartmentBarColor(dept.name)
+                return (
+                  <li key={dept.name}>
+                    <div className="flex items-center justify-between gap-3 mb-2">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <span
+                          className="w-2.5 h-2.5 rounded-full shrink-0"
+                          style={{ backgroundColor: barColor }}
+                          aria-hidden
+                        />
+                        <span className="font-medium text-gray-900 truncate" title={dept.name}>
+                          {dept.name}
+                        </span>
+                      </div>
+                      <span className="text-sm text-gray-500 tabular-nums shrink-0">
+                        {dept.count.toLocaleString()}
+                      </span>
+                    </div>
+                    <div className="h-2.5 w-full rounded-full bg-gray-100 overflow-hidden">
+                      <div
+                        className="h-full rounded-full transition-all duration-500 ease-out"
+                        style={{ width: `${barWidth}%`, backgroundColor: barColor }}
+                        role="progressbar"
+                        aria-valuenow={dept.count}
+                        aria-valuemin={0}
+                        aria-valuemax={maxDepartmentCount}
+                        aria-label={`${dept.name}: ${dept.count} contracts`}
+                      />
+                    </div>
+                  </li>
+                )
+              })}
+            </ul>
+          )}
         </div>
 
         {/* Status Distribution */}

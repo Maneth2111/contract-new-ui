@@ -55,7 +55,7 @@ const PaginationLink = ({ className, isActive, ...props }: PaginationLinkProps) 
     className={cn(
       "h-9 w-9 flex items-center justify-center rounded-md text-sm transition-colors",
       isActive
-        ? "bg-blue-600 text-white font-medium"
+        ? "bg-primary text-white font-medium"
         : "hover:bg-gray-100 text-gray-700",
       className
     )}

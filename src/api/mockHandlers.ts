@@ -422,9 +422,18 @@ export async function handleMockRequest(
   if (filesMatch) {
     const contractId = Number(filesMatch[1])
     if (method === 'GET') {
-      return { status: 200, data: ok(store.files.filter((f) => f.contractId === contractId)) }
+      const uploader = currentUserProfile()
+      const files = store.files
+        .filter((f) => f.contractId === contractId)
+        .map((f) => ({
+          ...f,
+          uploadedByName:
+            f.uploadedBy === uploader.id ? uploader.fullName : f.uploadedByName,
+        }))
+      return { status: 200, data: ok(files) }
     }
     if (method === 'POST') {
+      const uploader = currentUserProfile()
       const uploaded = {
         fileId: idGen.nextFileId(),
         contractId,
@@ -433,8 +442,8 @@ export async function handleMockRequest(
         fileSize: 1024,
         contentType: 'application/pdf',
         uploadedAt: ts(),
-        uploadedBy: 1,
-        uploadedByName: 'Ouy Ponlouer',
+        uploadedBy: uploader.id,
+        uploadedByName: uploader.fullName,
       }
       store.files.push(uploaded)
       return { status: 200, data: ok([uploaded]) }

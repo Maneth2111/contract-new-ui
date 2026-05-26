@@ -60,6 +60,17 @@ export function calcAutoAlertDaysFromExpiryAndAlert (
   return String(Math.round(diffMs / (1000 * 60 * 60 * 24)))
 }
 
+export function resolveContractFileUploadedByName (
+  file: { uploadedBy: number; uploadedByName?: string },
+  currentUser?: { id: number; fullName: string } | null,
+  options?: { preferCurrentUser?: boolean }
+): string | undefined {
+  if (currentUser && (options?.preferCurrentUser || file.uploadedBy === currentUser.id)) {
+    return currentUser.fullName
+  }
+  return file.uploadedByName
+}
+
 export function formatAttachmentFileSize (bytes: number): string {
   if (bytes < 1024) return bytes + ' B'
   if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(2) + ' KB'

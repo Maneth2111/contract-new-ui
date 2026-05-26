@@ -16,6 +16,7 @@ import {
   validateContractFile,
   resolveDepartmentAndContractType,
   isPdfAttachment,
+  isPdfFileName,
 } from '../utils/contractFormHelpers';
 import { getAllowedDepartments } from '../utils/departmentAccess';
 import { calculateDaysRemaining, formatDate, pluralS } from '../utils/contractUtils';
@@ -31,6 +32,8 @@ export interface UploadedFile {
   id: string;
   fileId?: number;
   displaySize?: number;
+  uploadedAt?: string;
+  uploadedByName?: string;
 }
 
 export interface ContractFormProps {
@@ -352,7 +355,12 @@ export function ContractForm({
         break;
       }
 
-      newFiles.push({ file, id: `${Date.now()}-${i}` });
+      newFiles.push({
+        file,
+        id: `${Date.now()}-${i}`,
+        uploadedAt: new Date().toISOString(),
+        uploadedByName: currentUser?.fullName,
+      });
       totalSize += file.size;
     }
 
@@ -362,17 +370,57 @@ export function ContractForm({
     event.target.value = '';
   };
 
+  const openReplacePicker = (file: UploadedFile) => {
+    setReplaceTarget({ id: file.id, fileId: file.fileId })
+    replaceInputRef.current?.click()
+  }
+
   const handleReplaceSelected = async (nextFile: File) => {
-    const target = replaceTarget;
-    if (!target) return;
-    const fileError = validateContractFile(nextFile);
+    const target = replaceTarget
+    if (!target) return
+    const fileError = validateContractFile(nextFile)
 
     if (fileError) {
-      toast.error(fileError);
+      toast.error(fileError)
       setReplaceTarget(null)
       if (replaceInputRef.current) replaceInputRef.current.value = ''
-      return;
+      return
     }
+
+    const existing = uploadedFiles.find((f) => f.id === target.id)
+    if (!existing) {
+      setReplaceTarget(null)
+      if (replaceInputRef.current) replaceInputRef.current.value = ''
+      return
+    }
+
+    if (target.fileId && onReplaceExistingFile) {
+      try {
+        await onReplaceExistingFile(target.fileId, nextFile)
+      } catch {
+        toast.error('Failed to replace file')
+        setReplaceTarget(null)
+        if (replaceInputRef.current) replaceInputRef.current.value = ''
+        return
+      }
+    }
+
+    const nextFiles = uploadedFiles.map((f) =>
+      f.id === target.id
+        ? {
+            file: nextFile,
+            id: f.id,
+            fileId: f.fileId,
+            displaySize: nextFile.size,
+            uploadedAt: f.uploadedAt ?? new Date().toISOString(),
+            uploadedByName: currentUser?.fullName ?? f.uploadedByName,
+          }
+        : f
+    )
+    onFilesChange(nextFiles)
+    setFileError(null)
+    setReplaceTarget(null)
+    if (replaceInputRef.current) replaceInputRef.current.value = ''
   }
 
   // Handle Submit 
@@ -415,11 +463,11 @@ export function ContractForm({
 
   const fieldClass = readOnly
     ? 'w-full px-4 py-2 border border-gray-200 rounded-lg bg-gray-50 text-gray-900 cursor-default focus:outline-none'
-    : 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500'
+    : 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary'
 
   const selectClass = readOnly
     ? `${fieldClass} appearance-none pr-4`
-    : 'w-full px-4 py-2 border border-gray-300 rounded-lg appearance-none bg-white pr-8 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer'
+    : 'w-full px-4 py-2 border border-gray-300 rounded-lg appearance-none bg-white pr-8 focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer'
 
   const readOnlyShell = readOnly
     ? '[&_label_.text-red-500]:hidden'
@@ -487,7 +535,7 @@ export function ContractForm({
                 {...register('department')}
                 value={watchedDepartment}
                 onChange={(e) => handleDepartmentChange(e.target.value)}
-                className={readOnly ? selectClass : `w-full px-4 py-2 border border-gray-300 rounded-lg appearance-none bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 ${isSingleDepartment ? 'cursor-default' : 'cursor-pointer pr-8'}`}
+                className={readOnly ? selectClass : `w-full px-4 py-2 border border-gray-300 rounded-lg appearance-none bg-white focus:outline-none focus:ring-2 focus:ring-primary ${isSingleDepartment ? 'cursor-default' : 'cursor-pointer pr-8'}`}
                 disabled={readOnly || isSingleDepartment}
               >
                 {!isSingleDepartment && hasRestrictedAccess && allowedDepartments.length > 1 && (
@@ -531,7 +579,7 @@ export function ContractForm({
                     href={viewMeta.msChannelUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="block px-4 py-2 border border-gray-200 rounded-lg bg-gray-50 text-blue-600 hover:underline break-all"
+                    className="block px-4 py-2 border border-gray-200 rounded-lg bg-gray-50 text-primary hover:underline break-all"
                   >
                     {viewMeta.msChannelTitle ?? 'N/A'}
                   </a>
@@ -560,7 +608,7 @@ export function ContractForm({
                 <select
                   {...register('status')}
                   disabled={readOnly}
-                  className={readOnly ? selectClass : 'w-full px-4 py-2 border border-gray-300 rounded-lg appearance-none bg-white pr-8 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer'}
+                  className={readOnly ? selectClass : 'w-full px-4 py-2 border border-gray-300 rounded-lg appearance-none bg-white pr-8 focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer'}
                 >
                   {statuses
                     .filter(status => {
@@ -611,7 +659,7 @@ export function ContractForm({
             <button
               type="button"
               onClick={() => appendPartner({ partnerName: '', contactPerson: '', contactNumber: '' })}
-              className="flex items-center gap-2 px-3 py-1 text-blue-600 hover:bg-blue-50 rounded-lg cursor-pointer text-sm"
+              className="flex items-center gap-2 px-3 py-1 text-primary hover:bg-primary/5 rounded-lg cursor-pointer text-sm"
             >
               <Plus className="w-4 h-4" />
               Add Partner
@@ -660,7 +708,7 @@ export function ContractForm({
                       {partnerOptionsMap[index].map((p, idx) => (
                         <li
                           key={p.partnerId ?? idx}
-                          className="px-3 py-2 hover:bg-blue-100 cursor-pointer"
+                          className="px-3 py-2 hover:bg-primary/10 cursor-pointer"
                           onClick={() => handlePartnerSelect(p, index)}
                         >
                           {p.partnerName}
@@ -813,7 +861,7 @@ export function ContractForm({
                 <button
                   type="button"
                   onClick={() => appendAlertDate({ value: '' })}
-                  className="flex items-center gap-2 px-3 py-1 text-blue-600 hover:bg-blue-50 rounded-lg cursor-pointer text-sm"
+                  className="flex items-center gap-2 px-3 py-1 text-primary hover:bg-primary/5 rounded-lg cursor-pointer text-sm"
                 >
                   <Plus className="w-4 h-4" />
                   Add Alert Date
@@ -898,12 +946,12 @@ export function ContractForm({
             />
             <label
               htmlFor={fileInputId}
-              className="block border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-blue-500 transition-colors cursor-pointer"
+              className="block border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-primary transition-colors cursor-pointer"
             >
               <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
               <p className="text-gray-700 mb-2">Click to upload or drag and drop</p>
               <p className="text-gray-500 mb-4">PDF, DOC, DOCX (Max 10MB per file, total 50MB)</p>
-              <span className="inline-block px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+              <span className="inline-block px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90">
                 Choose Files
               </span>
             </label>
@@ -916,65 +964,98 @@ export function ContractForm({
             <p className="text-gray-700">
               Uploaded File{pluralS(uploadedFiles.length)} ({uploadedFiles.length})
             </p>
-            {uploadedFiles.map((file) => (
-              <div
-                key={file.id}
-                className="flex items-center justify-between p-3 bg-gray-50 border border-gray-200 rounded-lg"
-              >
-                <div className="flex items-center gap-2 flex-1 min-w-0">
-                  {isPdfAttachment(file.file) ? (
-                    <img src="/pdf-logo.png" alt="PDF" className="w-5 h-5 shrink-0 object-contain" />
-                  ) : (
-                    <FileText className="w-5 h-5 text-blue-600 shrink-0" />
-                  )}
-                  <span className="text-gray-900 truncate">{file.file.name}</span>
-                </div>
-                <div className="flex items-center gap-3 shrink-0 ml-3">
-                  <span className="text-gray-500 text-sm">
-                    {formatAttachmentFileSize(file.displaySize ?? file.file.size)}
-                  </span>
-                  {readOnly && file.fileId && onDownloadFile ? (
+            {uploadedFiles.map((file) => {
+              const fileName = file.file.name
+              const isPdf = isPdfAttachment(file.file) || isPdfFileName(fileName)
+              const fileSizeLabel = formatAttachmentFileSize(file.displaySize ?? file.file.size)
+              const fileMetaLine = (() => {
+                if (file.uploadedAt && file.uploadedByName) {
+                  return `${fileSizeLabel} · Uploaded ${formatDate(file.uploadedAt)} by ${file.uploadedByName}`
+                }
+                if (file.uploadedAt) {
+                  return `${fileSizeLabel} · Uploaded ${formatDate(file.uploadedAt)}`
+                }
+                return fileSizeLabel
+              })()
+
+              const fileIcon = isPdf ? (
+                <img src="/pdf-logo.png" alt="PDF" className="w-5 h-5 shrink-0 object-contain" />
+              ) : (
+                <FileText className="w-5 h-5 text-primary shrink-0" />
+              )
+
+              if (readOnly) {
+                return (
+                  <div
+                    key={file.id}
+                    className="flex items-center justify-between gap-3 p-4 border border-gray-200 rounded-lg bg-white"
+                  >
+                    <div className="flex items-center gap-3 flex-1 min-w-0">
+                      {fileIcon}
+                      <div className="min-w-0 flex-1">
+                        <p className="text-gray-900 truncate" title={fileName}>{fileName}</p>
+                        <p className="text-gray-500 text-sm mt-0.5">{fileMetaLine}</p>
+                      </div>
+                    </div>
+                    {file.fileId && onDownloadFile ? (
+                      <button
+                        type="button"
+                        disabled={downloadingFileIds?.has(file.fileId)}
+                        onClick={() => onDownloadFile(file.fileId!, fileName)}
+                        className="inline-flex items-center gap-2 text-primary hover:text-brand-navy text-sm font-medium cursor-pointer disabled:opacity-50 disabled:pointer-events-none shrink-0"
+                      >
+                        {downloadingFileIds?.has(file.fileId) ? (
+                          <>
+                            <Loader2 className="w-4 h-4 shrink-0 animate-spin" />
+                            <span>Downloading…</span>
+                          </>
+                        ) : (
+                          <span>Download</span>
+                        )}
+                      </button>
+                    ) : null}
+                  </div>
+                )
+              }
+
+              return (
+                <div
+                  key={file.id}
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => openReplacePicker(file)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault()
+                      openReplacePicker(file)
+                    }
+                  }}
+                  title="Click to replace file"
+                  className="flex items-center justify-between gap-3 p-3 border border-gray-200 rounded-lg bg-gray-50 hover:border-primary/50 hover:bg-gray-100/80 transition-colors cursor-pointer"
+                >
+                  <div className="flex items-center gap-2 flex-1 min-w-0 pointer-events-none">
+                    {fileIcon}
+                    <span className="text-gray-900 truncate" title={fileName}>{fileName}</span>
+                  </div>
+                  <div className="flex items-center gap-3 shrink-0">
+                    <span className="text-gray-500 text-sm pointer-events-none">{fileSizeLabel}</span>
                     <button
                       type="button"
-                      disabled={downloadingFileIds?.has(file.fileId)}
-                      onClick={() => onDownloadFile(file.fileId!, file.file.name)}
-                      className="text-blue-600 hover:text-blue-700 text-sm font-medium cursor-pointer disabled:opacity-50"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        const nextFiles = uploadedFiles.filter((f) => f.id !== file.id)
+                        if (nextFiles.length === 0) setFileError('File upload is required')
+                        onFilesChange(nextFiles)
+                      }}
+                      className="text-red-600 hover:bg-red-50 p-1 rounded cursor-pointer pointer-events-auto"
+                      title="Remove file"
                     >
-                      {downloadingFileIds?.has(file.fileId) ? (
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                      ) : (
-                        'Download'
-                      )}
+                      <X className="w-4 h-4" />
                     </button>
-                  ) : !readOnly ? (
-                    <>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setReplaceTarget({ id: file.id, fileId: file.fileId })
-                          replaceInputRef.current?.click()
-                        }}
-                        className="text-blue-600 text-sm cursor-pointer"
-                      >
-                        Replace
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const nextFiles = uploadedFiles.filter((f) => f.id !== file.id)
-                          if (nextFiles.length === 0) setFileError('File upload is required')
-                          onFilesChange(nextFiles)
-                        }}
-                        className="text-red-600 hover:bg-red-50 p-1 rounded cursor-pointer"
-                        title="Remove file"
-                      >
-                        <X className="w-4 h-4" />
-                      </button>
-                    </>
-                  ) : null}
+                  </div>
                 </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
         )}
         {readOnly && uploadedFiles.length === 0 && (
@@ -1000,7 +1081,7 @@ export function ContractForm({
           <button
             type="submit"
             disabled={isSubmitting}
-            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 cursor-pointer"
+            className="px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 disabled:opacity-50 cursor-pointer"
           >
             {isSubmitting ? 'Saving…' : submitLabel}
           </button>

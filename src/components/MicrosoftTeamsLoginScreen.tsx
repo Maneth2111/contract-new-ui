@@ -16,7 +16,7 @@ export function MicrosoftTeamsLoginScreen({ onTeamsLogin, onRedirectDone }: Micr
   if (isRedirectLoading || isSilentLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <Loader2 className="h-9 w-9 text-blue-600 animate-spin" />
+        <Loader2 className="h-9 w-9 text-primary animate-spin" />
       </div>
     )
   }
@@ -26,17 +26,17 @@ export function MicrosoftTeamsLoginScreen({ onTeamsLogin, onRedirectDone }: Micr
       <Toaster position="top-center" toastOptions={{ duration: 4000 }} />
 
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-32 -left-32 w-96 h-96 bg-blue-200 rounded-full opacity-30 blur-3xl" />
+        <div className="absolute -top-32 -left-32 w-96 h-96 bg-primary/20 rounded-full opacity-30 blur-3xl" />
         <div className="absolute -bottom-32 -right-32 w-96 h-96 bg-indigo-300 rounded-full opacity-30 blur-3xl" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-150 h-150 bg-blue-100 rounded-full opacity-20 blur-3xl" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-150 h-150 bg-primary/10 rounded-full opacity-20 blur-3xl" />
       </div>
 
-      <div className="relative bg-white/80 backdrop-blur-xl rounded-2xl shadow-2xl shadow-blue-200/50 w-full max-w-sm p-10 border border-white/60">
+      <div className="relative bg-white/80 backdrop-blur-xl rounded-2xl shadow-2xl shadow-primary/25 w-full max-w-sm p-10 border border-white/60">
         <div className="flex flex-col items-center mb-10">
           <img
             src="/color.png"
             alt="Chokchey Finance"
-            className="w-20 h-20 rounded-2xl object-contain shadow-lg shadow-blue-300/50 mb-4"
+            className="w-20 h-20 rounded-2xl object-contain shadow-lg shadow-primary/30 mb-4"
           />
           <h1 className="text-xl font-semibold text-gray-800 tracking-tight">Contract Management</h1>
           <p className="text-gray-400 mt-1">CHOKCHEY Finance Plc.</p>

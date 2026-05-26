@@ -57,10 +57,10 @@ export function CreateUser({ currentUser, onCancel, onSuccess }: CreateUserProps
           <button onClick={onCancel}><X className="w-6 h-6 cursor-pointer" /></button>
         </div>
         <form onSubmit={userFormProps.form.handleSubmit(onSubmit)}>
-          <UserForm {...userFormProps} moduleAccess={currentUser?.moduleAccess} />
+          <UserForm {...userFormProps} insideModal moduleAccess={currentUser?.moduleAccess} />
           <div className="flex justify-end gap-3 px-6 py-4 border-t border-gray-200 bg-gray-50">
             <button type="button" onClick={onCancel} className="px-6 py-2 border border-gray-300 rounded-lg cursor-pointer">Cancel</button>
-            <button type="submit" disabled={creating} className="px-6 py-2 bg-blue-600 text-white rounded-lg disabled:opacity-50 cursor-pointer">
+            <button type="submit" disabled={creating} className="px-6 py-2 bg-primary text-white rounded-lg disabled:opacity-50 cursor-pointer">
               Create User
             </button>
           </div>

@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Contract } from '../types/contract';
-import { calculateDaysRemaining, formatCurrency, formatDate } from '../utils/contractUtils';
-import { Search, Eye, Edit2, Trash2, ChevronDown, RefreshCw, FilePlus } from 'lucide-react';
+import { calculateDaysRemaining, formatCurrency, formatDate, pluralS } from '../utils/contractUtils';
+import { useNotifications } from '../hook/useNotification';
+import { Search, Eye, Edit2, Trash2, ChevronDown, RefreshCw, FilePlus, AlertTriangle, Clock } from 'lucide-react';
 import { RegisterContract } from './RegisterContract';
 import { useDepartments } from '../hook/useDepartment';
 import { useContractStatus } from '../hook/useStatus';
@@ -15,6 +16,9 @@ import { deleteContractFile, getContractFiles } from '../services/contractFileSe
 import { listStatusBadgeClass, mapApiContractToListRow } from '../utils/contractListMappers';
 import toast from 'react-hot-toast';
 import { getAllowedDepartments } from '../utils/departmentAccess';
+import { contractTableSortAccessors } from '../utils/contractTableSort';
+import { useTableSort } from '../hook/useTableSort';
+import { SortableTableHead } from './SortableTableHead';
 import type { UserProfile } from '../services/userService';
 interface ContractListProps {
   isLoggedIn?: boolean;
@@ -55,6 +59,10 @@ export function ContractList({
   const [showRegisterContract, setShowRegisterContract] = useState(false);
   const { statuses } = useContractStatus();
   const { pagination, goToPage, setSize } = usePagination(10);
+  const { data: notificationData, refetch: refetchNotifications } = useNotifications(isLoggedIn);
+  const notificationSummary = notificationData?.summary;
+  const overdueCount = notificationSummary?.overdue ?? 0;
+
   const { contracts: apiContracts, total, totalPages, refetch } = useContracts({
     search: searchText.trim() || undefined,
     status: selectedStatus === '' ? undefined : selectedStatus,
@@ -92,6 +100,7 @@ export function ContractList({
 
       if (contract) {
         await refetch()
+        void refetchNotifications()
         onTotalsRefresh?.()
       }
     } catch (error) {
@@ -116,6 +125,11 @@ export function ContractList({
     return true;
   });
 
+  const { sortKey, sortDirection, toggleSort, sortedItems: sortedContracts } = useTableSort(
+    filteredContracts,
+    contractTableSortAccessors
+  );
+
   const handleViewContractDetails = (contract: Contract, formMode: 'view' | 'edit' = 'view') => {
     if (formMode === 'view' && !contractPermission.viewDocuments) return
     if (formMode === 'edit' && !contractPermission.edit) return
@@ -123,16 +137,58 @@ export function ContractList({
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="bg-white p-6 rounded-lg border border-gray-200">
+          <div className="flex items-center gap-3">
+            <span><AlertTriangle className="w-10 h-10 text-red-600" /></span>
+            <div>
+              <p className="text-gray-600">Overdue Contract{pluralS(overdueCount)}</p>
+              <p className="mt-1">{overdueCount}</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white p-6 rounded-lg border border-gray-200">
+          <div className="flex items-center gap-3">
+            <span><Clock className="w-10 h-10 text-red-600" /></span>
+            <div>
+              <p className="text-gray-600">30-Day Warning</p>
+              <p className="mt-1">{notificationSummary?.expire30 ?? 0}</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white p-6 rounded-lg border border-gray-200">
+          <div className="flex items-center gap-3">
+            <span><Clock className="w-10 h-10 text-orange-600" /></span>
+            <div>
+              <p className="text-gray-600">60-Day Warning</p>
+              <p className="mt-1">{notificationSummary?.expire60 ?? 0}</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white p-6 rounded-lg border border-gray-200">
+          <div className="flex items-center gap-3">
+            <span><Clock className="w-10 h-10 text-yellow-600" /></span>
+            <div>
+              <p className="text-gray-600">90-Day Warning</p>
+              <p className="mt-1">{notificationSummary?.expire90 ?? 0}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Filters */}
       <div className="bg-white p-4 rounded-lg border border-gray-200">
         <div className="flex items-center justify-between mb-4">
-          <h2>Contract Management</h2>
+          <h2 className='text-2xl font-medium'>Contract Management</h2>
           {contractPermission.create && (
             <button
               type="button"
               onClick={() => setShowRegisterContract(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 cursor-pointer"
+              className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 cursor-pointer"
             >
               <FilePlus className="w-4 h-4" />
               New Registration
@@ -205,33 +261,33 @@ export function ContractList({
         <div
           className={[
             'overflow-x-auto lg:overflow-x-visible',
-            filteredContracts.length > 10 ? 'overflow-y-auto max-h-[70vh]' : '',
+            sortedContracts.length > 10 ? 'overflow-y-auto max-h-[70vh]' : '',
           ].join(' ').trim() || undefined}
         >
-          <table className="w-full min-w-4xl lg:min-w-0 table-auto lg:table-fixed text-sm [&_th]:px-2 [&_th]:py-2 [&_th]:whitespace-nowrap [&_td]:px-2 [&_td]:py-2">
+          <table className="w-full min-w-4xl lg:min-w-0 table-auto lg:table-fixed text-sm [&_th]:px-2 [&_th]:py-5 [&_th]:whitespace-nowrap [&_td]:px-2 [&_td]:py-2">
             <thead className="sticky top-0 z-10 bg-gray-50">
               <tr>
-                <th className="lg:w-[9%] text-left text-gray-700 font-medium">Contract ID</th>
-                <th className="lg:w-[16%] text-left text-gray-700 font-medium wrap-break-word whitespace-normal!">Title</th>
-                <th className="w-40 min-w-40 max-w-40 text-left text-gray-700 font-medium whitespace-nowrap">Department</th>
-                <th className="lg:w-[10%] text-left text-gray-700 font-medium">In Charge</th>
-                <th className="lg:w-[11%] text-left text-gray-700 font-medium wrap-break-word whitespace-normal!">Partner</th>
-                <th className="lg:w-[9%] text-left text-gray-700 font-medium">Expiry</th>
-                <th className="lg:w-[8%] text-left text-gray-700 font-medium">Days Left</th>
-                <th className="lg:w-[9%] text-left text-gray-700 font-medium">Status</th>
-                <th className="lg:w-[10%] text-left text-gray-700 font-medium wrap-break-word whitespace-normal!  lg:max-w-0">Total Contract Value</th>
-                <th className="lg:w-[11%] text-left text-gray-700 font-medium wrap-break-word whitespace-normal!  lg:max-w-0">Action</th>
+                <SortableTableHead label="Contract ID" columnKey="id" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="lg:w-[9%]" />
+                <SortableTableHead label="Title" columnKey="title" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="lg:w-[16%] wrap-break-word whitespace-normal!" />
+                <SortableTableHead label="Department" columnKey="department" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="w-40 min-w-40 max-w-40 whitespace-nowrap" />
+                <SortableTableHead label="In Charge" columnKey="personInCharge" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="lg:w-[10%]" />
+                <SortableTableHead label="Partner" columnKey="partnerName" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="lg:w-[11%] wrap-break-word whitespace-normal!" />
+                <SortableTableHead label="Expiry" columnKey="expiryDate" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="lg:w-[9%]" />
+                <SortableTableHead label="Days Left" columnKey="daysRemaining" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="lg:w-[8%]" />
+                <SortableTableHead label="Status" columnKey="status" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="lg:w-[9%]" />
+                <SortableTableHead label="Total Contract Value" columnKey="contractValue" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="lg:w-[12%] lg:max-w-0 " />
+                <th className="lg:w-[10%] text-gray-700 font-medium wrap-break-word whitespace-normal! lg:max-w-0 text-center">Action</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
-              {filteredContracts.length === 0 ? (
+              {sortedContracts.length === 0 ? (
                 <tr>
-                  <td colSpan={10} className="px-4 py-8 text-center text-gray-500">
+                  <td colSpan={10} className="px-4 py-10 text-center text-gray-500">
                     No contracts found
                   </td>
                 </tr>
               ) : (
-                filteredContracts.map((contract) => {
+                sortedContracts.map((contract) => {
                   const daysRemaining = calculateDaysRemaining(contract.expiryDate);
                   const isDeleting = deletingId === contract.contractId;
 
@@ -241,7 +297,7 @@ export function ContractList({
                       onClick={() => contractPermission.viewDocuments && handleViewContractDetails(contract)}
                       className={`hover:bg-gray-50 transition-opacity cursor-pointer ${isDeleting ? 'opacity-40 pointer-events-none' : ''}`}
                     >
-                      <td className="wrap-break-word whitespace-normal!  lg:max-w-0" title={contract.id}>{contract.id}</td>
+                      <td className="wrap-break-word whitespace-normal!  lg:max-w-0 " title={contract.id}>{contract.id}</td>
                       <td className="wrap-break-word whitespace-normal  lg:max-w-0">
                         <div className="flex flex-wrap items-start gap-1 min-w-0">
                           <span className="wrap-break-word">{contract.title}</span>
@@ -261,7 +317,7 @@ export function ContractList({
                           {daysRemaining} days
                         </span>
                       </td>
-                      <td className="text-center align-middle whitespace-nowrap lg:max-w-0">
+                      <td className="text-left align-middle whitespace-nowrap lg:max-w-0">
                         <span
                           className={`inline-block px-1.5 py-0.5 rounded-full text-xs whitespace-nowrap ${listStatusBadgeClass(contract.status)}`}
                           title={contract.status}
@@ -269,7 +325,7 @@ export function ContractList({
                           {contract.status}
                         </span>
                       </td>
-                      <td className="whitespace-nowrap lg:truncate lg:max-w-0" title={formatCurrency(contract.contractValue)}>
+                      <td className="whitespace-nowrap lg:truncate lg:max-w-0 text-center" title={formatCurrency(contract.contractValue)}>
                         {formatCurrency(contract.contractValue)}
                       </td>
                       <td className="whitespace-nowrap">
@@ -281,7 +337,7 @@ export function ContractList({
                                 e.stopPropagation()
                                 handleViewContractDetails(contract)
                               }}
-                              className="p-1.5 hover:bg-gray-100 rounded-lg text-blue-600 cursor-pointer"
+                              className="p-1.5 hover:bg-gray-100 rounded-lg text-primary cursor-pointer"
                               title="View details"
                             >
                               <Eye className="w-4 h-4" />
@@ -294,7 +350,7 @@ export function ContractList({
                                 e.stopPropagation()
                                 handleViewContractDetails(contract, 'edit')
                               }}
-                              className="p-1.5 hover:bg-gray-100 rounded-lg text-blue-600 cursor-pointer"
+                              className="p-1.5 hover:bg-gray-100 rounded-lg text-primary cursor-pointer"
                               title="Edit"
                             >
                               <Edit2 className="w-4 h-4" />
@@ -370,6 +426,7 @@ export function ContractList({
           onSuccess={async () => {
             setShowRegisterContract(false)
             await refetch()
+            void refetchNotifications()
             onTotalsRefresh?.()
           }}
         />

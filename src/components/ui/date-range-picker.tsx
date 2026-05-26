@@ -138,7 +138,7 @@ export const DateRangePicker = React.forwardRef<HTMLDivElement,DateRangePickerPr
               )}
               disabled={isDisabled}
             >
-              <CalendarIcon className="h-4 w-4 shrink-0 text-blue-600 cursor-pointer" />
+              <CalendarIcon className="h-4 w-4 shrink-0 text-primary cursor-pointer" />
               <span className="min-w-0 flex-1 truncate">{formatDateRange()}</span>
             </button>
           </PopoverTrigger>
@@ -186,7 +186,7 @@ export const DateRangePicker = React.forwardRef<HTMLDivElement,DateRangePickerPr
                         className={cn(
                           'w-full rounded px-2 py-1 text-left text-xs cursor-pointer',
                           year === currentYear
-                            ? 'bg-blue-50 font-semibold text-blue-900'
+                            ? 'bg-primary/5 font-semibold text-brand-navy'
                             : 'text-gray-700 hover:bg-gray-50',
                         )}
                       >
@@ -207,7 +207,7 @@ export const DateRangePicker = React.forwardRef<HTMLDivElement,DateRangePickerPr
                         className={cn(
                           'rounded px-1 py-1.5 text-[10px] font-medium transition-colors cursor-pointer',
                           idx === currentMonth
-                            ? 'bg-blue-600 text-white'
+                            ? 'bg-primary text-white'
                             : 'border border-gray-200 bg-white text-gray-700 hover:bg-gray-50',
                         )}
                       >
@@ -253,12 +253,12 @@ export const DateRangePicker = React.forwardRef<HTMLDivElement,DateRangePickerPr
                             ? 'text-gray-300'
                             : 'text-gray-900',
                           isDateStart(date) || isDateEnd(date)
-                            ? 'bg-blue-600 font-semibold text-white'
+                            ? 'bg-primary font-semibold text-white'
                             : isDateInRange(date)
-                              ? 'bg-blue-100 text-blue-900'
+                              ? 'bg-primary/10 text-brand-navy'
                               : 'hover:bg-gray-100',
                           isToday(date) && !isDateStart(date) && !isDateEnd(date)
-                            ? 'border border-blue-400'
+                            ? 'border border-primary/60'
                             : '',
                           disabled?.(date) ? 'cursor-not-allowed opacity-50' : 'cursor-pointer',
                         )}
@@ -280,7 +280,7 @@ export const DateRangePicker = React.forwardRef<HTMLDivElement,DateRangePickerPr
                     <Button
                       type="button"
                       onClick={handleApply}
-                      className="h-8 flex-1 bg-blue-600 text-xs text-white hover:bg-blue-700 cursor-pointer"
+                      className="h-8 flex-1 bg-primary text-xs text-white hover:bg-primary/90 cursor-pointer"
                     >
                       Apply
                     </Button>

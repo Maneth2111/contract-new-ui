@@ -46,13 +46,13 @@ export function ChangePasswordForm({ onSubmit, onCancel }: ChangePasswordProps) 
     };
 
     return (
-        <div className="min-h-screen bg-linear-to-br from-blue-50 to-blue-100 flex items-center justify-center p-4">
+        <div className="min-h-screen bg-linear-to-br from-primary/5 to-brand-pink/15 flex items-center justify-center p-4">
             <Toaster position="top-center" toastOptions={{ duration: 4000 }} />
             <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-8">
 
                 {/* Header */}
                 <div className="text-center mb-8">
-                    <div className="w-20 h-20 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <div className="w-20 h-20 bg-primary rounded-full flex items-center justify-center mx-auto mb-4">
                         <Lock className="w-8 h-8 text-white" />
                     </div>
                     <h1 className="text-gray-900 mb-2">Reset New Password</h1>
@@ -71,7 +71,7 @@ export function ChangePasswordForm({ onSubmit, onCancel }: ChangePasswordProps) 
                                 type={showCurrent ? 'text' : 'password'}
                                 disabled={isSubmitting}
                                 placeholder="Enter your current password"
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 pr-10"
+                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary pr-10"
                             />
                             <button
                                 type="button"
@@ -93,7 +93,7 @@ export function ChangePasswordForm({ onSubmit, onCancel }: ChangePasswordProps) 
                                 type={showNew ? 'text' : 'password'}
                                 disabled={isSubmitting}
                                 placeholder="Enter your new password"
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 pr-10"
+                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary pr-10"
                             />
                             <button
                                 type="button"
@@ -115,7 +115,7 @@ export function ChangePasswordForm({ onSubmit, onCancel }: ChangePasswordProps) 
                                 type={showConfirm ? 'text' : 'password'}
                                 disabled={isSubmitting}
                                 placeholder="Confirm your new password"
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 pr-10"
+                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary pr-10"
                             />
                             <button
                                 type="button"
@@ -143,7 +143,7 @@ export function ChangePasswordForm({ onSubmit, onCancel }: ChangePasswordProps) 
                         <button
                             type="submit"
                             disabled={isSubmitting}
-                            className="flex-1 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                            className="flex-1 px-4 py-3 bg-primary text-white rounded-lg hover:bg-primary/90 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors cursor-pointer"
                         >
                             {isSubmitting ? 'Reseting...' : 'Reset Password'}
                         </button>

@@ -167,12 +167,12 @@ export function LoginScreen({ onRedirectDone, onLogin, onTeamsLogin }: LoginScre
     message ? <p className="text-red-500 text-sm mt-1">{message}</p> : null;
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-blue-50 to-blue-100 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-linear-to-br from-primary/5 to-brand-pink/15 flex items-center justify-center p-4">
       <Toaster position="top-center" toastOptions={{ duration: 4000 }} />
       <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-8">
         {/* Logo and System Name */}
         <div className="text-center mb-8">
-          <div className="w-20 h-20 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+          <div className="w-20 h-20 bg-primary rounded-full flex items-center justify-center mx-auto mb-4">
             <span className="text-white">CF</span>
           </div>
           <h1 className="text-gray-900 mb-2">Contract Monitor System</h1>
@@ -194,7 +194,7 @@ export function LoginScreen({ onRedirectDone, onLogin, onTeamsLogin }: LoginScre
               type="text"
               disabled={isLoading || isTeamsLoading}
               placeholder="Enter your username or email"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
               required
             />
             <ErrorMsg message={errors.username?.message} />
@@ -208,7 +208,7 @@ export function LoginScreen({ onRedirectDone, onLogin, onTeamsLogin }: LoginScre
                 type={showPassword ? 'text' : 'password'}
                 disabled={isLoading || isTeamsLoading}
                 placeholder="Enter your password"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 pr-10"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary pr-10"
               />
               <button
                 type="button"
@@ -228,7 +228,7 @@ export function LoginScreen({ onRedirectDone, onLogin, onTeamsLogin }: LoginScre
                 {...register('rememberMe')}
                 type="checkbox"
                 disabled={isLoading || isTeamsLoading}
-                className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                className="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary"
               />
               <span className="ml-2 text-gray-700">Remember Me</span>
             </label>
@@ -236,7 +236,7 @@ export function LoginScreen({ onRedirectDone, onLogin, onTeamsLogin }: LoginScre
             <button
               type="button"
               onClick={() => alert('Password reset functionality would be implemented here')}
-              className="text-blue-600 hover:text-blue-700 cursor-pointer"
+              className="text-primary hover:text-brand-navy cursor-pointer"
             >
               Forgot Password?
             </button>
@@ -245,7 +245,7 @@ export function LoginScreen({ onRedirectDone, onLogin, onTeamsLogin }: LoginScre
           <button
             type="submit"
             disabled={isFormEmpty || isLoading || isTeamsLoading}
-            className="w-full px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors cursor-pointer"
+            className="w-full px-4 py-3 bg-primary text-white rounded-lg hover:bg-primary/90 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors cursor-pointer"
           >
             {isLoading ? (
               <span className="inline-flex items-center justify-center gap-2">

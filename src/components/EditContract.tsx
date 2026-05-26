@@ -139,7 +139,7 @@ export function EditContract({ contract, onUpdate, onCancel, currentUser }: Edit
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-start justify-center z-[60] overflow-y-auto py-8">
+    <div className="fixed inset-0 bg-black/50 flex items-start justify-center z-60 overflow-y-auto py-8">
       <div className="bg-white rounded-lg w-full max-w-4xl mx-4">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200">

@@ -13,6 +13,9 @@ import { PaginationBar } from './PaginationBar';
 import { usePagination } from '../hook/usePagination';
 import { DateRangePicker } from './ui/date-range-picker';
 import { getAllowedDepartments } from '../utils/departmentAccess';
+import { contractTableSortAccessors } from '../utils/contractTableSort';
+import { useTableSort } from '../hook/useTableSort';
+import { SortableTableHead } from './SortableTableHead';
 
 type StatusFilter = 'ALL' | 'ACTIVE' | 'EXPIRED' | 'EXPIRING_SOON' | 'OVERDUE' | 'CLOSED';
 
@@ -186,6 +189,11 @@ export function ReportDashboard({ currentUser }: ReportDashboardProps) {
     return true;
   });
 
+  const { sortKey, sortDirection, toggleSort, sortedItems: sortedContracts } = useTableSort(
+    filteredContracts,
+    contractTableSortAccessors
+  );
+
   const handleExportCSV = async () => {
     try {
       setExportingCSV(true);
@@ -323,27 +331,29 @@ export function ReportDashboard({ currentUser }: ReportDashboardProps) {
     <div className="space-y-6">
       {/* Report Filters */}
       <div className="bg-white rounded-lg border border-gray-200 p-6">
-        {/* Export Buttons - Positioned at the right */}
-        <div className="flex justify-end gap-3 mb-4">
-          <button
-            onClick={handleExportCSV}
-            disabled={total === 0 || exportingCSV}
-            className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed cursor-pointer"
-          >
-            {exportingCSV ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
-            {exportingCSV ? 'Exporting...' : 'Export CSV'}
-          </button>
-          <button
-            onClick={handleExportPDF}
-            disabled={total === 0 || exportingPDF}
-            className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:bg-gray-300 disabled:cursor-not-allowed cursor-pointer"
-          >
-            {exportingPDF ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
-            {exportingPDF ? 'Exporting...' : 'Export PDF'}
-          </button>
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6">
+          <h2 className="font-bold text-xl text-gray-900 shrink-0">Contract Summary Report</h2>
+          <div className="flex flex-wrap items-center gap-3 sm:justify-end">
+            <button
+              type="button"
+              onClick={handleExportCSV}
+              disabled={total === 0 || exportingCSV}
+              className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed cursor-pointer text-sm font-medium"
+            >
+              {exportingCSV ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+              {exportingCSV ? 'Exporting...' : 'Export CSV'}
+            </button>
+            <button
+              type="button"
+              onClick={handleExportPDF}
+              disabled={total === 0 || exportingPDF}
+              className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:bg-gray-300 disabled:cursor-not-allowed cursor-pointer text-sm font-medium"
+            >
+              {exportingPDF ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+              {exportingPDF ? 'Exporting...' : 'Export PDF'}
+            </button>
+          </div>
         </div>
-
-        <h2 className="mb-6 font-bold">Contract Summary Report</h2>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
           <div>
@@ -429,10 +439,6 @@ export function ReportDashboard({ currentUser }: ReportDashboardProps) {
       {/* Report Preview */}
       <div className="bg-white rounded-lg border border-gray-200 p-6">
         <div className="mb-6 pb-6 border-b border-gray-200">
-          <div>
-            <h3>Contract Summary Report</h3>
-            <p className="text-gray-600 mt-1">Generated on: {today}</p>
-          </div>
 
           <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="bg-gray-50 p-3 rounded border border-gray-300">
@@ -441,7 +447,7 @@ export function ReportDashboard({ currentUser }: ReportDashboardProps) {
                   <p className="text-gray-600">Total Contracts</p>
                   <p className="mt-1">{summary?.totalContracts}</p>
                 </div>
-                <FileText className="w-8 h-8 text-blue-500" />
+                <FileText className="w-8 h-8 text-primary" />
               </div>
             </div>
             <div className="bg-gray-50 p-3 rounded border border-gray-300">
@@ -478,37 +484,37 @@ export function ReportDashboard({ currentUser }: ReportDashboardProps) {
         <div
           className={[
             'overflow-x-auto lg:overflow-x-visible',
-            filteredContracts.length > 10 ? 'overflow-y-auto max-h-[70vh]' : '',
+            sortedContracts.length > 10 ? 'overflow-y-auto max-h-[70vh]' : '',
           ].join(' ').trim() || undefined}
         >
-          <table className="w-full min-w-4xl lg:min-w-0 table-auto lg:table-fixed text-sm [&_th]:px-2 [&_th]:py-2 [&_th]:whitespace-nowrap [&_td]:px-2 [&_td]:py-2">
+          <table className="w-full min-w-4xl lg:min-w-0 table-auto lg:table-fixed text-sm [&_th]:px-2 [&_th]:py-5 [&_th]:whitespace-nowrap [&_td]:px-2 [&_td]:py-2">
             <thead className="sticky top-0 z-10 bg-gray-50">
               <tr>
-                <th className="lg:w-[8%] text-left text-gray-700 font-medium">Contract ID</th>
-                <th className="lg:w-[14%] text-left text-gray-700 font-medium">Title</th>
-                <th className="w-40 min-w-40 max-w-40 text-left text-gray-700 font-medium whitespace-nowrap">Department</th>
-                <th className="lg:w-[9%] text-left text-gray-700 font-medium">In Charge</th>
-                <th className="lg:w-[13%] text-left text-gray-700 font-medium">Partner</th>
-                <th className="lg:w-[9%] text-left text-gray-700 font-medium">Effective</th>
-                <th className="lg:w-[9%] text-left text-gray-700 font-medium">Expiry</th>
-                <th className="lg:w-[7%] text-left text-gray-700 font-medium">Days Left</th>
-                <th className="lg:w-[9%] text-center text-gray-700 font-medium">Status</th>
-                <th className="lg:w-[11%] text-left text-gray-700 font-medium wrap-break-word whitespace-normal!  lg:max-w-0">Total Contract Value</th>
+                <SortableTableHead label="Contract ID" columnKey="id" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="lg:w-[9%]" />
+                <SortableTableHead label="Title" columnKey="title" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="lg:w-[14%]" />
+                <SortableTableHead label="Department" columnKey="department" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="w-40 min-w-40 max-w-40 whitespace-nowrap" />
+                <SortableTableHead label="In Charge" columnKey="personInCharge" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="lg:w-[9%]" />
+                <SortableTableHead label="Partner" columnKey="partnerName" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="lg:w-[13%]" />
+                <SortableTableHead label="Effective" columnKey="effectiveDate" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="lg:w-[8%]" />
+                <SortableTableHead label="Expiry" columnKey="expiryDate" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="lg:w-[8%]" />
+                <SortableTableHead label="Days Left" columnKey="daysRemaining" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="lg:w-[7%]" />
+                <SortableTableHead label="Status" columnKey="status" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="lg:w-[9%]" align="center" />
+                <SortableTableHead label="Total Contract Value" columnKey="contractValue" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="lg:w-[12%] lg:max-w-0" />
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
-              {filteredContracts.length === 0 ? (
+              {sortedContracts.length === 0 ? (
                 <tr>
                   <td colSpan={10} className="px-4 py-8 text-center text-gray-500">
                     No contracts found
                   </td>
                 </tr>
               ) : (
-                filteredContracts.map(contract => {
+                sortedContracts.map(contract => {
                   const daysRemaining = calculateDaysRemaining(contract.expiryDate);
                   return (
                     <tr key={contract.id} className="hover:bg-gray-50">
-                      <td className="wrap-break-word whitespace-normal!  lg:max-w-0" title={contract.contractCode}>{contract.contractCode}</td>
+                      <td className="lg:max-w-0" title={contract.contractCode}>{contract.contractCode}</td>
                       <td className="wrap-break-word whitespace-normal!  lg:max-w-0" title={contract.title}>{contract.title}</td>
                       <td className="w-40 min-w-40 max-w-40 whitespace-nowrap truncate" title={contract.department}>{contract.department}</td>
                       <td className="wrap-break-word whitespace-normal!  lg:max-w-0" title={contract.personInCharge}>{contract.personInCharge}</td>
@@ -520,7 +526,7 @@ export function ReportDashboard({ currentUser }: ReportDashboardProps) {
                           {daysRemaining} days
                         </span>
                       </td>
-                      <td className="text-center align-middle whitespace-nowrap lg:max-w-0">
+                      <td className="text-left align-middle whitespace-nowrap lg:max-w-0">
                         <span
                           className={`inline-block px-1.5 py-0.5 rounded-full text-xs whitespace-nowrap ${getStatusColor(contract.status)}`}
                           title={contract.status}
@@ -528,7 +534,7 @@ export function ReportDashboard({ currentUser }: ReportDashboardProps) {
                           {contract.status}
                         </span>
                       </td>
-                      <td className="whitespace-nowrap lg:truncate lg:max-w-0" title={formatCurrency(contract.contractValue)}>
+                      <td className="whitespace-nowrap text-center lg:truncate lg:max-w-0" title={formatCurrency(contract.contractValue)}>
                         {formatCurrency(contract.contractValue)}
                       </td>
                     </tr>
