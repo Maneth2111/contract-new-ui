@@ -474,7 +474,6 @@ export async function handleMockRequest(
         historyId: 1,
         contractId,
         actionType: 'CREATED',
-        description: 'Contract created',
         oldValue: null,
         newValue: null,
         actionDate: ts(),

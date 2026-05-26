@@ -1,216 +1,305 @@
-import { useNotifications } from '../hook/useNotification';
-import { calculateDaysRemaining, formatDate, pluralS } from '../utils/contractUtils';
-import { AlertTriangle, Clock, Bell } from 'lucide-react';
-import { PaginationBar } from './PaginationBar';
+import { useState } from "react";
+import { PaginationBar } from "./PaginationBar";
 
-interface NotificationCenterProps {
-  onSelectContract: (contractId: number) => void;
-  isLoggedIn?: boolean;
+// ─── Types ───────────────────────────────────────────────────────────────────
+
+interface ContractNotification {
+  id: number;
+  code: string;
+  title: string;
+  pic: string;
+  dept: string;
+  partner: string;
+  expiry: string;      // "YYYY-MM-DD"
+  status: "OVERDUE" | "EXPIRING_SOON";
+  alertedAt: string;   // ISO datetime – drives "X ago" label
 }
 
-export function NotificationCenter({ onSelectContract, isLoggedIn }: NotificationCenterProps) {
-  const { data, overduePage, setOverduePage, expireSoonPage, setExpireSoonPage } = useNotifications(isLoggedIn);
+type FilterKey = "all" | "overdue" | "30" | "60" | "90";
 
-  const overdueContracts = data?.overdueContracts.items ?? [];
-  const expiringSoonContracts = (data?.expireSoonContracts.items ?? []).filter(
-    (c) => c.status !== 'OVERDUE' && (c.daysRemaining ?? 0) >= 0
+interface NotificationCenterProps {
+  onSelectContract?: (contractId: number) => void;
+  isLoggedIn?: boolean;
+  onUnreadChange?: (count: number) => void;
+}
+
+// ─── Mock data ───────────────────────────────────────────────────────────────
+
+const NOW = new Date("2026-05-26T10:30:00");
+
+const MOCK_CONTRACTS: ContractNotification[] = [
+  { id: 56, code: "CCF-2026-049", title: "Test Contract",     pic: "Test User",  dept: "CEO Office",         partner: "YTest Corp",      expiry: "2026-05-16", status: "OVERDUE",       alertedAt: "2026-05-26T10:28:00" },
+  { id: 50, code: "CCF-2026-046", title: "Legal Contract",    pic: "John",       dept: "Legal & Compliance", partner: "Global Software",  expiry: "2026-08-19", status: "EXPIRING_SOON", alertedAt: "2026-05-26T08:00:00" },
+  { id: 49, code: "CCF-2026-045", title: "Contract Testing",  pic: "John",       dept: "Legal & Compliance", partner: "Training Experts", expiry: "2026-07-21", status: "EXPIRING_SOON", alertedAt: "2026-05-25T09:15:00" },
+  { id: 48, code: "CCF-2026-044", title: "Lease Agreement",   pic: "John",       dept: "Admin & Marketing",  partner: "Global Software",  expiry: "2026-08-19", status: "EXPIRING_SOON", alertedAt: "2026-05-24T14:00:00" },
+  { id: 46, code: "CCF-2026-042", title: "Testing Agreement", pic: "Test User",  dept: "Legal & Compliance", partner: "YTest Corp",       expiry: "2026-06-18", status: "EXPIRING_SOON", alertedAt: "2026-05-26T09:30:00" },
+  { id: 43, code: "CCF-2026-039", title: "Testing",           pic: "John Smith", dept: "IT Department",      partner: "ABC Company",      expiry: "2026-07-18", status: "EXPIRING_SOON", alertedAt: "2026-05-23T07:45:00" },
+  { id: 42, code: "CCF-2026-038", title: "Test Contract B",   pic: "Test User",  dept: "CEO Office",         partner: "YTest Corp",       expiry: "2026-07-16", status: "EXPIRING_SOON", alertedAt: "2026-05-20T11:00:00" },
+  { id: 40, code: "CCF-2026-036", title: "VG Agreement",      pic: "Menghok",    dept: "CEO Office",         partner: "EE Solutions",     expiry: "2026-06-30", status: "EXPIRING_SOON", alertedAt: "2026-05-26T10:00:00" },
+];
+
+const PAGE_SIZE = 10;
+
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+
+function daysDiff(expiry: string): number {
+  const a = new Date(new Date(NOW).toDateString());
+  const b = new Date(new Date(expiry).toDateString());
+  return Math.round((b.getTime() - a.getTime()) / 86400000);
+}
+
+function formatDate(dateStr: string): string {
+  return new Date(dateStr).toLocaleDateString("en-GB", {
+    day: "2-digit", month: "short", year: "numeric",
+  });
+}
+
+function timeAgo(alertedAt: string): string {
+  const diff  = NOW.getTime() - new Date(alertedAt).getTime();
+  const mins  = Math.floor(diff / 60_000);
+  const hours = Math.floor(diff / 3_600_000);
+  const days  = Math.floor(diff / 86_400_000);
+
+  if (mins  < 1)  return "just now";
+  if (mins  < 60) return `${mins}m ago`;
+  if (hours < 24) return `${hours}h ago`;
+  if (days  < 7)  return `${days}d ago`;
+  return formatDate(alertedAt);
+}
+
+// ─── Warning config ───────────────────────────────────────────────────────────
+
+interface Warning {
+  label: string;
+  badgeClass: string;
+  accentClass: string;
+  daysColorClass: string;
+}
+
+function getWarning(days: number): Warning {
+  if (days < 0)   return { label: "Overdue",          badgeClass: "badge-overdue", accentClass: "accent-overdue", daysColorClass: "text-red-600"    };
+  if (days <= 30) return { label: "30 days warning",  badgeClass: "badge-30",      accentClass: "accent-30",      daysColorClass: "text-red-500"    };
+  if (days <= 60) return { label: "60 days warning",  badgeClass: "badge-60",      accentClass: "accent-60",      daysColorClass: "text-orange-600" };
+  return               { label: "90 days warning",  badgeClass: "badge-90",      accentClass: "accent-90",      daysColorClass: "text-yellow-600" };
+}
+
+// ─── Sub-components ───────────────────────────────────────────────────────────
+
+function FilterPills({
+  current,
+  onChange,
+}: {
+  current: FilterKey;
+  onChange: (f: FilterKey) => void;
+}) {
+  const filters: { key: FilterKey; label: string }[] = [
+    { key: "all",     label: "All"       },
+    { key: "overdue", label: "Overdue"   },
+    { key: "30",      label: "≤ 30 days" },
+    { key: "60",      label: "≤ 60 days" },
+    { key: "90",      label: "≤ 90 days" },
+  ];
+  return (
+    <div className="flex flex-wrap gap-2 mb-4">
+      {filters.map(f => (
+        <button
+          key={f.key}
+          onClick={() => onChange(f.key)}
+          className={`rounded-sm px-4 py-1 text-sm border border-primary transition-colors ${
+            current === f.key
+              ? "bg-primary text-white border-primary"
+              : "bg-white text-gray-500 border-gray-200 hover:bg-gray-50"
+          }`}
+        >
+          {f.label}
+        </button>
+      ))}
+    </div>
   );
-  const summary = data?.summary;
-  const overdueTotalPages = data?.overdueContracts.paginationResponse.totalPages ?? 0;
-  const expireSoonTotalPages = data?.expireSoonContracts.paginationResponse.totalPages ?? 0;
-  const overdueCount = summary?.overdue ?? 0;
+}
 
-  const getWarningCategory = (
-    alertType: string,
-    daysRemaining?: number
-  ): { label: string; color: string } => {
-    const normalized = alertType?.toUpperCase().replace(/[\s-]/g, '_') ?? ''
+interface ContractCardProps {
+  contract: ContractNotification & { days: number };
+  isRead: boolean;
+  onRead: (id: number) => void;
+  onSelectContract?: (contractId: number) => void;
+}
 
-    if (
-      normalized === 'OVERDUE_ALERT' ||
-      normalized === 'OVERDUE' ||
-      (daysRemaining !== undefined && daysRemaining < 0)
-    ) {
-      return { label: 'Overdue', color: 'text-red-600 bg-red-50 border-red-200' }
-    }
+function ContractCard({ contract, isRead, onRead, onSelectContract }: ContractCardProps) {
+  const w   = getWarning(contract.days);
+  const abs = Math.abs(contract.days);
+  const daysText   = contract.days < 0
+    ? `${abs} day${abs !== 1 ? "s" : ""} overdue`
+    : `${contract.days} day${contract.days !== 1 ? "s" : ""} remaining`;
+  const expiryColor = contract.days < 0
+    ? "text-red-600"
+    : contract.days <= 30
+    ? "text-red-500"
+    : contract.days <= 60
+    ? "text-orange-600"
+    : "text-yellow-600";
 
-    const is30 =
-      normalized === '30DAYS' ||
-      normalized === 'EXPIRE_30' ||
-      normalized.endsWith('_30')
-    const is60 =
-      normalized === '60DAYS' ||
-      normalized === 'EXPIRE_60' ||
-      normalized.endsWith('_60')
-    const is90 =
-      normalized === '90DAYS' ||
-      normalized === 'EXPIRE_90' ||
-      normalized.endsWith('_90')
+  const accentColors: Record<string, string> = {
+    "accent-overdue": "bg-red-600",
+    "accent-30":      "bg-red-500",
+    "accent-60":      "bg-orange-600",
+    "accent-90":      "bg-yellow-500",
+  };
+  const badgeColors: Record<string, string> = {
+    "badge-overdue": "bg-red-100 text-red-600",
+    "badge-30":      "bg-red-50 text-red-500",
+    "badge-60":      "bg-orange-50 text-orange-600",
+    "badge-90":      "bg-yellow-50 text-yellow-600",
+  };
 
-    if (is30 || (daysRemaining !== undefined && daysRemaining >= 0 && daysRemaining <= 30)) {
-      return { label: '30 days warning', color: 'text-red-600 bg-red-50 border-red-200' }
-    }
-    if (is60 || (daysRemaining !== undefined && daysRemaining >= 0 && daysRemaining <= 60)) {
-      return { label: '60 days warning', color: 'text-orange-600 bg-orange-50 border-orange-200' }
-    }
-    if (is90 || (daysRemaining !== undefined && daysRemaining >= 0 && daysRemaining <= 90)) {
-      return { label: '90 days warning', color: 'text-yellow-600 bg-yellow-50 border-yellow-200' }
-    }
-    return { label: 'Normal', color: 'text-gray-600 bg-gray-50 border-gray-200' }
+  const handleClick = () => {
+    // Mark as read
+    onRead(contract.id);
+    // Navigate to contract details
+    onSelectContract?.(contract.id);
+  };
+
+  return (
+    <div
+      onClick={handleClick}
+      className={`border border-gray-200 rounded-xl overflow-hidden hover:bg-gray-50 transition-colors cursor-pointer ${
+        isRead ? "bg-white" : "bg-blue-50/40"
+      }`}
+    >
+      <div className="flex">
+        {/* Colored left accent bar */}
+        <div className={`w-1 shrink-0 ${accentColors[w.accentClass]}`} />
+
+        <div className="flex-1 p-4">
+          {/* Top row */}
+          <div className="flex items-start gap-2 mb-3">
+            <div className="flex flex-wrap items-center gap-5 flex-1 min-w-0">
+              {/* Unread dot */}
+              {!isRead && (
+                <span className="w-2 h-2 rounded-full bg-blue-500 shrink-0 mt-0.5" aria-label="Unread" />
+              )}
+              <span className="bg-gray-100 text-gray-600 text-xs font-medium rounded-md px-2.5 py-1">
+                {contract.code}
+              </span>
+              <span className={`text-xs font-medium rounded-md px-2.5 py-1 ${badgeColors[w.badgeClass]}`}>
+                {w.label}
+              </span>
+            </div>
+            {/* Time ago – top right */}
+            <div className="flex items-center gap-1 text-xs text-gray-400 whitespace-nowrap shrink-0 pt-0.5">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+              </svg>
+              {timeAgo(contract.alertedAt)}
+            </div>
+          </div>
+
+          {/* Meta grid */}
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-x-4 gap-y-2">
+            {[
+              { label: "Department",       value: contract.dept,    color: "" },
+              { label: "Person in charge", value: contract.pic,     color: "" },
+              { label: "Partner",          value: contract.partner, color: "" },
+              { label: contract.days < 0 ? "Expired on" : "Expiry date", value: formatDate(contract.expiry), color: expiryColor },
+              { label: "Days",             value: daysText,         color: w.daysColorClass },
+            ].map(m => (
+              <div key={m.label}>
+                <p className="text-xs text-gray-400">{m.label}</p>
+                <p className={`text-sm font-${isRead ? "normal" : "medium"} ${m.color || "text-gray-900"}`}>
+                  {m.value}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Main component ───────────────────────────────────────────────────────────
+
+export function NotificationCenter({ onSelectContract }: NotificationCenterProps) {
+  const [filter, setFilter] = useState<FilterKey>("all");
+  const [page,   setPage  ] = useState(1);
+  // All contracts start as unread; set stores IDs that have been read
+  const [readIds, setReadIds] = useState<Set<number>>(new Set());
+
+  const enriched = MOCK_CONTRACTS.map(c => ({ ...c, days: daysDiff(c.expiry) }));
+
+  const filtered = enriched.filter(c => {
+    if (filter === "overdue") return c.days < 0;
+    if (filter === "30")      return c.days >= 0 && c.days <= 30;
+    if (filter === "60")      return c.days > 30  && c.days <= 60;
+    if (filter === "90")      return c.days > 60  && c.days <= 90;
+    return true;
+  });
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const safePage   = Math.min(page, totalPages);
+  const pageItems  = filtered.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
+
+  const unreadCount = enriched.filter(c => !readIds.has(c.id)).length;
+
+  function handleFilter(f: FilterKey) { setFilter(f); setPage(1); }
+
+  function handleRead(id: number) {
+    setReadIds(prev => new Set(prev).add(id));
+  }
+
+  function handleMarkAllRead() {
+    setReadIds(new Set(enriched.map(c => c.id)));
   }
 
   return (
-    <div className="space-y-6">
-      {/* Overdue Contracts */}
-      {overdueContracts.length > 0 && (
-        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-          <div className="bg-red-50 border-b border-red-200 px-6 py-4">
-            <div className="flex items-center gap-3">
-              <AlertTriangle className="w-6 h-6 text-red-600" />
-              <h3 className="text-red-900">
-                Overdue Contract{pluralS(overdueContracts.length)} ({overdueContracts.length})
-              </h3>
-            </div>
-          </div>
-          <div className="divide-y divide-gray-200">
-            {overdueContracts.map((contract, index) => {
-              const daysOverdue = Math.abs(calculateDaysRemaining(contract.expireDate));
-              return (
-                <div key={`overdue-${contract.contractId}-${index}`} className="p-6 hover:bg-gray-50">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="flex flex-wrap items-center gap-2 mb-2">
-                        <span className="px-3 py-1 bg-red-100 text-red-800 rounded-full text-sm">
-                          {contract.contractCode}
-                        </span>
-                        <h4 className="text-red-900">{contract.contractTitle}</h4>
-                        <span className="px-3 py-1 rounded-full border text-sm text-red-600 bg-red-50 border-red-200">
-                          Overdue
-                        </span>
-                      </div>
-                      <div className="grid grid-cols-2 md:grid-cols-5 gap-3 text-sm text-gray-600">
-                        <div>
-                          <span className="block">Department</span>
-                          <span className="text-gray-900">{contract.departmentName}</span>
-                        </div>
-                        <div>
-                          <span className="block">Person In Charge</span>
-                          <span className="text-gray-900">{contract.personInCharge}</span>
-                        </div>
-                        <div>
-                          <span className="block">Partner</span>
-                          <span className="text-gray-900">{contract.partners[0]?.partnerName}</span>
-                        </div>
-                        <div>
-                          <span className="block">Expired On</span>
-                          <span className="text-red-600">{formatDate(contract.expireDate)}</span>
-                        </div>
-                        <div>
-                          <span className="block">Days Overdue</span>
-                          <span className="text-red-600">{daysOverdue} days</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+    <div className="space-y-4">
+      {/* Header row with unread count + mark all read */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          {unreadCount > 0 && (
+            <span className="inline-flex items-center justify-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
+              {unreadCount} unread
+            </span>
+          )}
         </div>
-      )}
-      <div className="border-t border-gray-200 flex justify-center sm:justify-end">
-        <PaginationBar
-          currentPage={overduePage}
-          totalPages={overdueTotalPages}
-          onPageChange={setOverduePage}
-        />
+        {unreadCount > 0 && (
+          <button
+            type="button"
+            onClick={handleMarkAllRead}
+            className="text-xs text-primary hover:underline cursor-pointer"
+          >
+            Mark all as read
+          </button>
+        )}
       </div>
 
-      {/* Expiring Soon Contracts */}
-      {expiringSoonContracts.length > 0 && (
-        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-          <div className="bg-orange-50 border-b border-orange-200 px-4 sm:px-6 py-4">
-            <div className="flex items-center gap-3">
-              <Bell className="w-6 h-6 text-orange-600" />
-              <h3 className="text-orange-900">
-                Expiring Soon Contract{pluralS(expiringSoonContracts.length)} ({expiringSoonContracts.length})
-              </h3>
-            </div>
-          </div>
-          <div className="divide-y divide-gray-200">
-            {expiringSoonContracts.map((contract, index) => {
-              const daysRemaining = calculateDaysRemaining(contract.expireDate);
-              const warning = getWarningCategory(
-                contract.alertType,
-                contract.daysRemaining ?? daysRemaining
-              );
-              return (
-                <div key={`expire-${contract.contractId}-${index}`} className="p-4 sm:p-6 hover:bg-gray-50">
-                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
-                    <div className="flex-1">
-                      <div className="flex flex-wrap items-center gap-2 mb-2">
-                        <span className="px-3 py-1 bg-gray-100 text-gray-800 rounded-full text-sm">
-                          {contract.contractCode}
-                        </span>
-                        <h4 className="text-sm sm:text-base">{contract.contractTitle}</h4>
-                        <span className={`px-3 py-1 rounded-full border text-sm ${warning.color}`}>
-                          {warning.label}
-                        </span>
-                      </div>
-                      <div className="grid grid-cols-2 md:grid-cols-5 gap-3 text-sm text-gray-600">
-                        <div>
-                          <span className="block">Department</span>
-                          <span className="text-gray-900">{contract.departmentName}</span>
-                        </div>
-                        <div>
-                          <span className="block">Person In Charge</span>
-                          <span className="text-gray-900">{contract.personInCharge}</span>
-                        </div>
-                        <div>
-                          <span className="block">Partner</span>
-                          <span className="text-gray-900">{contract.partners[0]?.partnerName}</span>
-                        </div>
-                        <div>
-                          <span className="block">Expiry Date</span>
-                          <span className="text-orange-600">{formatDate(contract.expireDate)}</span>
-                        </div>
-                        <div>
-                          <span className="block">Days Remaining</span>
-                          <span className={warning.color.split(' ')[0]}>{daysRemaining} days</span>
-                        </div>
-                      </div>
-                    </div>
-                    {/* <button
-                      onClick={() => onSelectContract(contract.contractId)}
-                      className="w-full sm:w-auto sm:ml-4 px-4 py-2 text-sm bg-orange-600 text-white rounded-lg hover:bg-orange-700 cursor-pointer whitespace-nowrap text-center"
-                    >
-                      Review Contract
-                    </button> */}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+      <FilterPills current={filter} onChange={handleFilter} />
+
+      {pageItems.length === 0 ? (
+        <div className="text-center py-12">
+          <p className="text-gray-400 text-sm">No contracts match this filter.</p>
+        </div>
+      ) : (
+        <div className="flex flex-col gap-2.5">
+          {pageItems.map(c => (
+            <ContractCard
+              key={c.id}
+              contract={c}
+              isRead={readIds.has(c.id)}
+              onRead={handleRead}
+              onSelectContract={onSelectContract}
+            />
+          ))}
         </div>
       )}
-      <div className="border-t border-gray-200 flex justify-center sm:justify-end">
+
+      <div className="flex justify-end">
         <PaginationBar
-          currentPage={expireSoonPage}
-          totalPages={expireSoonTotalPages}
-          onPageChange={setExpireSoonPage}
+          currentPage={safePage}
+          totalPages={totalPages}
+          onPageChange={(p) => setPage(p)}
         />
       </div>
-
-      {/* No Alerts */}
-      {overdueContracts.length === 0 && expiringSoonContracts.length === 0 && (
-        <div className="bg-green-50 border border-green-200 rounded-lg p-12 text-center">
-          <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Bell className="w-8 h-8 text-green-600" />
-          </div>
-          <h3 className="text-green-900 mb-2">All Clear!</h3>
-          <p className="text-green-700">No overdue or expiring contracts at this time.</p>
-        </div>
-      )}
     </div>
   );
 }

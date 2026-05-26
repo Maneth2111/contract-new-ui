@@ -142,7 +142,7 @@ export function ContractList({
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="bg-white p-6 rounded-lg border border-gray-200">
           <div className="flex items-center gap-3">
-            <span><AlertTriangle className="w-10 h-10 text-red-600" /></span>
+            <span><AlertTriangle className="w-10 h-10 text-red-800" /></span>
             <div>
               <p className="text-gray-600">Overdue Contract{pluralS(overdueCount)}</p>
               <p className="mt-1">{overdueCount}</p>
@@ -152,7 +152,7 @@ export function ContractList({
 
         <div className="bg-white p-6 rounded-lg border border-gray-200">
           <div className="flex items-center gap-3">
-            <span><Clock className="w-10 h-10 text-red-600" /></span>
+            <span><Clock className="w-10 h-10 text-red-500" /></span>
             <div>
               <p className="text-gray-600">30-Day Warning</p>
               <p className="mt-1">{notificationSummary?.expire30 ?? 0}</p>

@@ -49,7 +49,6 @@ export const store = {
     historyId: number
     contractId: number
     actionType: 'CREATED' | 'MODIFIED' | 'DELETED'
-    description: string
     oldValue: Record<string, unknown> | null
     newValue: Record<string, unknown> | null
     actionDate: string

@@ -50,7 +50,7 @@ export function CreateUser({ currentUser, onCancel, onSuccess }: CreateUserProps
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-start justify-center z-50 overflow-y-auto py-8">
+    <div className="fixed inset-0 bg-black/50 flex items-start justify-center z-50 overflow-y-auto py-8">
       <div className="bg-white rounded-lg w-full max-w-3xl mx-4">
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
           <h2 className="text-xl font-medium">Create New User</h2>

@@ -1,4 +1,4 @@
-/* @custom-variant dark (&:is(.dark *)); */
+@custom-variant dark (&:is(.dark *));
 @import "react-datepicker/dist/react-datepicker.css";
 
 :root {
@@ -82,7 +82,7 @@
   --sidebar-ring: oklch(0.439 0 0);
 }
 
-/* @theme inline {
+@theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -124,9 +124,9 @@
   --color-brand-primary: var(--brand-primary);
   --color-brand-pink: var(--brand-pink);
   --color-brand-navy: var(--brand-navy);
-} */
+}
 
-/* @layer base {
+@layer base {
   * {
     @apply border-border outline-ring/50;
   }
@@ -134,7 +134,7 @@
   body {
     @apply bg-background text-foreground;
   }
-} */
+}
 
 /**
  * Base typography. This is not applied to elements which have an ancestor with a Tailwind text class.
