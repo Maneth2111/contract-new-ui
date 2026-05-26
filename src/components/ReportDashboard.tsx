@@ -16,6 +16,7 @@ import { getAllowedDepartments } from '../utils/departmentAccess';
 import { contractTableSortAccessors } from '../utils/contractTableSort';
 import { useTableSort } from '../hook/useTableSort';
 import { SortableTableHead } from './SortableTableHead';
+import { tableRowHover, tableTheadClass } from '../utils/tableRowHover';
 
 type StatusFilter = 'ALL' | 'ACTIVE' | 'EXPIRED' | 'EXPIRING_SOON' | 'OVERDUE' | 'CLOSED';
 
@@ -487,8 +488,8 @@ export function ReportDashboard({ currentUser }: ReportDashboardProps) {
             sortedContracts.length > 10 ? 'overflow-y-auto max-h-[70vh]' : '',
           ].join(' ').trim() || undefined}
         >
-          <table className="w-full min-w-4xl lg:min-w-0 table-auto lg:table-fixed text-sm [&_th]:px-2 [&_th]:py-5 [&_th]:whitespace-nowrap [&_td]:px-2 [&_td]:py-2">
-            <thead className="sticky top-0 z-10 bg-gray-50">
+          <table className={`w-full min-w-4xl lg:min-w-0 table-auto lg:table-fixed text-sm [&_th]:px-2 [&_th]:py-5 [&_th]:whitespace-nowrap [&_td]:px-2 [&_td]:py-2 ${tableRowHover}`}>
+            <thead className={tableTheadClass}>
               <tr>
                 <SortableTableHead label="Contract ID" columnKey="id" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="lg:w-[9%]" />
                 <SortableTableHead label="Title" columnKey="title" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="lg:w-[14%]" />
@@ -504,7 +505,7 @@ export function ReportDashboard({ currentUser }: ReportDashboardProps) {
             </thead>
             <tbody className="divide-y divide-gray-200">
               {sortedContracts.length === 0 ? (
-                <tr>
+                <tr data-empty>
                   <td colSpan={10} className="px-4 py-8 text-center text-gray-500">
                     No contracts found
                   </td>
@@ -513,7 +514,7 @@ export function ReportDashboard({ currentUser }: ReportDashboardProps) {
                 sortedContracts.map(contract => {
                   const daysRemaining = calculateDaysRemaining(contract.expiryDate);
                   return (
-                    <tr key={contract.id} className="hover:bg-gray-50">
+                    <tr key={contract.id}>
                       <td className="lg:max-w-0" title={contract.contractCode}>{contract.contractCode}</td>
                       <td className="wrap-break-word whitespace-normal!  lg:max-w-0" title={contract.title}>{contract.title}</td>
                       <td className="w-40 min-w-40 max-w-40 whitespace-nowrap truncate" title={contract.department}>{contract.department}</td>

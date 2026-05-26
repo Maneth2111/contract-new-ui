@@ -429,14 +429,14 @@ export default function App() {
     }
     if (isLoggingIn) {
       return (
-        <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center px-6 gap-3">
+        <div className="min-h-screen bg-primary/5 flex flex-col items-center justify-center px-6 gap-3">
           <Loader2 className="h-9 w-9 text-primary animate-spin" aria-hidden />
         </div>
       )
     }
     if (isTeamsApp && (teamsLoading || teamsProfileCheckPending)) {
       return (
-        <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center px-6 gap-3">
+        <div className="min-h-screen bg-primary/5 flex flex-col items-center justify-center px-6 gap-3">
           <Loader2 className="h-9 w-9 text-primary animate-spin" aria-hidden />
         </div>
       )
@@ -450,7 +450,7 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-primary/5">
       <Toaster position="top-center" toastOptions={{ duration: 4000 }} />
       {/* Header with tab navigation */}
       <header className="bg-white border-b border-gray-200 sticky top-0 z-40">

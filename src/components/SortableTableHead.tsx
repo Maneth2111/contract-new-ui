@@ -29,7 +29,7 @@ export function SortableTableHead ({
       <button
         type="button"
         onClick={() => onSort(columnKey)}
-        className={`inline-flex items-center gap-1 w-full font-medium text-gray-700 hover:text-gray-900 cursor-pointer select-none ${alignClass}`}
+        className={`inline-flex items-center gap-1 w-full font-medium text-brand-navy hover:text-primary cursor-pointer select-none ${alignClass}`}
       >
         <span>{label}</span>
         {active ? (
@@ -39,7 +39,7 @@ export function SortableTableHead ({
             <ChevronDown className="w-4 h-4 shrink-0 text-primary" aria-hidden />
           )
         ) : (
-          <ChevronsUpDown className="w-4 h-4 shrink-0 text-gray-400" aria-hidden />
+          <ChevronsUpDown className="w-4 h-4 shrink-0 text-brand-navy/40" aria-hidden />
         )}
       </button>
     </th>

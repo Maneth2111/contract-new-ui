@@ -19,6 +19,7 @@ import { getAllowedDepartments } from '../utils/departmentAccess';
 import { contractTableSortAccessors } from '../utils/contractTableSort';
 import { useTableSort } from '../hook/useTableSort';
 import { SortableTableHead } from './SortableTableHead';
+import { tableRowHover, tableTheadClass } from '../utils/tableRowHover';
 import type { UserProfile } from '../services/userService';
 interface ContractListProps {
   isLoggedIn?: boolean;
@@ -188,7 +189,7 @@ export function ContractList({
             <button
               type="button"
               onClick={() => setShowRegisterContract(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 cursor-pointer"
+              className="flex items-center gap-2 px-4 py-2  bg-primary text-white rounded-lg hover:bg-primary/90 cursor-pointer"
             >
               <FilePlus className="w-4 h-4" />
               New Registration
@@ -257,15 +258,15 @@ export function ContractList({
       </div>
 
       {/* Contract Table */}
-      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+      <div className="bg-white rounded-lg border border-gray-200">
         <div
           className={[
             'overflow-x-auto lg:overflow-x-visible',
             sortedContracts.length > 10 ? 'overflow-y-auto max-h-[70vh]' : '',
           ].join(' ').trim() || undefined}
         >
-          <table className="w-full min-w-4xl lg:min-w-0 table-auto lg:table-fixed text-sm [&_th]:px-2 [&_th]:py-5 [&_th]:whitespace-nowrap [&_td]:px-2 [&_td]:py-2">
-            <thead className="sticky top-0 z-10 bg-gray-50">
+          <table className={`w-full min-w-4xl lg:min-w-0 table-auto lg:table-fixed text-sm [&_th]:px-2 [&_th]:py-5 [&_th]:whitespace-nowrap [&_td]:px-2 [&_td]:py-2 ${tableRowHover}`}>
+            <thead className={tableTheadClass}>
               <tr>
                 <SortableTableHead label="Contract ID" columnKey="id" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="lg:w-[9%]" />
                 <SortableTableHead label="Title" columnKey="title" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="lg:w-[16%] wrap-break-word whitespace-normal!" />
@@ -276,12 +277,12 @@ export function ContractList({
                 <SortableTableHead label="Days Left" columnKey="daysRemaining" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="lg:w-[8%]" />
                 <SortableTableHead label="Status" columnKey="status" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="lg:w-[9%]" />
                 <SortableTableHead label="Total Contract Value" columnKey="contractValue" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="lg:w-[12%] lg:max-w-0 " />
-                <th className="lg:w-[10%] text-gray-700 font-medium wrap-break-word whitespace-normal! lg:max-w-0 text-center">Action</th>
+                <th className="lg:w-[10%] text-brand-navy font-medium wrap-break-word whitespace-normal! lg:max-w-0 text-center">Action</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
               {sortedContracts.length === 0 ? (
-                <tr>
+                <tr data-empty>
                   <td colSpan={10} className="px-4 py-10 text-center text-gray-500">
                     No contracts found
                   </td>
@@ -295,7 +296,7 @@ export function ContractList({
                     <tr
                       key={contract.id}
                       onClick={() => contractPermission.viewDocuments && handleViewContractDetails(contract)}
-                      className={`hover:bg-gray-50 transition-opacity cursor-pointer ${isDeleting ? 'opacity-40 pointer-events-none' : ''}`}
+                      className={`transition-opacity cursor-pointer ${isDeleting ? 'opacity-40 pointer-events-none' : ''}`}
                     >
                       <td className="wrap-break-word whitespace-normal!  lg:max-w-0 " title={contract.id}>{contract.id}</td>
                       <td className="wrap-break-word whitespace-normal  lg:max-w-0">

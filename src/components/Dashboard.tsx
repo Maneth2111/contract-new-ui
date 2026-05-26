@@ -1,6 +1,7 @@
+import React from 'react'
 import { formatCurrency, pluralS } from '../utils/contractUtils';
 import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { FileText, DollarSign, CheckCircle, AlertTriangle, Clock, Building2 } from 'lucide-react';
+import { FileText, DollarSign, CheckCircle, AlertTriangle, Clock } from 'lucide-react';
 import { useContractsByDepartment, useDashboardSummary, useStatusDistribution, useUpcomingExprirations } from '../hook/useDashboard';
 
 export function Dashboard() {
@@ -40,15 +41,7 @@ export function Dashboard() {
 
   const COLORS = ['#22c55e', '#eab308', '#f97316', '#ef4444', '#6b7280'];
 
-  const BRAND_COLORS = ['#0fbab5', '#052744', '#de6ea0'] as const;
-
-  function getDepartmentBarColor (departmentName: string): string {
-    let hash = 0
-    for (let i = 0; i < departmentName.length; i++) {
-      hash = departmentName.charCodeAt(i) + ((hash << 5) - hash)
-    }
-    return BRAND_COLORS[Math.abs(hash) % BRAND_COLORS.length]
-  }
+  const DEPARTMENT_COLORS = ['#0fbab5', '#052744', '#de6ea0', '#00A693'] as const
 
   // Format date 
   function formatApiMonth(apiMonth: string): string {
@@ -159,9 +152,9 @@ export function Dashboard() {
             <p className="text-center text-gray-500 py-16">No department data available</p>
           ) : (
             <ul className="space-y-6 min-h-65">
-              {departmentData.map((dept) => {
+              {departmentData.map((dept, index) => {
                 const barWidth = (dept.count / maxDepartmentCount) * 100
-                const barColor = getDepartmentBarColor(dept.name)
+                const barColor = DEPARTMENT_COLORS[index % DEPARTMENT_COLORS.length]
                 return (
                   <li key={dept.name}>
                     <div className="flex items-center justify-between gap-3 mb-2">

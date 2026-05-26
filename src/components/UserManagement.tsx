@@ -15,6 +15,7 @@ import { getAllowedDepartments } from '../utils/departmentAccess';
 import { userTableSortAccessors } from '../utils/userTableSort';
 import { useTableSort } from '../hook/useTableSort';
 import { SortableTableHead } from './SortableTableHead';
+import { tableRowHover, tableTheadClass } from '../utils/tableRowHover';
 
 interface UserManagementProps {
   currentUser?: UserProfile | null;
@@ -228,15 +229,15 @@ export function UserManagement({ currentUser, userPermission, onSelectUser, onRe
         </div>
       </div>
 
-      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+      <div className="bg-white rounded-lg border border-gray-200">
         <div
           className={[
             'overflow-x-auto',
             sortedUsers.length > 10 ? 'overflow-y-auto max-h-[70vh]' : '',
           ].join(' ').trim()}
         >
-          <table className="w-full">
-            <thead className="sticky top-0 z-10 bg-gray-50">
+          <table className={`w-full ${tableRowHover}`}>
+            <thead className={tableTheadClass}>
               <tr>
                 <SortableTableHead label="Employee ID" columnKey="employeeId" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="px-4 py-3" />
                 <SortableTableHead label="Full Name" columnKey="fullName" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="px-4 py-3" />
@@ -244,12 +245,12 @@ export function UserManagement({ currentUser, userPermission, onSelectUser, onRe
                 <SortableTableHead label="Department" columnKey="department" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="px-4 py-3" />
                 <SortableTableHead label="Role" columnKey="role" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="px-4 py-3" />
                 <SortableTableHead label="Status" columnKey="status" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="px-4 py-3" />
-                <th className="px-4 py-3 text-left text-gray-700 font-medium">Actions</th>
+                <th className="px-4 py-3 text-left text-brand-navy font-medium">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
               {sortedUsers.length === 0 ? (
-                <tr>
+                <tr data-empty>
                   <td colSpan={7} className="px-4 py-8 text-center text-gray-500">
                     No users found
                   </td>
@@ -259,7 +260,7 @@ export function UserManagement({ currentUser, userPermission, onSelectUser, onRe
                   <tr
                     key={user.id}
                     onClick={() => userPermission.view && handleViewUserDetails(user)}
-                    className={`hover:bg-gray-50 transition-colors ${userPermission.view ? 'cursor-pointer' : ''}`}
+                    className={`transition-colors ${userPermission.view ? 'cursor-pointer' : ''}`}
                   >
                     <td className="px-4 py-3">{user.employeeId}</td>
                     <td className="px-4 py-3">{user.fullName}</td>
