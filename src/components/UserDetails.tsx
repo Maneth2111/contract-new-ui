@@ -158,7 +158,7 @@ function UserAuditPanel({ audit }: { audit: Audit | undefined }) {
 
 // ── Main component ────────────────────────────────────────────────────────
 
-export function UserDetails({
+export default function UserDetails({
   userId,
   onClose,
   onUpdate,

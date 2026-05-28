@@ -12,7 +12,7 @@ export interface ConfirmDialogProps {
   onCancel: () => void;
 }
 
-export function ConfirmDialog({
+export default function ConfirmDialog({
   isOpen,
   title,
   message,

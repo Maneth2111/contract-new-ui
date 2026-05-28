@@ -203,7 +203,7 @@ interface ContractDetailsProps {
 
 type ViewTab = 'details' | 'history';
 
-export function ContractDetails({
+export default function ContractDetails({
   contract,
   onClose,
   onUpdate,

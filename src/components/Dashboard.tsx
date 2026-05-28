@@ -68,7 +68,7 @@ const expiringByMonth = Array.from({ length: 12 }, (_, i) => {
 
 // ─────────────────────────────────────────────────────────────────────────────
 
-export function Dashboard() {
+export default function Dashboard() {
   const formatPercent = (part: number, total: number) =>
     total > 0 ? ((part / total) * 100).toFixed(1) : '0';
 
