@@ -84,8 +84,12 @@ export function UserManagement({ currentUser, userPermission, onSelectUser, onRe
   const [allUsers, setAllUsers] = useState<User[]>(() => mockUsers.map(mockToUser));
 
   // Expose a stable refetch reference to the parent
-  const refetch = React.useCallback(() => {
-    setAllUsers(mockUsers.map(mockToUser));
+  const refetch = React.useCallback((updatedUser?: User) => {
+    if (updatedUser) {
+      setAllUsers(prev => prev.map(u => u.id === updatedUser.id ? { ...u, ...updatedUser } : u));
+    } else {
+      setAllUsers(mockUsers.map(mockToUser));
+    }
   }, []);
 
   React.useEffect(() => {
@@ -435,9 +439,9 @@ export function UserManagement({ currentUser, userPermission, onSelectUser, onRe
         <CreateUser
           currentUser={currentUser}
           onCancel={() => setShowCreateUser(false)}
-          onSuccess={() => {
+          onSuccess={(newUser?: User) => {
+            if (newUser) setAllUsers(prev => [...prev, newUser]);
             setShowCreateUser(false);
-            refetch();
           }}
         />
       )}

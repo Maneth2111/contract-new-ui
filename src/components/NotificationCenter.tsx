@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { PaginationBar } from "./PaginationBar";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -105,7 +105,7 @@ function FilterPills({
         <button
           key={f.key}
           onClick={() => onChange(f.key)}
-          className={`rounded-sm px-4 shadow py-1 text-sm  transition-colors ${
+          className={`rounded-sm px-4 shadow py-1 text-sm transition-colors ${
             current === f.key
               ? "bg-primary text-white border-primary"
               : "bg-white text-gray-500 border-gray-200 hover:bg-gray-50"
@@ -128,7 +128,7 @@ interface ContractCardProps {
 function ContractCard({ contract, isRead, onRead, onSelectContract }: ContractCardProps) {
   const w   = getWarning(contract.days);
   const abs = Math.abs(contract.days);
-  const daysText   = contract.days < 0
+  const daysText = contract.days < 0
     ? `${abs} day${abs !== 1 ? "s" : ""} overdue`
     : `${contract.days} day${contract.days !== 1 ? "s" : ""} remaining`;
   const expiryColor = contract.days < 0
@@ -153,18 +153,14 @@ function ContractCard({ contract, isRead, onRead, onSelectContract }: ContractCa
   };
 
   const handleClick = () => {
-    // Mark as read
     onRead(contract.id);
-    // Navigate to contract details
     onSelectContract?.(contract.id);
   };
 
   return (
     <div
       onClick={handleClick}
-      className={`border border-gray-200 shadow rounded-xl overflow-hidden hover:bg-gray-50 transition-colors cursor-pointer ${
-        isRead ? "bg-white" : "bg-white"
-      }`}
+      className="shadow rounded-xl overflow-hidden hover:bg-gray-50 transition-colors cursor-pointer bg-white"
     >
       <div className="flex">
         {/* Colored left accent bar */}
@@ -205,7 +201,7 @@ function ContractCard({ contract, isRead, onRead, onSelectContract }: ContractCa
             ].map(m => (
               <div key={m.label}>
                 <p className="text-xs text-gray-400">{m.label}</p>
-                <p className={`text-sm font-${isRead ? "normal" : "medium"} ${m.color || "text-gray-900"}`}>
+                <p className={`text-sm ${isRead ? "font-normal" : "font-medium"} ${m.color || "text-gray-900"}`}>
                   {m.value}
                 </p>
               </div>
@@ -219,10 +215,9 @@ function ContractCard({ contract, isRead, onRead, onSelectContract }: ContractCa
 
 // ─── Main component ───────────────────────────────────────────────────────────
 
-export function NotificationCenter({ onSelectContract }: NotificationCenterProps) {
+export function NotificationCenter({ onSelectContract, onUnreadChange }: NotificationCenterProps) {
   const [filter, setFilter] = useState<FilterKey>("all");
   const [page,   setPage  ] = useState(1);
-  // All contracts start as unread; set stores IDs that have been read
   const [readIds, setReadIds] = useState<Set<number>>(new Set());
 
   const enriched = MOCK_CONTRACTS.map(c => ({ ...c, days: daysDiff(c.expiry) }));
@@ -241,6 +236,11 @@ export function NotificationCenter({ onSelectContract }: NotificationCenterProps
 
   const unreadCount = enriched.filter(c => !readIds.has(c.id)).length;
 
+  // Notify parent whenever unread count changes
+  useEffect(() => {
+    onUnreadChange?.(unreadCount);
+  }, [unreadCount, onUnreadChange]);
+
   function handleFilter(f: FilterKey) { setFilter(f); setPage(1); }
 
   function handleRead(id: number) {
@@ -254,24 +254,6 @@ export function NotificationCenter({ onSelectContract }: NotificationCenterProps
   return (
     <div className="space-y-4">
       {/* Header row with unread count + mark all read */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          {unreadCount > 0 && (
-            <span className="inline-flex items-center justify-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
-              {unreadCount} unread
-            </span>
-          )}
-        </div>
-        {unreadCount > 0 && (
-          <button
-            type="button"
-            onClick={handleMarkAllRead}
-            className="text-xs text-primary hover:underline cursor-pointer"
-          >
-            Mark all as read
-          </button>
-        )}
-      </div>
 
       <FilterPills current={filter} onChange={handleFilter} />
 

@@ -1,80 +1,96 @@
-import React from 'react'
+import React from 'react';
 import { formatCurrency, pluralS } from '../utils/contractUtils';
 import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { FileText, DollarSign, CheckCircle, AlertTriangle, Clock } from 'lucide-react';
-import { useContractsByDepartment, useDashboardSummary, useStatusDistribution, useUpcomingExprirations } from '../hook/useDashboard';
+import {
+  mockContracts as RAW_CONTRACTS,
+  mockPartners,
+  mockContractsByDepartment,
+  type Contract as MockContract,
+} from '../data/mockData';
+
+// ── Map to display status (same logic as ContractList) ────────────────────────
+function toDisplayStatus(status: MockContract['status']): string {
+  switch (status) {
+    case 'ACTIVE':        return 'Active';
+    case 'OVERDUE':       return 'Overdue';
+    case 'EXPIRED':       return 'Expired';
+    case 'EXPIRING_SOON': return 'Expiring Soon';
+    default:              return status;
+  }
+}
+
+// ── Derive all stats from the same mock contracts ────────────────────────────
+const totalContracts   = RAW_CONTRACTS.length;
+const activeContracts  = RAW_CONTRACTS.filter(c => c.status === 'ACTIVE').length;
+const overdueContracts = RAW_CONTRACTS.filter(c => c.status === 'OVERDUE').length;
+const expiringSoon     = RAW_CONTRACTS.filter(c => c.status === 'EXPIRING_SOON').length;
+const totalValue       = RAW_CONTRACTS.reduce((sum, c) => sum + c.contractValue, 0);
+const uniquePartners   = mockPartners.length;
+
+// Status distribution counts
+const statusCounts = RAW_CONTRACTS.reduce(
+  (acc, c) => {
+    if      (c.status === 'ACTIVE')        acc.active        += 1;
+    else if (c.status === 'EXPIRING_SOON') acc.expiringSoon  += 1;
+    else if (c.status === 'EXPIRED')       acc.expired       += 1;
+    else if (c.status === 'OVERDUE')       acc.overdue       += 1;
+    return acc;
+  },
+  { active: 0, expiringSoon: 0, expired: 0, overdue: 0, closed: 0 }
+);
+
+// Contracts by department — count directly from RAW_CONTRACTS for accuracy
+const deptCountMap: Record<string, number> = {};
+for (const c of RAW_CONTRACTS) {
+  const name = c.department.departmentName;
+  deptCountMap[name] = (deptCountMap[name] ?? 0) + 1;
+}
+const departmentData = Object.entries(deptCountMap)
+  .map(([name, count]) => ({ name, count }))
+  .sort((a, b) => b.count - a.count);
+
+// Expiration by month (current year) counted from RAW_CONTRACTS
+const currentYear = new Date().getFullYear();
+const expirationMap: Record<string, number> = {};
+for (const c of RAW_CONTRACTS) {
+  const d = new Date(c.expireDate);
+  if (d.getFullYear() === currentYear) {
+    const key = d.toLocaleString('default', { month: 'short', year: 'numeric' });
+    expirationMap[key] = (expirationMap[key] ?? 0) + 1;
+  }
+}
+const expiringByMonth = Array.from({ length: 12 }, (_, i) => {
+  const date  = new Date(currentYear, i, 1);
+  const month = date.toLocaleString('default', { month: 'short', year: 'numeric' });
+  return { month, count: expirationMap[month] ?? 0 };
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
 
 export function Dashboard() {
-  const { statusDistrabution } = useStatusDistribution();
-  const { upcomingExpirations } = useUpcomingExprirations();
-  const { DepartmentCounts } = useContractsByDepartment();
-  const { summaryDashboard } = useDashboardSummary();
-  const totalContracts = summaryDashboard?.totalContracts ?? 0;
-  const totalValue = summaryDashboard?.totalContractValue ?? 0;
-  const activeContracts = summaryDashboard?.activeContracts ?? 0;
-  const expiringSoon = summaryDashboard?.expiringSoon90Days ?? 0;
-  const overdueContracts = summaryDashboard?.overdueContracts ?? 0;
-  const uniquePartners = summaryDashboard?.totalPartners ?? 0;
   const formatPercent = (part: number, total: number) =>
     total > 0 ? ((part / total) * 100).toFixed(1) : '0';
 
-  const activePercentage = formatPercent(activeContracts, totalContracts);
+  const activePercentage   = formatPercent(activeContracts, totalContracts);
+  const maxDepartmentCount = Math.max(...departmentData.map(d => d.count), 1);
 
-  const departmentData = (DepartmentCounts?.map(d => ({
-    name: d.department,
-    count: Number(d.contractCount) || 0,
-  })) ?? [])
-    .sort((a, b) => b.count - a.count)
-
-  const maxDepartmentCount = Math.max(...departmentData.map((d) => d.count), 1)
-
-  // Convert API object to array 
-  const statusData = statusDistrabution ? [
-    { name: 'Active', value: statusDistrabution.active },
-    { name: 'Expiring Soon', value: statusDistrabution.expiringSoon },
-    { name: 'Expired', value: statusDistrabution.expired },
-    { name: 'Closed', value: statusDistrabution.closed },
-    { name: 'Overdue', value: statusDistrabution.overdue },
-  ].filter(d => d.value > 0) : [];
+  const statusData = [
+    { name: 'Active',        value: statusCounts.active       },
+    { name: 'Expiring Soon', value: statusCounts.expiringSoon },
+    { name: 'Expired',       value: statusCounts.expired      },
+    { name: 'Closed',        value: statusCounts.closed       },
+    { name: 'Overdue',       value: statusCounts.overdue      },
+  ].filter(d => d.value > 0);
 
   const statusTotal = statusData.reduce((sum, d) => sum + d.value, 0);
 
-  const COLORS = ['#22c55e', '#eab308', '#f97316', '#ef4444', '#6b7280'];
+  const COLORS           = ['#22c55e', '#eab308', '#f97316', '#ef4444', '#6b7280'];
+  const DEPARTMENT_COLORS = ['#0fbab5', '#052744', '#de6ea0', '#00A693'] as const;
 
-  const DEPARTMENT_COLORS = ['#0fbab5', '#052744', '#de6ea0', '#00A693'] as const
-
-  // Format date 
-  function formatApiMonth(apiMonth: string): string {
-    const [year, month] = apiMonth.split('-');
-    const date = new Date(Number(year), Number(month) - 1);
-    return date.toLocaleString('default', { month: 'short', year: 'numeric' });
-  }
-  const currentYear = new Date().getFullYear();
-  const monthsOfCurrentYear = Array.from({ length: 12 }, (_, i) => {
-    const date = new Date(currentYear, i, 1);
-
-    return {
-      month: date.toLocaleString('default', {
-        month: 'short',
-        year: 'numeric',
-      }),
-      count: 0,
-    };
-  });
-
-  const expiringByMonth = monthsOfCurrentYear.map(skeleton => {
-    const found = upcomingExpirations?.find(
-      u => formatApiMonth(u.month) === skeleton.month
-    );
-    return found ? { month: skeleton.month, count: found.count } : skeleton;
-  });
-
-  const maxExpirationCount = Math.max(...expiringByMonth.map((d) => d.count), 0);
+  const maxExpirationCount = Math.max(...expiringByMonth.map(d => d.count), 0);
   const expirationYAxisMax = Math.max(maxExpirationCount, 3);
-  const expirationYTicks = Array.from(
-    { length: expirationYAxisMax + 1 },
-    (_, i) => i
-  );
+  const expirationYTicks   = Array.from({ length: expirationYAxisMax + 1 }, (_, i) => i);
 
   return (
     <div className="space-y-6">
@@ -99,6 +115,7 @@ export function Dashboard() {
             <AlertTriangle className="w-8 h-8 text-red-500" />
           </div>
         </div>
+
         <div className="bg-white p-6 rounded-lg border border-gray-200">
           <div className="flex items-center justify-between">
             <div>
@@ -108,6 +125,7 @@ export function Dashboard() {
             <CheckCircle className="w-8 h-8 text-green-500" />
           </div>
         </div>
+
         <div className="bg-white p-6 rounded-lg border border-gray-200">
           <div className="flex items-center justify-between">
             <div>
@@ -127,7 +145,6 @@ export function Dashboard() {
             <DollarSign className="w-8 h-8 text-green-500" />
           </div>
         </div>
-
 
         <div className="bg-white p-6 rounded-lg border border-gray-200">
           <div className="flex items-center justify-between">
@@ -153,8 +170,8 @@ export function Dashboard() {
           ) : (
             <ul className="space-y-6 min-h-65">
               {departmentData.map((dept, index) => {
-                const barWidth = (dept.count / maxDepartmentCount) * 100
-                const barColor = DEPARTMENT_COLORS[index % DEPARTMENT_COLORS.length]
+                const barWidth = (dept.count / maxDepartmentCount) * 100;
+                const barColor = DEPARTMENT_COLORS[index % DEPARTMENT_COLORS.length];
                 return (
                   <li key={dept.name}>
                     <div className="flex items-center justify-between gap-3 mb-2">
@@ -184,7 +201,7 @@ export function Dashboard() {
                       />
                     </div>
                   </li>
-                )
+                );
               })}
             </ul>
           )}
@@ -205,7 +222,7 @@ export function Dashboard() {
                 fill="#8884d8"
                 dataKey="value"
               >
-                {statusData.map((entry, index) => (
+                {statusData.map((_, index) => (
                   <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                 ))}
               </Pie>
@@ -230,4 +247,4 @@ export function Dashboard() {
       </div>
     </div>
   );
-}
+}                      

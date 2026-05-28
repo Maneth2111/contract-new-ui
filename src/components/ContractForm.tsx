@@ -4,8 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Plus, Trash2, Upload, ChevronDown, X, FileText, Loader2 } from 'lucide-react';
 import { ContractFormValues, getContractSchema } from '../lib/contractSchema';
 import { useContractFormData } from '../hook/useContactByDepartment';
-import { getAllPartners } from '../services/partnerService';
-import { useContractStatus } from '../hook/useStatus';
+
 import { titleCase } from 'text-case';
 import {
   MAX_CONTRACT_FILES_TOTAL_BYTES,
@@ -22,6 +21,7 @@ import { getAllowedDepartments } from '../utils/departmentAccess';
 import { calculateDaysRemaining, formatDate, pluralS } from '../utils/contractUtils';
 import toast from 'react-hot-toast';
 import type { UserProfile } from '../services/userService';
+import { mockContractStatuses, mockPartners } from '../data/mockData';
 
 type ContractFormRHFValues = Omit<ContractFormValues, 'attachments'> & {
   attachments?: File[]
@@ -159,7 +159,7 @@ export function ContractForm({
 }: ContractFormProps) {
   const { departments, contractTypesByDepartment, departmentList, contractTypeList } = useContractFormData();
   const [partnerOptionsMap, setPartnerOptionsMap] = useState<Record<number, any[]>>({});
-  const { statuses } = useContractStatus();
+  const statuses = mockContractStatuses;
   const [fileError, setFileError] = useState<string | null>(null);
   const [replaceTarget, setReplaceTarget] = useState<{
     id: string
@@ -207,46 +207,49 @@ export function ContractForm({
   const { fields: alertDateFields, append: appendAlertDate, remove: removeAlertDate } = useFieldArray({ control, name: 'manualAlertDates' as any });
 
   // Handle Search Partner if partner exist take Its Id but not create new
-  const handlePartnerSearch = async (query: string, index: number) => {
-    const currentPartnerId = watch(`partners.${index}.partnerId`)
-    const hasPartnerId = currentPartnerId !== null && currentPartnerId !== undefined
-    const isEditPartner = editPartner && hasPartnerId
+const handlePartnerSearch = async (query: string, index: number) => {
+  const currentPartnerId = watch(`partners.${index}.partnerId`)
+  const hasPartnerId = currentPartnerId !== null && currentPartnerId !== undefined
+  const isEditPartner = editPartner && hasPartnerId
 
-    setValue(`partners.${index}.partnerName`, query, { shouldDirty: true, shouldValidate: true })
+  setValue(`partners.${index}.partnerName`, query, { shouldDirty: true, shouldValidate: true })
+  if (!isEditPartner) {
+    setValue(`partners.${index}.partnerId`, null, { shouldDirty: true, shouldValidate: true })
+  }
+  if (!query) {
+    setPartnerOptionsMap(prev => ({ ...prev, [index]: [] }))
+    return
+  }
+  try {
+    const lowerQuery = query.trim().toLowerCase();
+    const items = mockPartners
+      .filter((p) => p.partnerName.toLowerCase().includes(lowerQuery))
+      .slice(0, 5);
+
+    setPartnerOptionsMap(prev => ({ ...prev, [index]: items }))
+
+    const existingPartner = items.find(
+      (p) => p.partnerName.toLowerCase() === lowerQuery
+    );
+
     if (!isEditPartner) {
-      setValue(`partners.${index}.partnerId`, null, { shouldDirty: true, shouldValidate: true })
-    }
-    if (!query) {
-      setPartnerOptionsMap(prev => ({ ...prev, [index]: [] }))
-      return
-    }
-    try {
-      const data = await getAllPartners({ search: query, page: 1, size: 5 })
-      setPartnerOptionsMap(prev => ({ ...prev, [index]: data.items ?? [] }))
-
-      const existingPartner = data.items.find(
-        (p) => p.partnerName.toLowerCase() === query.trim().toLowerCase()
-      );
-
-      if (!isEditPartner) {
-        if (existingPartner) {
-          setValue(`partners.${index}.contactPerson`, existingPartner.contactPerson, { shouldDirty: true, shouldValidate: true })
-          setValue(`partners.${index}.contactNumber`, existingPartner.contactNumber, { shouldDirty: true, shouldValidate: true })
-          setValue(`partners.${index}.partnerId`, existingPartner.partnerId, { shouldDirty: true, shouldValidate: true })
-        } else {
-          setValue(`partners.${index}.contactPerson`, '', { shouldDirty: true, shouldValidate: true })
-          setValue(`partners.${index}.contactNumber`, '', { shouldDirty: true, shouldValidate: true })
-        }
-      }
-    } catch (error: any) {
-      if (error?.response?.status === 404) {
-        setPartnerOptionsMap(prev => ({ ...prev, [index]: [] }))
-
+      if (existingPartner) {
+        setValue(`partners.${index}.contactPerson`, existingPartner.contactPerson, { shouldDirty: true, shouldValidate: true })
+        setValue(`partners.${index}.contactNumber`, existingPartner.contactNumber, { shouldDirty: true, shouldValidate: true })
+        setValue(`partners.${index}.partnerId`, existingPartner.partnerId, { shouldDirty: true, shouldValidate: true })
       } else {
-        console.error('Failed to search partners', error);
+        setValue(`partners.${index}.contactPerson`, '', { shouldDirty: true, shouldValidate: true })
+        setValue(`partners.${index}.contactNumber`, '', { shouldDirty: true, shouldValidate: true })
       }
     }
-  };
+  } catch (error: any) {
+    if (error?.response?.status === 404) {
+      setPartnerOptionsMap(prev => ({ ...prev, [index]: [] }))
+    } else {
+      console.error('Failed to search partners', error);
+    }
+  }
+};
 
   const handlePartnerSelect = (partner: any, index: number) => {
     setValue(`partners.${index}.partnerId`, partner.partnerId, { shouldDirty: true, shouldValidate: true });

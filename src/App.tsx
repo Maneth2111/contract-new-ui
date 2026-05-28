@@ -174,15 +174,12 @@ export default function App() {
   const permissions = getPermissionFlagsFromUser(user);
 
   // ── Notification badge count (from mock summary) ──────────────────────────
-  const notificationCount =
-    MOCK_NOTIFICATION_SUMMARY.overdue +
-    MOCK_NOTIFICATION_SUMMARY.expire30 +
-    MOCK_NOTIFICATION_SUMMARY.expire60 +
-    MOCK_NOTIFICATION_SUMMARY.expire90;
+  const MOCK_CONTRACTS_TOTAL = 8;
+  const [unreadCount, setUnreadCount] = useState(MOCK_CONTRACTS_TOTAL);
 
   // ── Refs shared with child components ─────────────────────────────────────
-  const contractRefetchRef = useRef<() => void>(() => {});
-  const userRefetchRef = useRef<() => void>(() => {});
+  const contractRefetchRef = useRef<() => void>(() => { });
+  const userRefetchRef = useRef<() => void>(() => { });
 
   // ── Handlers ──────────────────────────────────────────────────────────────
   const handleUpdateUser = (updatedUser: User) => {
@@ -210,17 +207,16 @@ export default function App() {
 
       {/* Header with tab navigation */}
       <header className="bg-white border-b border-gray-200 sticky top-0 z-40">
-        <div className="max-w-350 mx-auto px-8 lg:px-10">
-          <div className="flex items-stretch justify-between gap-6 min-h-16">
+        <div className="max-w-350 mx-auto px-3 lg:px-10 ">
+          <div className="flex items-stretch justify-between gap-0.5 min-h-16 ">
             <nav className="flex flex-1 min-w-0 gap-2 overflow-x-auto" aria-label="Main navigation">
               <button
                 type="button"
                 onClick={() => setActiveTab('dashboard')}
-                className={`flex shrink-0 items-center gap-2.5 px-6 py-4 border-b-2 text-base font-medium transition-colors cursor-pointer ${
-                  activeTab === 'dashboard'
-                    ? 'border-primary text-primary'
-                    : 'border-transparent text-gray-600 hover:text-gray-900'
-                }`}
+                className={`flex shrink-0 items-center gap-2.5 px-6 py-4 border-b-2 text-base font-medium transition-colors cursor-pointer ${activeTab === 'dashboard'
+                  ? 'border-primary text-primary'
+                  : 'border-transparent text-gray-600 hover:text-gray-900'
+                  }`}
               >
                 <LayoutDashboard className="w-5 h-5" />
                 Dashboard
@@ -228,40 +224,37 @@ export default function App() {
               <button
                 type="button"
                 onClick={() => setActiveTab('contracts')}
-                className={`flex shrink-0 items-center gap-2.5 px-6 py-4 border-b-2 text-base font-medium transition-colors cursor-pointer ${
-                  activeTab === 'contracts'
-                    ? 'border-primary text-primary'
-                    : 'border-transparent text-gray-600 hover:text-gray-900'
-                }`}
+                className={`flex shrink-0 items-center gap-2.5 px-6 py-4 border-b-2 text-base font-medium transition-colors cursor-pointer ${activeTab === 'contracts'
+                  ? 'border-primary text-primary'
+                  : 'border-transparent text-gray-600 hover:text-gray-900'
+                  }`}
               >
                 <FileText className="w-5 h-5" />
-                Contract Management{total > 0 ? ` (${total})` : ''}
+                Contract Management
               </button>
               <button
                 type="button"
                 onClick={() => setActiveTab('notifications')}
-                className={`relative flex shrink-0 items-center gap-2.5 px-6 py-4 border-b-2 text-base font-medium transition-colors cursor-pointer ${
-                  activeTab === 'notifications'
-                    ? 'border-primary text-primary'
-                    : 'border-transparent text-gray-600 hover:text-gray-900'
-                }`}
+                className={`relative flex shrink-0 items-center gap-2.5 px-6 py-4 border-b-2 text-base font-medium transition-colors cursor-pointer ${activeTab === 'notifications'
+                  ? 'border-primary text-primary'
+                  : 'border-transparent text-gray-600 hover:text-gray-900'
+                  }`}
               >
                 <Bell className="w-5 h-5" />
                 Notifications
-                {notificationCount > 0 && (
+                {unreadCount > 0 && (
                   <span className="absolute top-2 right-2 bg-red-500 text-white text-xs rounded-full min-w-5 h-5 px-1 flex items-center justify-center">
-                    {notificationCount}
+                    {unreadCount}
                   </span>
                 )}
               </button>
               <button
                 type="button"
                 onClick={() => setActiveTab('reports')}
-                className={`flex shrink-0 items-center gap-2.5 px-6 py-4 border-b-2 text-base font-medium transition-colors cursor-pointer ${
-                  activeTab === 'reports'
-                    ? 'border-primary text-primary'
-                    : 'border-transparent text-gray-600 hover:text-gray-900'
-                }`}
+                className={`flex shrink-0 items-center gap-2.5 px-6 py-4 border-b-2 text-base font-medium transition-colors cursor-pointer ${activeTab === 'reports'
+                  ? 'border-primary text-primary'
+                  : 'border-transparent text-gray-600 hover:text-gray-900'
+                  }`}
               >
                 <BarChart3 className="w-5 h-5" />
                 Reports
@@ -270,11 +263,10 @@ export default function App() {
                 <button
                   type="button"
                   onClick={() => setActiveTab('users')}
-                  className={`flex shrink-0 items-center gap-2.5 px-6 py-4 border-b-2 text-base font-medium transition-colors cursor-pointer ${
-                    activeTab === 'users'
-                      ? 'border-primary text-primary'
-                      : 'border-transparent text-gray-600 hover:text-gray-900'
-                  }`}
+                  className={`flex shrink-0 items-center gap-2.5 px-6 py-4 border-b-2 text-base font-medium transition-colors cursor-pointer ${activeTab === 'users'
+                    ? 'border-primary text-primary'
+                    : 'border-transparent text-gray-600 hover:text-gray-900'
+                    }`}
                 >
                   <Users className="w-5 h-5" />
                   User Management
@@ -360,6 +352,7 @@ export default function App() {
             onSelectContract={(id) => {
               openContractDetails(id, 'details', { hideRenew: true });
             }}
+            onUnreadChange={setUnreadCount}
           />
         )}
         {activeTab === 'reports' && <ReportDashboard currentUser={user} />}

@@ -2,15 +2,25 @@ import React, { useEffect, useMemo } from 'react'
 import { ChevronDown } from 'lucide-react';
 import { Controller, UseFormReturn } from 'react-hook-form';
 import { titleCase } from 'text-case';
-import { Department } from '../services/departmentService';
 import { UserFormValues } from "../types/user";
-import { useUserStatus } from '../hook/useStatus';
+
 import { PermissionFlags } from '../utils/appProfileHelpers';
 import { getAllowedDepartments, type ModuleAccessItem } from '../utils/departmentAccess'
 import { formatPermissionLabel } from '../utils/permissionLabels'
+import { mockUserStatuses } from '../data/mockData';
 
 interface Role { roleId: number; roleName: string; }
 interface Permission { id: number; name: string; }
+export interface Department{
+    departmentId: number,
+    departmentCode: string,
+    departmentName: string,
+    description: string,
+    msChannel: string | null,
+    title: string | null,
+    msWebhookUrl: string | null
+    msChannelUrl: string | null
+}
 
 interface UserFormProps {
   form: UseFormReturn<UserFormValues>;
@@ -71,7 +81,7 @@ export function UserForm({
 }: UserFormProps) {
   const { register, control, watch, setValue, formState: { errors } } = form;
   const formData = watch();
-  const { userStatus } = useUserStatus();
+  const userStatus = mockUserStatuses;
 
   const { allowedDepartments, isSingleDepartment, defaultDepartmentId } = useMemo(
     () => getAllowedDepartments(departments, moduleAccess),
@@ -324,7 +334,7 @@ export function UserForm({
                   <p className="text-sm text-gray-500">N/A</p>
                 ) : (
                   selectedDeptNames.map((name) => (
-                    <span key={name} className="px-3 py-1 bg-primary/10 text-brand-navy rounded-full text-xs">
+                    <span key={name} className="px-3 py-1 bg-primary text-white rounded-full text-xs text-medium text-center">
                       {name}
                     </span>
                   ))
