@@ -57,8 +57,8 @@ export default defineConfig({
     chunkSizeWarningLimit: 1000, // optional
     rollupOptions: {
       output: {
-        
-manualChunks(id) {
+
+        manualChunks(id) {
           if (!id.includes('node_modules')) return
 
           if (id.includes('react')) {
@@ -88,7 +88,7 @@ manualChunks(id) {
     },
 
     target: 'esnext',
-    outDir: 'build',
+    outDir: 'build, dist',
   },
   server: {
     allowedHosts: true,
