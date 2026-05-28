@@ -215,7 +215,7 @@ function ContractCard({ contract, isRead, onRead, onSelectContract }: ContractCa
 
 // ─── Main component ───────────────────────────────────────────────────────────
 
-export default function NotificationCenter({ onSelectContract, onUnreadChange }: NotificationCenterProps) {
+export function NotificationCenter({ onSelectContract, onUnreadChange }: NotificationCenterProps) {
   const [filter, setFilter] = useState<FilterKey>("all");
   const [page,   setPage  ] = useState(1);
   const [readIds, setReadIds] = useState<Set<number>>(new Set());

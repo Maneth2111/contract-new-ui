@@ -93,7 +93,7 @@ function mockToContract(c: MockContract): Contract {
   };
 }
 
-export default function ReportDashboard({ currentUser }: ReportDashboardProps) {
+export function ReportDashboard({ currentUser }: ReportDashboardProps) {
   const [reportType] = useState('Contract Summary Report');
   const [selectedDepartment, setSelectedDepartment] = useState<number | undefined>(undefined);
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('ALL');

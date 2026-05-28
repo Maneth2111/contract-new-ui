@@ -1,8 +1,16 @@
-import React, { lazy, useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Contract } from './types/contract';
 import { User } from './types/user';
+
+import { ContractList } from './components/ContractList';
+import { NotificationCenter } from './components/NotificationCenter';
+import { ReportDashboard } from './components/ReportDashboard';
+import { UserManagement } from './components/UserManagement';
 import { LayoutDashboard, FileText, Bell, BarChart3, User as UserIcon, Users, LogOut, EllipsisVertical } from 'lucide-react';
 import toast, { Toaster } from 'react-hot-toast';
+import { ConfirmDialog } from './components/ConfirmationDialog';
+import { ContractDetails } from './components/ContractDetails';
+import { UserDetails } from './components/UserDetails';
 import {
   type ContractDetailTab,
   buildContractDetailPath,
@@ -10,14 +18,7 @@ import {
 } from './utils/contractDetailRoute';
 import { getPermissionFlagsFromUser, userHasConfidentialContractAccess } from './utils/appProfileHelpers';
 
-const Dashboard = lazy(() => import('./components/Dashboard'))
-const ContractList = lazy(() => import('./components/ContractList'))
-const NotificationCenter = lazy(() => import('./components/NotificationCenter'))
-const ReportDashboard = lazy(() => import('./components/ReportDashboard'))
-const UserManagement = lazy(() => import('./components/UserManagement'))
-const ContractDetails = lazy(() => import('./components/ContractDetails'))
-const UserDetails = lazy(() => import('./components/UserDetails'))
-const ConfirmDialog = lazy(() => import('./components/ConfirmationDialog'))
+const Dashboard = React.lazy(() => import('./components/Dashboard'));
 // ─── Mock data ────────────────────────────────────────────────────────────────
 import {
   mockUsers,

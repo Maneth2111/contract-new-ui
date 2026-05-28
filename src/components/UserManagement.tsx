@@ -55,7 +55,7 @@ interface UserManagementProps {
   onRefetchReady?: (refetch: () => void) => void;
 }
 
-export default function UserManagement({ currentUser, userPermission, onSelectUser, onRefetchReady }: UserManagementProps) {
+export function UserManagement({ currentUser, userPermission, onSelectUser, onRefetchReady }: UserManagementProps) {
   const [searchText, setSearchText] = useState('');
   const [selectedDepartmentId, setSelectedDepartmentId] = useState<number | undefined>(undefined);
   const [selectedRoleName, setSelectedRoleName] = useState<string | undefined>(undefined);

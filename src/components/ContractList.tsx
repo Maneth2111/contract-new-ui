@@ -73,7 +73,7 @@ interface ContractListProps {
   onSelectContract?: (contract: Contract, formMode?: 'view' | 'edit') => void;
 }
 
-export default function ContractList({
+export function ContractList({
   userConfidentialAccess,
   contractPermission,
   isLoggedIn,
