@@ -4,6 +4,20 @@ export type UserStatus = 'Active' | 'Inactive' | 'Disabled';
 
 export type PermissionLevel = 'View Only' | 'View & Edit' | 'Edit & Delete' | 'Full Access';
 
+export interface UserProfile {
+  id: number;
+  employeeId: string | null;
+  fullName: string;
+  email: string;
+  jobTitle: string | null;
+  phoneNumber: string | null;
+  status: string | null;
+  department: string | null;
+  confidentialAccess?: boolean;
+  moduleAccess: { id: number; name: string }[];
+  permissions: Record<string, { id: number; name: string }[]>;
+  roles: { id: number; name: string }[];
+}
 export interface ModuleAccessItem {
   id: number;
   name: string;

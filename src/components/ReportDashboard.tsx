@@ -1,14 +1,10 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import type { DateRange } from 'react-day-picker';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { Contract } from '../types/contract';
 import { calculateDaysRemaining, formatCurrency, formatDate, getPrimaryPartnerName, pluralS } from '../utils/contractUtils';
-import type { ContractReport, SummaryReport } from '../services/reportsService';
-import { fetchAllContractReportPages } from '../services/reportsService';
 import { FileText, Download, ChevronDown, DollarSign, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
-import { useDepartments } from '../hook/useDepartment';
-import { useContractReport } from '../hook/useContractReports';
 import { PaginationBar } from './PaginationBar';
 import { usePagination } from '../hook/usePagination';
 import { DateRangePicker } from './ui/date-range-picker';
@@ -18,31 +14,83 @@ import { useTableSort } from '../hook/useTableSort';
 import { SortableTableHead } from './SortableTableHead';
 import { tableRowHover, tableTheadClass } from '../utils/tableRowHover';
 
+// ─── Mock data ────────────────────────────────────────────────────────────────
+import {
+  mockContracts,
+  mockDepartments,
+  type Contract as MockContract,
+  type ContractStatus,
+} from '../data/mockData'; // adjust path to wherever you placed the mock data file
+
+// ─────────────────────────────────────────────────────────────────────────────
+
 type StatusFilter = 'ALL' | 'ACTIVE' | 'EXPIRED' | 'EXPIRING_SOON' | 'OVERDUE' | 'CLOSED';
 
 const STATUS_FILTER_OPTIONS: StatusFilter[] = ['ALL', 'ACTIVE', 'EXPIRED', 'EXPIRING_SOON', 'OVERDUE', 'CLOSED'];
 
+// ── Map mock ContractStatus → display label used by Contract['status'] ────────
+function apiStatusToDisplay(status: ContractStatus): Contract['status'] {
+  switch (status) {
+    case 'ACTIVE': return 'Active';
+    case 'EXPIRING_SOON': return 'Expiring Soon';
+    case 'OVERDUE': return 'Overdue';
+    case 'EXPIRED': return 'Expired';
+    default: return status as Contract['status'];
+  }
+}
+
+// ── Summary shape (mirrors SummaryReport from the real service) ───────────────
+interface SummaryReport {
+  totalContracts: number;
+  totalValue: number;
+  active: number;
+  expiringSoon: number;
+  closed: number;
+}
+
 function getStatusFilterLabel(filter: StatusFilter, summary: SummaryReport | null | undefined): string {
   switch (filter) {
-    case 'ALL':
-      return `All Contract${pluralS(summary?.totalContracts ?? 0)}`;
-    case 'ACTIVE':
-      return `Active Contract${pluralS(summary?.active ?? 0)}`;
-    case 'EXPIRED':
-      return `Expired Contract${pluralS(0)}`;
-    case 'EXPIRING_SOON':
-      return 'Expiring Soon (90 days)';
-    case 'OVERDUE':
-      return `Overdue Contract${pluralS(0)}`;
-    case 'CLOSED':
-      return `Closed Contract${pluralS(summary?.closed ?? 0)}`;
+    case 'ALL': return `All Contract${pluralS(summary?.totalContracts ?? 0)}`;
+    case 'ACTIVE': return `Active Contract${pluralS(summary?.active ?? 0)}`;
+    case 'EXPIRED': return `Expired Contract${pluralS(0)}`;
+    case 'EXPIRING_SOON': return 'Expiring Soon (90 days)';
+    case 'OVERDUE': return `Overdue Contract${pluralS(0)}`;
+    case 'CLOSED': return `Closed Contract${pluralS(summary?.closed ?? 0)}`;
   }
 }
 
 const delay = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
 
 interface ReportDashboardProps {
-  currentUser?: import('../services/userService').UserProfile | null
+  currentUser?: import('../services/userService').UserProfile | null;
+}
+
+// ── Convert a raw mock contract to the Contract shape the table expects ────────
+function mockToContract(c: MockContract): Contract {
+  return {
+    id: String(c.contractId),
+    contractCode: c.contractCode,
+    contractId: c.contractId,
+    title: c.contractTitle,
+    contractType: c.contractType.contractTypeName,
+    department: c.department.departmentName,
+    personInCharge: c.personInCharge,
+    partnerId: '',
+    partnerName: c.partners.map((p) => p.partnerName).join(', '),
+    partnerContact: '',
+    partnerContactNumber: '',
+    contractTerms: c.contractTerm,
+    effectiveDate: c.effectiveDate,
+    expiryDate: c.expireDate,
+    contractValue: c.contractValue,
+    status: apiStatusToDisplay(c.status),
+    confidential: false,
+    autoRenew: false,
+    alertDays: c.alertDays ?? 0,
+    remainingDays: c.remainingDays,
+    partners: [],
+    alerts: [],
+  };
 }
 
 export function ReportDashboard({ currentUser }: ReportDashboardProps) {
@@ -57,56 +105,33 @@ export function ReportDashboard({ currentUser }: ReportDashboardProps) {
   const createDateTo = createRange?.to ?? null;
   const expireDateFrom = expireRange?.from ?? null;
   const expireDateTo = expireRange?.to ?? null;
-  const { departmentList } = useDepartments();
-  const {
-    allowedDepartments,
-    isSingleDepartment,
-    defaultDepartmentId,
-  } = getAllowedDepartments(departmentList, currentUser?.moduleAccess);
+
+  // ── Department list from mock ──────────────────────────────────────────────
+  const departmentList = mockDepartments;
+  const { allowedDepartments, isSingleDepartment, defaultDepartmentId } =
+    getAllowedDepartments(departmentList, currentUser?.moduleAccess);
+
   const [exportingPDF, setExportingPDF] = useState(false);
-  const { pagination, goToPage, setSize } = usePagination(10);
   const [exportingCSV, setExportingCSV] = useState(false);
+  const { pagination, goToPage, setSize } = usePagination(10);
 
   React.useEffect(() => {
     if (isSingleDepartment && defaultDepartmentId != null) {
-      setSelectedDepartment(defaultDepartmentId)
-      goToPage(1)
+      setSelectedDepartment(defaultDepartmentId);
+      goToPage(1);
     }
-  }, [defaultDepartmentId, isSingleDepartment, goToPage])
+  }, [defaultDepartmentId, isSingleDepartment, goToPage]);
 
-
-  // Map API status
-  const mapStatusToApi = (status: StatusFilter) => {
-    switch (status) {
-      case 'ACTIVE':
-        return 'ACTIVE';
-      case 'EXPIRED':
-        return 'EXPIRED';
-      case 'EXPIRING_SOON':
-        return 'EXPIRING_SOON';
-      case 'OVERDUE':
-        return 'OVERDUE';
-      case 'CLOSED':
-        return 'CLOSED';
-      default:
-        return undefined;
-    }
-  };
-  const statusMatchesFilter = (status: string, filter: StatusFilter) => {
+  // ── Status matching helpers ────────────────────────────────────────────────
+  const statusMatchesFilter = (status: Contract['status'], filter: StatusFilter): boolean => {
     switch (filter) {
-      case 'ACTIVE':
-        return status === 'Active';
-      case 'EXPIRED':
-        return status === 'Expired';
-      case 'EXPIRING_SOON':
-        return status === 'Expiring Soon';
-      case 'OVERDUE':
-        return status === 'Overdue';
-      case 'CLOSED':
-        return status === 'Closed';
+      case 'ACTIVE': return status === 'Active';
+      case 'EXPIRED': return status === 'Expired';
+      case 'EXPIRING_SOON': return status === 'Expiring Soon';
+      case 'OVERDUE': return status === 'Overdue';
+      case 'CLOSED': return status === 'Closed';
       case 'ALL':
-      default:
-        return true;
+      default: return true;
     }
   };
 
@@ -121,79 +146,54 @@ export function ReportDashboard({ currentUser }: ReportDashboardProps) {
     }
   };
 
-  const formatDateForApi = (date: Date | null) => date ? date.toISOString().split('T')[0] : undefined;
+  const formatDateForApi = (date: Date | null) =>
+    date ? date.toISOString().split('T')[0] : undefined;
 
-  const reportFilterParams = {
-    status: mapStatusToApi(statusFilter),
-    departmentId: selectedDepartment,
-    createDateFrom: formatDateForApi(createDateFrom),
-    createDateTo: formatDateForApi(createDateTo),
-    expireDateFrom: formatDateForApi(expireDateFrom),
-    expireDateTo: formatDateForApi(expireDateTo),
-  };
+  // ── In-memory filtering (replaces useContractReport + fetchAllContractReportPages) ──
+  const allMapped: Contract[] = useMemo(() => mockContracts.map(mockToContract), []);
 
-  const mapReportItemToContract = (item: ContractReport): Contract => ({
-    id: String(item.contractId),
-    contractCode: item.contractCode,
-    contractId: item.contractId,
-    title: item.title,
-    contractType: '',
-    department: item.department,
-    personInCharge: item.personInCharge,
-    partnerId: '',
-    partnerName: getPrimaryPartnerName(item.partner),
-    partnerContact: '',
-    partnerContactNumber: '',
-    contractTerms: '',
-    effectiveDate: item.effectiveDate,
-    expiryDate: item.expiryDate,
-    contractValue: item.contractValue,
-    status: (
-      item.status === 'ACTIVE'
-        ? 'Active'
-        : item.status === 'EXPIRING_SOON'
-          ? 'Expiring Soon'
-          : item.status === 'OVERDUE'
-            ? 'Overdue'
-            : item.status === 'EXPIRED'
-              ? 'Expired'
-              : item.status === 'CLOSED'
-                ? 'Closed'
-                : item.status
-    ) as Contract['status'],
-    confidential: false,
-    autoRenew: false,
-    alertDays: 0,
-    remainingDays: 0,
-    partners: [],
-    alerts: [],
-  });
+  const filtered: Contract[] = useMemo(() => {
+    return allMapped.filter((c) => {
+      // Department
+      if (selectedDepartment !== undefined) {
+        const dept = mockDepartments.find((d) => d.departmentId === selectedDepartment);
+        if (dept && c.department !== dept.departmentName) return false;
+      }
+      // Status
+      if (!statusMatchesFilter(c.status, statusFilter)) return false;
+      // Creation date range (using effectiveDate as proxy)
+      if (createDateFrom && new Date(c.effectiveDate) < createDateFrom) return false;
+      if (createDateTo && new Date(c.effectiveDate) > createDateTo) return false;
+      // Expiry date range
+      if (expireDateFrom && new Date(c.expiryDate) < expireDateFrom) return false;
+      if (expireDateTo && new Date(c.expiryDate) > expireDateTo) return false;
+      return true;
+    });
+  }, [allMapped, selectedDepartment, statusFilter, createDateFrom, createDateTo, expireDateFrom, expireDateTo]);
 
-  const { contracts: apiContracts, total, totalPages, summary } = useContractReport({
-    page: pagination.page,
-    size: pagination.size,
-    ...reportFilterParams,
-  });
+  // ── Summary ────────────────────────────────────────────────────────────────
+  const summary: SummaryReport = useMemo(() => ({
+    totalContracts: filtered.length,
+    totalValue: filtered.reduce((s, c) => s + (Number(c.contractValue) || 0), 0),
+    active: filtered.filter((c) => c.status === 'Active').length,
+    expiringSoon: filtered.filter((c) => c.status === 'Expiring Soon').length,
+    closed: filtered.filter((c) => c.status === 'Closed').length,
+  }), [filtered]);
 
-  const fetchAllFilteredContracts = async (): Promise<Contract[]> => {
-    const { items } = await fetchAllContractReportPages(reportFilterParams);
-    return items
-      .map(mapReportItemToContract)
-      .filter((contract) => statusMatchesFilter(contract.status, statusFilter));
-  };
-
-  const contracts: Contract[] = apiContracts.map(mapReportItemToContract);
-
-  const filteredContracts = contracts.filter(contract => {
-    // Status filter
-    if (!statusMatchesFilter(contract.status, statusFilter)) return false;
-    return true;
-  });
-
-  const { sortKey, sortDirection, toggleSort, sortedItems: sortedContracts } = useTableSort(
-    filteredContracts,
-    contractTableSortAccessors
+  // ── Pagination ─────────────────────────────────────────────────────────────
+  const total = filtered.length;
+  const totalPages = Math.ceil(total / pagination.size);
+  const paged = filtered.slice(
+    (pagination.page - 1) * pagination.size,
+    pagination.page * pagination.size,
   );
+
+  // ── Sort ───────────────────────────────────────────────────────────────────
+  const { sortKey, sortDirection, toggleSort, sortedItems: sortedContracts } =
+    useTableSort(paged, contractTableSortAccessors);
+
+  // ── Export helpers (same logic as original, data sourced from mock) ────────
+  const fetchAllFilteredContracts = async (): Promise<Contract[]> => filtered;
 
   const handleExportCSV = async () => {
     try {
@@ -207,7 +207,7 @@ export function ReportDashboard({ currentUser }: ReportDashboardProps) {
             'Partner', 'Effective Date', 'Expiry Date', 'Days Remaining',
             'Status', 'Contract Value',
           ];
-          const rows = allContracts.map(contract => {
+          const rows = allContracts.map((contract) => {
             const daysRemaining = calculateDaysRemaining(contract.expiryDate);
             return [
               contract.contractCode,
@@ -224,7 +224,7 @@ export function ReportDashboard({ currentUser }: ReportDashboardProps) {
           });
           const csvContent = [
             headers.join(','),
-            ...rows.map(row => row.map(cell => `\"${cell}\"`).join(',')),
+            ...rows.map((row) => row.map((cell) => `"${cell}"`).join(',')),
           ].join('\n');
           const blob = new Blob([csvContent], { type: 'text/csv' });
           const url = window.URL.createObjectURL(blob);
@@ -239,6 +239,7 @@ export function ReportDashboard({ currentUser }: ReportDashboardProps) {
       setExportingCSV(false);
     }
   };
+
   const handleExportPDF = async () => {
     try {
       setExportingPDF(true);
@@ -315,19 +316,14 @@ export function ReportDashboard({ currentUser }: ReportDashboardProps) {
           doc.save(`contract-report-${new Date().toISOString().split('T')[0]}.pdf`);
         })(),
       ]);
-    } catch (err) {
+    } catch {
       alert('Failed to export PDF. Please try again.');
     } finally {
       setExportingPDF(false);
     }
   };
 
-  const today = new Date().toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  });
-
+  // ── Render ────────────────────────────────────────────────────────────────
   return (
     <div className="space-y-6">
       {/* Report Filters */}
@@ -339,7 +335,7 @@ export function ReportDashboard({ currentUser }: ReportDashboardProps) {
               type="button"
               onClick={handleExportCSV}
               disabled={total === 0 || exportingCSV}
-              className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed cursor-pointer text-sm font-medium"
+              className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/80 disabled:bg-gray-300 disabled:cursor-not-allowed cursor-pointer text-sm font-medium"
             >
               {exportingCSV ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
               {exportingCSV ? 'Exporting...' : 'Export CSV'}
@@ -348,7 +344,7 @@ export function ReportDashboard({ currentUser }: ReportDashboardProps) {
               type="button"
               onClick={handleExportPDF}
               disabled={total === 0 || exportingPDF}
-              className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:bg-gray-300 disabled:cursor-not-allowed cursor-pointer text-sm font-medium"
+              className="flex items-center gap-2 px-4 py-2 bg-brand-pink text-white rounded-lg hover:bg-brand-pink/80 disabled:bg-gray-300 disabled:cursor-not-allowed cursor-pointer text-sm font-medium"
             >
               {exportingPDF ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
               {exportingPDF ? 'Exporting...' : 'Export PDF'}
@@ -356,33 +352,27 @@ export function ReportDashboard({ currentUser }: ReportDashboardProps) {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-          <div>
-            <label className="block text-gray-700 mb-2">Report Type</label>
-            <div className="relative">
-              <select
-                value={reportType}
-                disabled
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg appearance-none bg-gray-50 pr-8"
-              >
-                <option>Contract Summary Report</option>
-              </select>
-              {/* <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" /> */}
-            </div>
-          </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
 
+          {/* Department */}
           <div>
             <label className="block text-gray-700 mb-2">Department</label>
             <div className="relative">
               <select
                 value={selectedDepartment ?? ''}
                 disabled={isSingleDepartment}
-                onChange={(e) => { setSelectedDepartment(e.target.value === '' ? undefined : Number(e.target.value)); goToPage(1) }}
-                className={`w-full px-4 py-2 border border-gray-300 rounded-lg appearance-none bg-white ${isSingleDepartment ? 'cursor-default' : 'cursor-pointer pr-8'}`}
+
+                onChange={(e) => {
+                  setSelectedDepartment(e.target.value === '' ? undefined : Number(e.target.value));
+                  goToPage(1);
+                }}
+                className={`w-full px-4 py-2 border  border-gray-300 rounded-lg appearance-none bg-white ${isSingleDepartment ? 'cursor-default' : 'cursor-pointer pr-8'}`}
               >
                 {!isSingleDepartment && <option value="">All Departments</option>}
-                {allowedDepartments.map(dept => (
-                  <option key={dept.departmentId} value={dept.departmentId}>{dept.departmentName}</option>
+                {allowedDepartments.map((dept) => (
+                  <option key={dept.departmentId} value={dept.departmentId}>
+                    {dept.departmentName}
+                  </option>
                 ))}
               </select>
               {!isSingleDepartment && (
@@ -391,38 +381,33 @@ export function ReportDashboard({ currentUser }: ReportDashboardProps) {
             </div>
           </div>
 
-          {/* Creation Date Range Picker */}
+          {/* Creation Date Range */}
           <div>
             <label className="block text-gray-700 mb-2">Creation Date</label>
             <DateRangePicker
               value={createRange}
-              onChange={(range) => {
-                setCreateRange(range);
-                goToPage(1);
-              }}
+              onChange={(range) => { setCreateRange(range); goToPage(1); }}
               placeholder="Start Date – End Date"
             />
           </div>
 
-          {/* Expiration Date Range Picker */}
+          {/* Expiration Date Range */}
           <div>
             <label className="block text-gray-700 mb-2">Expiration Date</label>
             <DateRangePicker
               value={expireRange}
-              onChange={(range) => {
-                setExpireRange(range);
-                goToPage(1);
-              }}
+              onChange={(range) => { setExpireRange(range); goToPage(1); }}
               placeholder="Start Date – End Date"
             />
           </div>
 
+          {/* Status */}
           <div>
             <label className="block text-gray-700 mb-2">Status</label>
             <div className="relative">
               <select
                 value={statusFilter}
-                onChange={(e) => { setStatusFilter(e.target.value as StatusFilter); goToPage(1) }}
+                onChange={(e) => { setStatusFilter(e.target.value as StatusFilter); goToPage(1); }}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg appearance-none bg-white pr-8 cursor-pointer"
               >
                 {STATUS_FILTER_OPTIONS.map((value) => (
@@ -440,13 +425,12 @@ export function ReportDashboard({ currentUser }: ReportDashboardProps) {
       {/* Report Preview */}
       <div className="bg-white rounded-lg border border-gray-200 p-6">
         <div className="mb-6 pb-6 border-b border-gray-200">
-
           <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="bg-gray-50 p-3 rounded border border-gray-300">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-gray-600">Total Contracts</p>
-                  <p className="mt-1">{summary?.totalContracts}</p>
+                  <p className="mt-1">{summary.totalContracts}</p>
                 </div>
                 <FileText className="w-8 h-8 text-primary" />
               </div>
@@ -455,7 +439,7 @@ export function ReportDashboard({ currentUser }: ReportDashboardProps) {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-gray-600">Total Contract Value</p>
-                  <p className="mt-1">{formatCurrency(summary?.totalValue ?? 0)}</p>
+                  <p className="mt-1">{formatCurrency(summary.totalValue)}</p>
                 </div>
                 <DollarSign className="w-8 h-8 text-green-500" />
               </div>
@@ -464,7 +448,7 @@ export function ReportDashboard({ currentUser }: ReportDashboardProps) {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-gray-600">Active</p>
-                  <p className="mt-1">{summary?.active}</p>
+                  <p className="mt-1">{summary.active}</p>
                 </div>
                 <CheckCircle className="w-8 h-8 text-green-500" />
               </div>
@@ -473,7 +457,7 @@ export function ReportDashboard({ currentUser }: ReportDashboardProps) {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-gray-600">Expiring Soon</p>
-                  <p className="mt-1">{summary?.expiringSoon}</p>
+                  <p className="mt-1">{summary.expiringSoon}</p>
                 </div>
                 <AlertCircle className="w-8 h-8 text-orange-500" />
               </div>
@@ -484,23 +468,23 @@ export function ReportDashboard({ currentUser }: ReportDashboardProps) {
         {/* Report Table */}
         <div
           className={[
-            'overflow-x-auto lg:overflow-x-visible',
+            'overflow-x-auto',
             sortedContracts.length > 10 ? 'overflow-y-auto max-h-[70vh]' : '',
           ].join(' ').trim() || undefined}
         >
-          <table className={`w-full min-w-4xl lg:min-w-0 table-auto lg:table-fixed text-sm [&_th]:px-2 [&_th]:py-5 [&_th]:whitespace-nowrap [&_td]:px-2 [&_td]:py-2 ${tableRowHover}`}>
+          <table className={`w-full min-w-max text-sm [&_th]:px-2 [&_th]:py-5 [&_th]:whitespace-nowrap [&_td]:px-2 [&_td]:py-3.5 ${tableRowHover}`}>
             <thead className={tableTheadClass}>
               <tr>
-                <SortableTableHead label="Contract ID" columnKey="id" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="lg:w-[9%]" />
-                <SortableTableHead label="Title" columnKey="title" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="lg:w-[14%]" />
-                <SortableTableHead label="Department" columnKey="department" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="w-40 min-w-40 max-w-40 whitespace-nowrap" />
-                <SortableTableHead label="In Charge" columnKey="personInCharge" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="lg:w-[9%]" />
-                <SortableTableHead label="Partner" columnKey="partnerName" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="lg:w-[13%]" />
-                <SortableTableHead label="Effective" columnKey="effectiveDate" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="lg:w-[8%]" />
-                <SortableTableHead label="Expiry" columnKey="expiryDate" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="lg:w-[8%]" />
-                <SortableTableHead label="Days Left" columnKey="daysRemaining" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="lg:w-[7%]" />
-                <SortableTableHead label="Status" columnKey="status" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="lg:w-[9%]" align="center" />
-                <SortableTableHead label="Total Contract Value" columnKey="contractValue" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="lg:w-[12%] lg:max-w-0" />
+                <SortableTableHead label="Contract ID" columnKey="id" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="w-fit" />
+                <SortableTableHead label="Title" columnKey="title" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="w-40" />
+                <SortableTableHead label="Department" columnKey="department" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="w-38" />
+                <SortableTableHead label="Person In Charge" columnKey="personInCharge" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="w-30" />
+                <SortableTableHead label="Partner" columnKey="partnerName" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="w-32" />
+                <SortableTableHead label="Effective" columnKey="effectiveDate" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="w-28" />
+                <SortableTableHead label="Expiry" columnKey="expiryDate" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="w-28" />
+                <SortableTableHead label="Days Left" columnKey="daysRemaining" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="w-24" />
+                <SortableTableHead label="Status" columnKey="status" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="w-fit" align="center" />
+                <SortableTableHead label="Total Contract Value" columnKey="contractValue" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="w-fit" />
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
@@ -511,15 +495,15 @@ export function ReportDashboard({ currentUser }: ReportDashboardProps) {
                   </td>
                 </tr>
               ) : (
-                sortedContracts.map(contract => {
+                sortedContracts.map((contract) => {
                   const daysRemaining = calculateDaysRemaining(contract.expiryDate);
                   return (
                     <tr key={contract.id}>
-                      <td className="lg:max-w-0" title={contract.contractCode}>{contract.contractCode}</td>
-                      <td className="wrap-break-word whitespace-normal!  lg:max-w-0" title={contract.title}>{contract.title}</td>
-                      <td className="w-40 min-w-40 max-w-40 whitespace-nowrap truncate" title={contract.department}>{contract.department}</td>
-                      <td className="wrap-break-word whitespace-normal!  lg:max-w-0" title={contract.personInCharge}>{contract.personInCharge}</td>
-                      <td className="wrap-break-word whitespace-normal!  lg:max-w-0" title={contract.partnerName}>{contract.partnerName}</td>
+                      <td className="whitespace-nowrap lg:max-w-0" title={contract.contractCode}>{contract.contractCode}</td>
+                      <td className="whitespace-nowrap lg:truncate lg:max-w-0" title={contract.title}>{contract.title}</td>
+                      <td className="whitespace-nowrap lg:truncate lg:max-w-0" title={contract.department}>{contract.department}</td>
+                      <td className="whitespace-nowrap lg:truncate lg:max-w-0" title={contract.personInCharge}>{contract.personInCharge}</td>
+                      <td className="whitespace-nowrap lg:truncate lg:max-w-0" title={contract.partnerName}>{contract.partnerName}</td>
                       <td className="whitespace-nowrap">{formatDate(contract.effectiveDate)}</td>
                       <td className="whitespace-nowrap">{formatDate(contract.expiryDate)}</td>
                       <td className="whitespace-nowrap">
@@ -527,7 +511,7 @@ export function ReportDashboard({ currentUser }: ReportDashboardProps) {
                           {daysRemaining} days
                         </span>
                       </td>
-                      <td className="text-left align-middle whitespace-nowrap lg:max-w-0">
+                      <td className="whitespace-nowrap text-center">
                         <span
                           className={`inline-block px-1.5 py-0.5 rounded-full text-xs whitespace-nowrap ${getStatusColor(contract.status)}`}
                           title={contract.status}
@@ -535,7 +519,7 @@ export function ReportDashboard({ currentUser }: ReportDashboardProps) {
                           {contract.status}
                         </span>
                       </td>
-                      <td className="whitespace-nowrap text-center lg:truncate lg:max-w-0" title={formatCurrency(contract.contractValue)}>
+                      <td className="whitespace-nowrap truncate max-w-0 text-center" title={formatCurrency(contract.contractValue)}>
                         {formatCurrency(contract.contractValue)}
                       </td>
                     </tr>
@@ -550,10 +534,10 @@ export function ReportDashboard({ currentUser }: ReportDashboardProps) {
       {/* Results count + pagination */}
       <div className="flex flex-col sm:flex-row justify-between w-full items-start sm:items-center gap-3 sm:gap-0">
         <div className="text-gray-600 text-sm sm:text-base whitespace-nowrap">
-          Showing {contracts.length} of {total} contracts
+          Showing {sortedContracts.length} of {total} contracts
         </div>
         <div className="flex items-center gap-3">
-          {total > 10  && (
+          {total > 10 && (
             <select
               value={pagination.size}
               onChange={(e) => { setSize(Number(e.target.value)); goToPage(1); }}

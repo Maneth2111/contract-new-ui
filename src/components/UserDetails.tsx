@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { ArrowLeft, Calendar, Edit2, History, Mail, PencilLine, UserPlus } from 'lucide-react'
+import { ArrowLeft, Calendar, Clock, Edit2, History, Mail, PencilLine, UserPlus } from 'lucide-react'
 import type { Audit } from '../services/userService'
 import { User, UserFormValues } from '../types/user'
 import { useUserDetail, useUpdateUser } from '../hook/useUser'
@@ -79,7 +79,6 @@ type AuditEventType = 'created' | 'updated'
 interface AuditEvent {
   id: string
   type: AuditEventType
-  title: string
   by: string
   email: string
   at: string
@@ -92,7 +91,6 @@ function buildAuditEvents(audit: Audit): AuditEvent[] {
     events.push({
       id: 'created',
       type: 'created',
-      title: 'Account created',
       by: audit.createdBy?.trim() || 'System',
       email: audit.createdByEmail?.trim() || '',
       at: audit.createdDateTime,
@@ -108,7 +106,6 @@ function buildAuditEvents(audit: Audit): AuditEvent[] {
     events.push({
       id: 'updated',
       type: 'updated',
-      title: 'Profile updated',
       by: audit.lastUpdatedBy?.trim() || 'Unknown',
       email: audit.lastUpdatedByEmail?.trim() || '',
       at: audit.lastUpdatedDateTime,
@@ -120,40 +117,26 @@ function buildAuditEvents(audit: Audit): AuditEvent[] {
 
 function AuditEventCard({ event }: { event: AuditEvent }) {
   const isCreated = event.type === 'created'
-  const badgeClass = isCreated
-    ? 'bg-green-100 text-green-800'
-    : 'bg-primary/10 text-brand-navy'
-  const ringClass = isCreated
-    ? 'bg-green-100 text-green-700 ring-green-200'
-    : 'bg-primary/10 text-brand-navy ring-primary/25'
 
   return (
-    <div className="flex-1 min-w-0 rounded-xl border border-gray-200 bg-white p-4 shadow-sm hover:border-gray-300 hover:shadow-md transition-all">
-      <div className="flex flex-wrap items-start justify-between gap-3 mb-3">
-        <div className="flex items-center gap-2">
-          <span className={`px-2.5 py-0.5 text-xs font-medium rounded-full ${badgeClass}`}>
-            {isCreated ? 'Created' : 'Updated'}
-          </span>
-          <span className="text-xs text-gray-500">{formatRelativeTime(event.at)}</span>
-        </div>
-        <div className="flex items-center gap-1.5 text-xs text-gray-500">
-          <Calendar className="w-3.5 h-3.5 shrink-0" />
-          <time dateTime={event.at}>{formatDateTime(event.at)}</time>
-        </div>
-      </div>
-
-      <p className="text-gray-900 font-medium mb-3">{event.title}</p>
-
-      <div className="flex items-center gap-3">
-        <div
-          className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-semibold ring-2 ${ringClass}`}
-          aria-hidden
-        >
-          {getInitials(event.by)}
-        </div>
-        <div className="min-w-0 flex-1">
-          <p className="text-sm font-medium text-gray-900 truncate">{event.by}</p>
-          {event.email ? (
+    <div className="border-l-4 border-primary pl-4 py-2">
+      <div className="flex items-start gap-3">
+        <div className="flex-1">
+          <div className="flex items-center gap-2 mb-1">
+            <span
+              className={`px-2 py-0.5 text-xs rounded font-medium ${isCreated
+                ? 'bg-green-100 text-green-800'
+                : 'bg-primary/10 text-brand-navy'
+                }`}
+            >
+              {isCreated ? 'Created' : 'Updated'}
+            </span>
+            <span className="text-gray-500 text-sm">
+              {formatDateTime(event.at)}
+            </span>
+          </div>
+          <p className="text-gray-500 text-sm mt-1">By: {event.by}</p>
+          {event.email && (
             <a
               href={`mailto:${event.email}`}
               className="inline-flex items-center gap-1.5 text-sm text-primary hover:text-brand-navy mt-0.5 truncate max-w-full"
@@ -161,8 +144,6 @@ function AuditEventCard({ event }: { event: AuditEvent }) {
               <Mail className="w-3.5 h-3.5 shrink-0" />
               <span className="truncate">{event.email}</span>
             </a>
-          ) : (
-            <p className="text-sm text-gray-500 mt-0.5">No email recorded</p>
           )}
         </div>
       </div>
@@ -184,7 +165,6 @@ function UserAuditPanel({ audit }: { audit: Audit | undefined }) {
   }
 
   const events = buildAuditEvents(audit)
-  const lastActivityAt = audit.lastUpdatedDateTime || audit.createdDateTime
 
   if (events.length === 0) {
     return (
@@ -195,8 +175,11 @@ function UserAuditPanel({ audit }: { audit: Audit | undefined }) {
     )
   }
 
+  const lastActivityAt = audit.lastUpdatedDateTime || audit.createdDateTime
+
   return (
     <div className="space-y-8">
+      {/* First created summary card — now below the timeline */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="rounded-xl border border-gray-200 bg-linear-to-br from-green-50 to-white p-5">
           <div className="flex items-start gap-4">
@@ -216,10 +199,10 @@ function UserAuditPanel({ audit }: { audit: Audit | undefined }) {
         <div className="rounded-xl border border-gray-200 bg-linear-to-br from-primary/5 to-white p-5">
           <div className="flex items-start gap-4">
             <div className="w-11 h-11 rounded-xl bg-primary/10 text-brand-navy flex items-center justify-center shrink-0">
-              <PencilLine className="w-5 h-5" />
+              <PencilLine className="w-5 h-5 text-primary" />
             </div>
             <div className="min-w-0">
-              <p className="text-xs font-medium uppercase tracking-wide text-brand-navy/80">Last updated</p>
+              <p className="text-xs font-medium uppercase tracking-wide text-brand-navy/80">Last activity</p>
               <p className="text-sm font-semibold text-gray-900 mt-1">
                 {lastActivityAt ? formatDateTime(lastActivityAt) : 'N/A'}
               </p>
@@ -230,7 +213,7 @@ function UserAuditPanel({ audit }: { audit: Audit | undefined }) {
           </div>
         </div>
       </div>
-
+      {/* Activity timeline */}
       <div>
         <div className="flex items-center gap-2 mb-5">
           <History className="w-5 h-5 text-gray-500" />
@@ -238,12 +221,12 @@ function UserAuditPanel({ audit }: { audit: Audit | undefined }) {
         </div>
 
         <div className="relative">
-          {events.map((event, index) => {
+          {[...events].reverse().map((event, index, arr) => {
             const isCreated = event.type === 'created'
             const Icon = isCreated ? UserPlus : PencilLine
             const nodeClass = isCreated
               ? 'bg-green-100 text-green-700 ring-green-200'
-              : 'bg-primary/10 text-brand-navy ring-primary/25'
+              : 'bg-primary/10 text-primary ring-primary/25'
 
             return (
               <div key={event.id} className="relative flex gap-4 pb-8 last:pb-0">
@@ -264,6 +247,8 @@ function UserAuditPanel({ audit }: { audit: Audit | undefined }) {
           })}
         </div>
       </div>
+
+
     </div>
   )
 }

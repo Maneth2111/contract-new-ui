@@ -77,7 +77,7 @@ export function RegisterContract({ onSuccess, onCancel, currentUser }: RegisterC
       onSubmit={handleSubmit}
       currentUser={currentUser}
       onSecondaryAction={isModal ? onCancel : () => setShowResetConfirm(true)}
-      submitLabel="Register Contract"
+      submitLabel="Submit"
       secondaryLabel={isModal ? 'Cancel' : 'Reset Form'}
       uploadedFiles={uploadedFiles}
       onFilesChange={setUploadedFiles}
@@ -90,7 +90,7 @@ export function RegisterContract({ onSuccess, onCancel, currentUser }: RegisterC
       <div className="fixed inset-0 bg-black/50 flex items-start justify-center z-50 overflow-y-auto py-8">
         <div className="bg-white rounded-lg w-full max-w-4xl mx-4">
           <div className="flex items-center justify-between p-6 border-b border-gray-200">
-            <h2 className="font-medium text-xl">New Registration</h2>
+            <h2 className="font-medium text-xl">New Contract</h2>
             <button
               type="button"
               onClick={onCancel}

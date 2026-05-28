@@ -408,13 +408,13 @@ export function ContractForm({
     const nextFiles = uploadedFiles.map((f) =>
       f.id === target.id
         ? {
-            file: nextFile,
-            id: f.id,
-            fileId: f.fileId,
-            displaySize: nextFile.size,
-            uploadedAt: f.uploadedAt ?? new Date().toISOString(),
-            uploadedByName: currentUser?.fullName ?? f.uploadedByName,
-          }
+          file: nextFile,
+          id: f.id,
+          fileId: f.fileId,
+          displaySize: nextFile.size,
+          uploadedAt: f.uploadedAt ?? new Date().toISOString(),
+          uploadedByName: currentUser?.fullName ?? f.uploadedByName,
+        }
         : f
     )
     onFilesChange(nextFiles)
@@ -1078,13 +1078,6 @@ export function ContractForm({
       {body}
       {!hideFooter && (
         <div className={footer}>
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 disabled:opacity-50 cursor-pointer"
-          >
-            {isSubmitting ? 'Saving…' : submitLabel}
-          </button>
           {onSecondaryAction && (
             <button
               type="button"
@@ -1094,6 +1087,13 @@ export function ContractForm({
               {secondaryLabel}
             </button>
           )}
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 disabled:opacity-50 cursor-pointer"
+          >
+            {isSubmitting ? 'Saving…' : submitLabel}
+          </button>
         </div>
       )}
     </form>

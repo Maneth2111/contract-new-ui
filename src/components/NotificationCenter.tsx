@@ -105,7 +105,7 @@ function FilterPills({
         <button
           key={f.key}
           onClick={() => onChange(f.key)}
-          className={`rounded-sm px-4 py-1 text-sm border border-primary transition-colors ${
+          className={`rounded-sm px-4 shadow py-1 text-sm  transition-colors ${
             current === f.key
               ? "bg-primary text-white border-primary"
               : "bg-white text-gray-500 border-gray-200 hover:bg-gray-50"
@@ -162,8 +162,8 @@ function ContractCard({ contract, isRead, onRead, onSelectContract }: ContractCa
   return (
     <div
       onClick={handleClick}
-      className={`border border-gray-200 rounded-xl overflow-hidden hover:bg-gray-50 transition-colors cursor-pointer ${
-        isRead ? "bg-white" : "bg-blue-50/40"
+      className={`border border-gray-200 shadow rounded-xl overflow-hidden hover:bg-gray-50 transition-colors cursor-pointer ${
+        isRead ? "bg-white" : "bg-white"
       }`}
     >
       <div className="flex">
@@ -176,7 +176,7 @@ function ContractCard({ contract, isRead, onRead, onSelectContract }: ContractCa
             <div className="flex flex-wrap items-center gap-5 flex-1 min-w-0">
               {/* Unread dot */}
               {!isRead && (
-                <span className="w-2 h-2 rounded-full bg-blue-500 shrink-0 mt-0.5" aria-label="Unread" />
+                <span className="w-2 h-2 rounded-full bg-primary shrink-0 mt-0.5" aria-label="Unread" />
               )}
               <span className="bg-gray-100 text-gray-600 text-xs font-medium rounded-md px-2.5 py-1">
                 {contract.code}
