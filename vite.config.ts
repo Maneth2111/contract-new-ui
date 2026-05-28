@@ -88,7 +88,7 @@ export default defineConfig({
     },
 
     target: 'esnext',
-    outDir: 'build',
+    outDir: 'build, dist',
   },
   server: {
     allowedHosts: true,
