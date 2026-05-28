@@ -327,7 +327,7 @@ export function ReportDashboard({ currentUser }: ReportDashboardProps) {
   return (
     <div className="space-y-6">
       {/* Report Filters */}
-      <div className="bg-white rounded-lg border border-gray-200 p-6">
+      <div className="bg-white rounded-lg shadow p-6">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6">
           <h2 className="font-bold text-xl text-gray-900 shrink-0">Contract Summary Report</h2>
           <div className="flex flex-wrap items-center gap-3 sm:justify-end">
@@ -423,7 +423,7 @@ export function ReportDashboard({ currentUser }: ReportDashboardProps) {
       </div>
 
       {/* Report Preview */}
-      <div className="bg-white rounded-lg border border-gray-200 p-6">
+      <div className="bg-white rounded-lg shadow p-6">
         <div className="mb-6 pb-6 border-b border-gray-200">
           <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="bg-gray-50 p-3 rounded border border-gray-300">
@@ -498,12 +498,31 @@ export function ReportDashboard({ currentUser }: ReportDashboardProps) {
                 sortedContracts.map((contract) => {
                   const daysRemaining = calculateDaysRemaining(contract.expiryDate);
                   return (
-                    <tr key={contract.id}>
-                      <td className="whitespace-nowrap lg:max-w-0" title={contract.contractCode}>{contract.contractCode}</td>
-                      <td className="whitespace-nowrap lg:truncate lg:max-w-0" title={contract.title}>{contract.title}</td>
-                      <td className="whitespace-nowrap lg:truncate lg:max-w-0" title={contract.department}>{contract.department}</td>
-                      <td className="whitespace-nowrap lg:truncate lg:max-w-0" title={contract.personInCharge}>{contract.personInCharge}</td>
-                      <td className="whitespace-nowrap lg:truncate lg:max-w-0" title={contract.partnerName}>{contract.partnerName}</td>
+                    <tr key={contract.id} className="group relative transition-all hover:bg-primary/10 cursor-pointer">
+                      <td className="relative whitespace-nowrap lg:max-w-0" title={contract.contractCode}>
+                        <span className="absolute left-0 top-0 h-full w-1 bg-brand-pink opacity-0 group-hover:opacity-100 transition-opacity"></span>
+                        {contract.contractCode}
+                      </td>
+                      <td className="whitespace-nowrap lg:truncate lg:max-w-0" title={contract.title}>
+                        <div className="flex items-center gap-1 min-w-0">
+                          <span className="whitespace-nowrap lg:truncate">{contract.title}</span>
+                        </div>
+                      </td>
+                      <td className="whitespace-nowrap lg:truncate lg:max-w-0" title={contract.department}>
+                        <div className="flex items-center gap-1 min-w-0">
+                          <span className="whitespace-nowrap lg:truncate">{contract.department}</span>
+                        </div>
+                      </td>
+                      <td className="whitespace-nowrap lg:truncate lg:max-w-0" title={contract.personInCharge}>
+                        <div className="flex items-center gap-1 min-w-0">
+                          <span className="whitespace-nowrap lg:truncate">{contract.personInCharge}</span>
+                        </div>
+                      </td>
+                      <td className="whitespace-nowrap lg:truncate lg:max-w-0" title={contract.partnerName}>
+                        <div className="flex items-center gap-1 min-w-0">
+                          <span className="whitespace-nowrap lg:truncate">{contract.partnerName}</span>
+                        </div>
+                      </td>
                       <td className="whitespace-nowrap">{formatDate(contract.effectiveDate)}</td>
                       <td className="whitespace-nowrap">{formatDate(contract.expiryDate)}</td>
                       <td className="whitespace-nowrap">

@@ -288,7 +288,7 @@ export default function App() {
                 </button>
 
                 {profileMenuOpen && (
-                  <div className="absolute right-0 top-full mt-1.5 w-52 rounded-xl border border-gray-200 bg-white shadow-lg py-1 z-50">
+                  <div className="absolute right-0 top-full mt-1.5 px-1 rounded-xl border border-gray-200 bg-white shadow-lg py-1 z-50">
                     {/* My Profile */}
                     <button
                       type="button"
@@ -298,9 +298,9 @@ export default function App() {
                         if (selectedContractId !== null) closeContractDetails();
                         openUserDetails(user.id, 'view');
                       }}
-                      className="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer"
+                      className="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 text-nowrap transition-colors cursor-pointer"
                     >
-                      <UserIcon className="w-4 h-4 text-gray-400" />
+                      <span><UserIcon className="w-4 h-4 text-gray-400" /></span>
                       My Profile
                     </button>
 
@@ -311,7 +311,7 @@ export default function App() {
                         setProfileMenuOpen(false);
                         setShowLogoutConfirm(true);
                       }}
-                      className="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors cursor-pointer"
+                      className="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 hover:w-full transition-colors cursor-pointer"
                     >
                       <LogOut className="w-4 h-4" />
                       Logout

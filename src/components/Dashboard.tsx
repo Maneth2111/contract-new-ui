@@ -96,7 +96,7 @@ export default function Dashboard() {
     <div className="space-y-6">
       {/* Summary Metrics */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-4 gap-x-8">
-        <div className="bg-white p-6 rounded-lg border border-gray-200">
+        <div className="bg-white p-6 rounded-lg shadow">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-gray-500">Expiring Soon (90 days)</p>
@@ -106,7 +106,7 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-lg border border-gray-200">
+        <div className="bg-white p-6 rounded-lg shadow">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-gray-500">Overdue Contract{pluralS(overdueContracts)}</p>
@@ -116,17 +116,17 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-lg border border-gray-200">
+        <div className="bg-white p-6 rounded-lg shadow">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-gray-500">Active Contract{pluralS(activeContracts)}</p>
-              <p className="mt-2">{activeContracts} ({activePercentage}%)</p>
+              <p className="mt-2">{activeContracts}</p>
             </div>
             <CheckCircle className="w-8 h-8 text-green-500" />
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-lg border border-gray-200">
+        <div className="bg-white p-6 rounded-lg shadow">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-gray-500">Total Contract{pluralS(totalContracts)}</p>
@@ -136,7 +136,7 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-lg border border-gray-200">
+        <div className="bg-white p-6 rounded-lg shadow">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-gray-500">Total Contract Value</p>
@@ -146,7 +146,7 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-lg border border-gray-200">
+        <div className="bg-white p-6 rounded-lg shadow">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-gray-500">Total Partner{pluralS(uniquePartners)}</p>
@@ -160,7 +160,7 @@ export default function Dashboard() {
       {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Contracts by Department */}
-        <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
+        <div className="bg-white p-6 rounded-lg shadow shadow-sm">
           <div className="flex items-center justify-between gap-4 mb-6">
             <h3 className="font-medium text-gray-900">Contracts by Department</h3>
             <span className="text-sm text-gray-500 shrink-0">By contract count</span>
@@ -208,7 +208,7 @@ export default function Dashboard() {
         </div>
 
         {/* Status Distribution */}
-        <div className="bg-white p-6 rounded-lg border border-gray-200">
+        <div className="bg-white p-6 rounded-lg shadow">
           <h3 className="mb-4">Status Distribution</h3>
           <ResponsiveContainer width="100%" height={300}>
             <PieChart>
@@ -233,7 +233,7 @@ export default function Dashboard() {
       </div>
 
       {/* Upcoming Expirations by Month */}
-      <div className="bg-white p-6 rounded-lg border border-gray-200">
+      <div className="bg-white p-6 rounded-lg shadow">
         <h3 className="mb-4">Upcoming Expirations by Month</h3>
         <ResponsiveContainer width="100%" height={300}>
           <BarChart data={expiringByMonth}>

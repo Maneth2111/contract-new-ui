@@ -130,7 +130,7 @@ export function UserForm({
   const renderPermissionTags = (ids: number[], items: Permission[], group: 'CONTRACT' | 'USER') => {
     const selected = items.filter((p) => ids.includes(p.id))
     if (selected.length === 0) return <p className="text-sm text-gray-500">N/A</p>
-    const tagClass = group === 'CONTRACT' ? 'bg-green-100 text-green-800' : 'bg-purple-100 text-purple-800'
+    const tagClass = group === 'CONTRACT' ? 'bg-brand-navy text-white text-center' : 'bg-brand-pink text-white text-center'
     return (
       <div className="flex flex-wrap gap-2">
         {selected.map((p) => (

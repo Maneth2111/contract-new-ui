@@ -186,7 +186,7 @@ export function UserManagement({ currentUser, userPermission, onSelectUser, onRe
     <div className="space-y-6">
       {/* Summary cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-white p-6 rounded-lg border border-gray-200">
+        <div className="bg-white p-6 rounded-lg shadow">
           <div className="flex items-center gap-3">
             <span><Users className="w-10 h-10 " /></span>
             <div>
@@ -195,7 +195,7 @@ export function UserManagement({ currentUser, userPermission, onSelectUser, onRe
             </div>
           </div>
         </div>
-        <div className="bg-white p-6 rounded-lg border border-gray-200">
+        <div className="bg-white p-6 rounded-lg shadow">
           <div className="flex items-center gap-3">
             <span><Users className="w-10 h-10" /></span>
             <div>
@@ -204,7 +204,7 @@ export function UserManagement({ currentUser, userPermission, onSelectUser, onRe
             </div>
           </div>
         </div>
-        <div className="bg-white p-6 rounded-lg border border-gray-200">
+        <div className="bg-white p-6 rounded-lg shadow">
           <div className="flex items-center gap-3">
             <span><Users className="w-10 h-10 text-red-500" /></span>
             <div>
@@ -213,7 +213,7 @@ export function UserManagement({ currentUser, userPermission, onSelectUser, onRe
             </div>
           </div>
         </div>
-        <div className="bg-white p-6 rounded-lg border border-gray-200">
+        <div className="bg-white p-6 rounded-lg shadow">
           <div className="flex items-center gap-3">
             <span><Users className="w-10 h-10 " /></span>
             <div>
@@ -225,7 +225,7 @@ export function UserManagement({ currentUser, userPermission, onSelectUser, onRe
       </div>
 
       {/* Filters */}
-      <div className="bg-white p-4 rounded-lg border border-gray-200">
+      <div className="bg-white p-4 rounded-lg shadow">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-2xl font-medium">User Management</h2>
           {userPermission.create && (
@@ -324,14 +324,14 @@ export function UserManagement({ currentUser, userPermission, onSelectUser, onRe
       </div>
 
       {/* User Table */}
-      <div className="bg-white rounded-lg border border-gray-200">
+      <div className="bg-white rounded-lg shadow">
         <div
           className={[
             'overflow-x-auto',
             sortedUsers.length > 10 ? 'overflow-y-auto max-h-[70vh]' : '',
           ].join(' ').trim()}
         >
-          <table className={`w-full min-w-max text-sm [&_th]:px-4 [&_th]:py-3 [&_th]:whitespace-nowrap [&_td]:px-4 [&_td]:py-3 ${tableRowHover}`}>
+          <table className={`w-full min-w-max text-sm [&_th]:px-4 [&_th]:py-5 [&_th]:whitespace-nowrap [&_td]:px-4 [&_td]:py-3 ${tableRowHover}`}>
             <thead className={tableTheadClass}>
               <tr>
                 <SortableTableHead label="Employee ID" columnKey="employeeId" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="w-10" />
@@ -340,7 +340,7 @@ export function UserManagement({ currentUser, userPermission, onSelectUser, onRe
                 <SortableTableHead label="Department" columnKey="department" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="w-44" />
                 <SortableTableHead label="Role" columnKey="role" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="w-44" />
                 <SortableTableHead label="Status" columnKey="status" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="w-12" />
-                <th className="w-28 text-left text-brand-navy font-medium">Actions</th>
+                <th className="w-28 text-left text-white font-medium">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
@@ -355,9 +355,19 @@ export function UserManagement({ currentUser, userPermission, onSelectUser, onRe
                   <tr
                     key={user.id}
                     onClick={() => userPermission.view && handleViewUserDetails(user)}
-                    className={`transition-colors ${userPermission.view ? 'cursor-pointer' : ''}`}
+                    className={[
+                      "group relative transition-colors",
+                      userPermission.view ? "cursor-pointer" : "",
+                      "hover:bg-primary/10"
+                    ].join(" ")}
+
                   >
-                    <td className="whitespace-nowrap lg:max-w-0">{user.employeeId}</td>
+
+                    <td className="relative">
+                      <span className="absolute left-0 top-0 h-full w-1 bg-brand-pink opacity-0 group-hover:opacity-100 transition-opacity"></span>
+                      {user.employeeId}
+                    </td>
+
                     <td className="whitespace-nowrap lg:truncate lg:max-w-0" title={user.fullName}>{user.fullName}</td>
                     <td className="whitespace-nowrap lg:truncate lg:max-w-0" title={user.email}>{user.email}</td>
                     <td className="whitespace-nowrap lg:truncate lg:max-w-0" title={user.department}>{user.department}</td>

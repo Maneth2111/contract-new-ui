@@ -29,12 +29,12 @@ export const calculateDaysRemaining = (expiryDate: string): number => {
   return diffDays;
 };
 
-export const formatCurrency = (value: number, fractionDigits = 2): string => {
+export const formatCurrency = (value: number): string => {
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'USD',
-    minimumFractionDigits: fractionDigits,
-    maximumFractionDigits: fractionDigits,
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
   }).format(value);
 };
 

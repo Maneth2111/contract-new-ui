@@ -29,17 +29,17 @@ export function SortableTableHead ({
       <button
         type="button"
         onClick={() => onSort(columnKey)}
-        className={`inline-flex items-center gap-1 w-full font-medium text-brand-navy hover:text-primary cursor-pointer select-none ${alignClass}`}
+        className={`inline-flex items-center gap-1 w-full font-medium text-white cursor-pointer select-none  ${alignClass}`}
       >
         <span>{label}</span>
         {active ? (
           sortDirection === 'asc' ? (
-            <ChevronUp className="w-4 h-4 shrink-0 text-primary" aria-hidden />
+            <ChevronUp className="w-4 h-4 shrink-0 text-white" aria-hidden />
           ) : (
-            <ChevronDown className="w-4 h-4 shrink-0 text-primary" aria-hidden />
+            <ChevronDown className="w-4 h-4 shrink-0 text-white" aria-hidden />
           )
         ) : (
-          <ChevronsUpDown className="w-4 h-4 shrink-0 text-brand-navy/40" aria-hidden />
+          <ChevronsUpDown className="w-4 h-4 shrink-0 text-white" aria-hidden />
         )}
       </button>
     </th>

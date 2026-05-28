@@ -108,7 +108,7 @@ function FilterPills({
           className={`rounded-sm px-4 shadow py-1 text-sm transition-colors ${
             current === f.key
               ? "bg-primary text-white border-primary"
-              : "bg-white text-gray-500 border-gray-200 hover:bg-gray-50"
+              : "bg-white text-gray-500  hover:bg-gray-50"
           }`}
         >
           {f.label}

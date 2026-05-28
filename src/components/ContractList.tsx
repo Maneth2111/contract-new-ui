@@ -190,7 +190,7 @@ export function ContractList({
     <div className="space-y-6">
       {/* Notification summary cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-white p-6 rounded-lg border border-gray-200 shadow">
+        <div className="bg-white p-6 rounded-lg  shadow">
           <div className="flex items-center gap-3">
             <span><AlertTriangle className="w-10 h-10 text-red-600" /></span>
             <div>
@@ -200,7 +200,7 @@ export function ContractList({
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-lg border border-gray-200 shadow">
+        <div className="bg-white p-6 rounded-lg  shadow">
           <div className="flex items-center gap-3">
             <span><Clock className="w-10 h-10 text-red-500" /></span>
             <div>
@@ -210,7 +210,7 @@ export function ContractList({
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-lg border border-gray-200 shadow">
+        <div className="bg-white p-6 rounded-lg  shadow">
           <div className="flex items-center gap-3">
             <span><Clock className="w-10 h-10 text-orange-600" /></span>
             <div>
@@ -220,7 +220,7 @@ export function ContractList({
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-lg border border-gray-200 shadow">
+        <div className="bg-white p-6 rounded-lg shadow">
           <div className="flex items-center gap-3">
             <span><Clock className="w-10 h-10 text-yellow-600" /></span>
             <div>
@@ -232,7 +232,7 @@ export function ContractList({
       </div>
 
       {/* Filters */}
-      <div className="bg-white p-4 rounded-lg border border-gray-200 shadow">
+      <div className="bg-white p-4 rounded-lg shadow">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-2xl font-medium">Contract Management</h2>
           {contractPermission.create && (
@@ -312,14 +312,14 @@ export function ContractList({
       </div>
 
       {/* Contract Table */}
-      <div className="bg-white rounded-lg border border-gray-200">
+      <div className="bg-white rounded-lg  shadow ">
         <div
           className={[
             'overflow-x-auto',
             pagedContracts.length > 10 ? 'overflow-y-auto max-h-[70vh] lg:overflow-y-hidden' : '',
           ].join(' ').trim() || undefined}
         >
-          <table className={`w-full min-w-max text-sm shadow [&_th]:px-2 [&_th]:py-5 [&_th]:whitespace-nowrap [&_td]:px-2 [&_td]:py-3.5 ${tableRowHover}`}>
+          <table className={`w-full min-w-max text-sm [&_th]:px-2 [&_th]:py-5 [&_th]:whitespace-nowrap [&_td]:px-2 [&_td]:py-3.5 ${tableRowHover}`}>
             <thead className={tableTheadClass}>
               <tr>
                 <SortableTableHead label="Contract ID" columnKey="id" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="w-fit" />
@@ -331,7 +331,7 @@ export function ContractList({
                 <SortableTableHead label="Days Left" columnKey="daysRemaining" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="w-24" />
                 <SortableTableHead label="Status" columnKey="status" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="w-fit" />
                 <SortableTableHead label="Total Contract Value" columnKey="contractValue" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="w-35" />
-                <th className="w-fit text-brand-navy font-medium text-center">Action</th>
+                <th className="w-fit text-white font-medium text-center">Action</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
@@ -350,9 +350,9 @@ export function ContractList({
                     <tr
                       key={contract.id}
                       onClick={() => contractPermission.viewDocuments && handleViewContractDetails(contract)}
-                      className={`transition-opacity cursor-pointer ${isDeleting ? 'opacity-40 pointer-events-none' : ''}`}
+                      className={`group relative transition-all hover:bg-primary/10 cursor-pointer ${isDeleting ? 'opacity-40 pointer-events-none' : ''}`}
                     >
-                      <td className="whitespace-nowrap lg:max-w-0" title={contract.id}>{contract.id}</td>
+                      <td className="relative whitespace-nowrap lg:max-w-0" title={contract.id}><span className="absolute left-0 top-0 h-full w-1 bg-brand-pink opacity-0 group-hover:opacity-100 transition-opacity"></span>{contract.id}</td>
                       <td className="whitespace-nowrap lg:truncate lg:max-w-0" title={contract.title}>
                         <div className="flex items-center gap-1 min-w-0">
                           <span className="whitespace-nowrap lg:truncate">{contract.title}</span>
