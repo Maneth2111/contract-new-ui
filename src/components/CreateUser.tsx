@@ -3,12 +3,13 @@ import { useForm } from 'react-hook-form';
 import { X } from 'lucide-react';
 import { UserForm } from './UserForm';
 import { User, UserFormValues } from '../types/user';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { userSchema } from '../lib/userSchema';
 import {
   mockDepartments,
   mockRoles,
   mockContractPermissions,
   mockUserPermissions,
-  mockUsers,
 } from '../data/mockData';
 import type { UserProfile } from '../services/userService';
 import toast from 'react-hot-toast';
@@ -38,10 +39,12 @@ export function CreateUser({ currentUser, onCancel, onSuccess }: CreateUserProps
   const [depAccess, setDepAccess] = useState(false);
   const depAccessRef = { current: null } as React.RefObject<HTMLDivElement | null>;
 
-  const form = useForm<UserFormValues>({ defaultValues });
+  const form = useForm<UserFormValues>({
+    defaultValues,
+    resolver: zodResolver(userSchema),
+  });
   const formData = form.watch();
 
-  // ── Derived permission toggle state ────────────────────────────────
   const allContractOn = mockContractPermissions.every(p =>
     formData.contractPermissionIds.includes(p.id)
   );
@@ -49,12 +52,13 @@ export function CreateUser({ currentUser, onCancel, onSuccess }: CreateUserProps
     formData.userPermissionIds.includes(p.id)
   );
 
-  const deptAccessLabel = formData.deptAccessIds.length === 0
-    ? 'Select departments'
-    : mockDepartments
-      .filter(d => formData.deptAccessIds.includes(d.departmentId))
-      .map(d => d.departmentName)
-      .join(', ');
+  const deptAccessLabel =
+    formData.deptAccessIds.length === 0
+      ? 'Select departments'
+      : mockDepartments
+          .filter(d => formData.deptAccessIds.includes(d.departmentId))
+          .map(d => d.departmentName)
+          .join(', ');
 
   const onDeptAccessToggle = (id: number) => {
     const current = formData.deptAccessIds;
@@ -103,15 +107,15 @@ export function CreateUser({ currentUser, onCancel, onSuccess }: CreateUserProps
     setCreating(true);
     await new Promise(r => setTimeout(r, 400));
 
-    // Build a User object from the form data so the list updates immediately
     const newUser: User = {
-      id: String(Date.now()), // temporary id
+      id: String(Date.now()),
       employeeId: data.employeeId,
       fullName: data.fullName,
       email: data.email,
       phoneNumber: data.phoneNumber ?? '',
       jobTitle: data.jobTitle ?? '',
-      department: mockDepartments.find(d => d.departmentId === data.departmentId)?.departmentName ?? '',
+      department:
+        mockDepartments.find(d => d.departmentId === data.departmentId)?.departmentName ?? '',
       role: data.roleNames[0] ?? '',
       status: 'Active',
       moduleAccess: mockDepartments
@@ -136,7 +140,9 @@ export function CreateUser({ currentUser, onCancel, onSuccess }: CreateUserProps
       <div className="bg-white rounded-lg w-full max-w-3xl mx-4">
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
           <h2 className="text-xl font-medium">Create New User</h2>
-          <button onClick={onCancel}><X className="w-6 h-6 cursor-pointer" /></button>
+          <button type="button" onClick={onCancel}>
+            <X className="w-6 h-6 cursor-pointer" />
+          </button>
         </div>
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <UserForm
@@ -160,10 +166,18 @@ export function CreateUser({ currentUser, onCancel, onSuccess }: CreateUserProps
             insideModal
           />
           <div className="flex justify-end gap-3 px-6 py-4 border-t border-gray-200 bg-gray-50">
-            <button type="button" onClick={onCancel} className="px-6 py-2 border border-gray-300 rounded-lg cursor-pointer">
+            <button
+              type="button"
+              onClick={onCancel}
+              className="px-6 py-2 border border-gray-300 rounded-lg cursor-pointer"
+            >
               Cancel
             </button>
-            <button type="submit" disabled={creating} className="px-6 py-2 bg-primary text-white rounded-lg disabled:opacity-50 cursor-pointer">
+            <button
+              type="submit"
+              disabled={creating}
+              className="px-6 py-2 bg-primary text-white rounded-lg disabled:opacity-50 cursor-pointer"
+            >
               {creating ? 'Creating…' : 'Create User'}
             </button>
           </div>

@@ -12,29 +12,29 @@ import {
 // ── Map to display status (same logic as ContractList) ────────────────────────
 function toDisplayStatus(status: MockContract['status']): string {
   switch (status) {
-    case 'ACTIVE':        return 'Active';
-    case 'OVERDUE':       return 'Overdue';
-    case 'EXPIRED':       return 'Expired';
+    case 'ACTIVE': return 'Active';
+    case 'OVERDUE': return 'Overdue';
+    case 'EXPIRED': return 'Expired';
     case 'EXPIRING_SOON': return 'Expiring Soon';
-    default:              return status;
+    default: return status;
   }
 }
 
 // ── Derive all stats from the same mock contracts ────────────────────────────
-const totalContracts   = RAW_CONTRACTS.length;
-const activeContracts  = RAW_CONTRACTS.filter(c => c.status === 'ACTIVE').length;
+const totalContracts = RAW_CONTRACTS.length;
+const activeContracts = RAW_CONTRACTS.filter(c => c.status === 'ACTIVE').length;
 const overdueContracts = RAW_CONTRACTS.filter(c => c.status === 'OVERDUE').length;
-const expiringSoon     = RAW_CONTRACTS.filter(c => c.status === 'EXPIRING_SOON').length;
-const totalValue       = RAW_CONTRACTS.reduce((sum, c) => sum + c.contractValue, 0);
-const uniquePartners   = mockPartners.length;
+const expiringSoon = RAW_CONTRACTS.filter(c => c.status === 'EXPIRING_SOON').length;
+const totalValue = RAW_CONTRACTS.reduce((sum, c) => sum + c.contractValue, 0);
+const uniquePartners = mockPartners.length;
 
 // Status distribution counts
 const statusCounts = RAW_CONTRACTS.reduce(
   (acc, c) => {
-    if      (c.status === 'ACTIVE')        acc.active        += 1;
-    else if (c.status === 'EXPIRING_SOON') acc.expiringSoon  += 1;
-    else if (c.status === 'EXPIRED')       acc.expired       += 1;
-    else if (c.status === 'OVERDUE')       acc.overdue       += 1;
+    if (c.status === 'ACTIVE') acc.active += 1;
+    else if (c.status === 'EXPIRING_SOON') acc.expiringSoon += 1;
+    else if (c.status === 'EXPIRED') acc.expired += 1;
+    else if (c.status === 'OVERDUE') acc.overdue += 1;
     return acc;
   },
   { active: 0, expiringSoon: 0, expired: 0, overdue: 0, closed: 0 }
@@ -61,7 +61,7 @@ for (const c of RAW_CONTRACTS) {
   }
 }
 const expiringByMonth = Array.from({ length: 12 }, (_, i) => {
-  const date  = new Date(currentYear, i, 1);
+  const date = new Date(currentYear, i, 1);
   const month = date.toLocaleString('default', { month: 'short', year: 'numeric' });
   return { month, count: expirationMap[month] ?? 0 };
 });
@@ -72,90 +72,183 @@ export default function Dashboard() {
   const formatPercent = (part: number, total: number) =>
     total > 0 ? ((part / total) * 100).toFixed(1) : '0';
 
-  const activePercentage   = formatPercent(activeContracts, totalContracts);
+  const activePercentage = formatPercent(activeContracts, totalContracts);
   const maxDepartmentCount = Math.max(...departmentData.map(d => d.count), 1);
 
   const statusData = [
-    { name: 'Active',        value: statusCounts.active       },
+    { name: 'Active', value: statusCounts.active },
     { name: 'Expiring Soon', value: statusCounts.expiringSoon },
-    { name: 'Expired',       value: statusCounts.expired      },
-    { name: 'Closed',        value: statusCounts.closed       },
-    { name: 'Overdue',       value: statusCounts.overdue      },
+    { name: 'Expired', value: statusCounts.expired },
+    { name: 'Closed', value: statusCounts.closed },
+    { name: 'Overdue', value: statusCounts.overdue },
   ].filter(d => d.value > 0);
 
   const statusTotal = statusData.reduce((sum, d) => sum + d.value, 0);
 
-  const COLORS           = ['#22c55e', '#eab308', '#f97316', '#ef4444', '#6b7280'];
+  const COLORS = ['#22c55e', '#eab308', '#f97316', '#ef4444', '#6b7280'];
   const DEPARTMENT_COLORS = ['#0fbab5', '#052744', '#de6ea0', '#00A693'] as const;
 
   const maxExpirationCount = Math.max(...expiringByMonth.map(d => d.count), 0);
   const expirationYAxisMax = Math.max(maxExpirationCount, 3);
-  const expirationYTicks   = Array.from({ length: expirationYAxisMax + 1 }, (_, i) => i);
+  const expirationYTicks = Array.from({ length: expirationYAxisMax + 1 }, (_, i) => i);
 
   return (
     <div className="space-y-6">
       {/* Summary Metrics */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-4 gap-x-8">
-        <div className="bg-white p-6 rounded-lg shadow">
-          <div className="flex items-center justify-between">
+        {/* Expiring Soon */}
+        <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex">
+          {/* LEFT LINE */}
+          <div className="w-1 rounded-l-xl bg-orange-500 mr-4" />
+
+          <div className="flex-1 flex items-center justify-between">
             <div>
-              <p className="text-gray-500">Expiring Soon (90 days)</p>
-              <p className="mt-2">{expiringSoon}</p>
+              <p className="text-gray-700 font-medium">
+                Expiring Soon (90 days)
+              </p>
+
+              <p className="mt-2 text-2xl font-bold text-gray-900">
+                {expiringSoon}
+              </p>
+
+              <p className="text-sm text-gray-400 mt-1">
+                Requires attention soon
+              </p>
             </div>
-            <Clock className="w-8 h-8 text-orange-500" />
+
+            <div className="p-3 rounded-lg bg-orange-50">
+              <Clock className="w-6 h-6 text-orange-500" />
+            </div>
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-lg shadow">
-          <div className="flex items-center justify-between">
+        {/* Overdue */}
+        <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex">
+          <div className="w-1 rounded-l-xl bg-red-500 mr-4" />
+
+          <div className="flex-1 flex items-center justify-between">
             <div>
-              <p className="text-gray-500">Overdue Contract{pluralS(overdueContracts)}</p>
-              <p className="mt-2">{overdueContracts}</p>
+              <p className="text-gray-700 font-medium">
+                Overdue Contract{pluralS(overdueContracts)}
+              </p>
+
+              <p className="mt-2 text-2xl font-bold text-gray-900">
+                {overdueContracts}
+              </p>
+
+              <p className="text-sm text-red-400 mt-1">
+                Immediate action required
+              </p>
             </div>
-            <AlertTriangle className="w-8 h-8 text-red-500" />
+
+            <div className="p-3 rounded-lg bg-red-50">
+              <AlertTriangle className="w-6 h-6 text-red-500" />
+            </div>
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-lg shadow">
-          <div className="flex items-center justify-between">
+        {/* Active */}
+        <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex">
+          <div className="w-1 rounded-l-xl bg-green-500 mr-4" />
+
+          <div className="flex-1 flex items-center justify-between">
             <div>
-              <p className="text-gray-500">Active Contract{pluralS(activeContracts)}</p>
-              <p className="mt-2">{activeContracts}</p>
+              <p className="text-gray-700 font-medium">
+                Active Contract{pluralS(activeContracts)}
+              </p>
+
+              <p className="mt-2 text-2xl font-bold text-gray-900">
+                {activeContracts}
+              </p>
+
+              <p className="text-sm text-green-400 mt-1">
+                Currently in progress
+              </p>
             </div>
-            <CheckCircle className="w-8 h-8 text-green-500" />
+
+            <div className="p-3 rounded-lg bg-green-50">
+              <CheckCircle className="w-6 h-6 text-green-500" />
+            </div>
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-lg shadow">
-          <div className="flex items-center justify-between">
+        {/* Total Contracts */}
+        <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex">
+          <div className="w-1 rounded-l-xl bg-blue-500 mr-4" />
+
+          <div className="flex-1 flex items-center justify-between">
             <div>
-              <p className="text-gray-500">Total Contract{pluralS(totalContracts)}</p>
-              <p className="mt-2">{totalContracts}</p>
+              <p className="text-gray-700 font-medium">
+                Total Contract{pluralS(totalContracts)}
+              </p>
+
+              <p className="mt-2 text-2xl font-bold text-gray-900">
+                {totalContracts}
+              </p>
+
+              <p className="text-sm text-gray-400 mt-1">
+                All registered contracts
+              </p>
             </div>
-            <FileText className="w-8 h-8 text-primary" />
+
+            <div className="p-3 rounded-lg bg-blue-50">
+              <FileText className="w-6 h-6 text-blue-500" />
+            </div>
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-lg shadow">
-          <div className="flex items-center justify-between">
+        {/* Total Value */}
+        <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex">
+          <div className="w-1 rounded-l-xl bg-green-500 mr-4" />
+
+          <div className="flex-1 flex items-center justify-between">
             <div>
-              <p className="text-gray-500">Total Contract Value</p>
-              <p className="mt-2">{formatCurrency(totalValue)}</p>
+              <p className="text-gray-700 font-medium">
+                Total Contract Value
+              </p>
+
+              <p className="mt-2 text-2xl font-bold text-gray-900">
+                {formatCurrency(totalValue)}
+              </p>
+
+              <p className="text-sm text-gray-400 mt-1">
+                Combined contract worth
+              </p>
             </div>
-            <DollarSign className="w-8 h-8 text-green-500" />
+
+            <div className="p-3 rounded-lg bg-green-50">
+              <DollarSign className="w-6 h-6 text-green-500" />
+            </div>
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-lg shadow">
-          <div className="flex items-center justify-between">
+        {/* Partners */}
+        <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex">
+          <div className="w-1 rounded-l-xl bg-purple-500 mr-4" />
+
+          <div className="flex-1 flex items-center justify-between">
             <div>
-              <p className="text-gray-500">Total Partner{pluralS(uniquePartners)}</p>
-              <p className="mt-2">{uniquePartners}</p>
+              <p className="text-gray-700 font-medium">
+                Total Partner{pluralS(uniquePartners)}
+              </p>
+
+              <p className="mt-2 text-2xl font-bold text-gray-900">
+                {uniquePartners}
+              </p>
+
+              <p className="text-sm text-gray-400 mt-1">
+                Unique organizations
+              </p>
             </div>
-            <FileText className="w-8 h-8 text-purple-500" />
+
+            <div className="p-3 rounded-lg bg-purple-50">
+              <FileText className="w-6 h-6 text-purple-500" />
+            </div>
           </div>
         </div>
       </div>
+
+
 
       {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -208,27 +301,72 @@ export default function Dashboard() {
         </div>
 
         {/* Status Distribution */}
-        <div className="bg-white p-6 rounded-lg shadow">
-          <h3 className="mb-4">Status Distribution</h3>
-          <ResponsiveContainer width="100%" height={300}>
-            <PieChart>
-              <Pie
-                data={statusData}
-                cx="50%"
-                cy="50%"
-                labelLine={false}
-                label={({ name, value }) => `${name}: ${formatPercent(value, statusTotal)}%`}
-                outerRadius={80}
-                fill="#8884d8"
-                dataKey="value"
-              >
-                {statusData.map((_, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                ))}
-              </Pie>
-              <Tooltip />
-            </PieChart>
-          </ResponsiveContainer>
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+          <h3 className="mb-4 text-gray-700 font-semibold">
+            Status Distribution
+          </h3>
+
+          <div className="flex items-center">
+            {/* CHART */}
+            <ResponsiveContainer width="50%" height={200}>
+              <PieChart>
+                <Pie
+                  data={statusData}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={55}  
+                  outerRadius={75}
+                  paddingAngle={3}
+                  dataKey="value"
+                >
+                  {statusData.map((_, index) => (
+                    <Cell
+                      key={`cell-${index}`}
+                      fill={COLORS[index % COLORS.length]}
+                    />
+                  ))}
+                </Pie>
+                <Tooltip
+                  formatter={(value: number) =>
+                    `${formatPercent(value, statusTotal)}%`
+                  }
+                />
+              </PieChart>
+            </ResponsiveContainer>
+
+            {/* LEGEND / DETAILS */}
+            <div className="space-y-3 w-1/2 pl-4">
+              {statusData.map((item, index) => {
+                const percent = formatPercent(item.value, statusTotal);
+
+                return (
+                  <div
+                    key={index}
+                    className="flex items-center gap-2 "
+                  >
+                    {/* LEFT */}
+                    <div className="flex items-center gap-3">
+                      <span
+                        className="w-3 h-3 rounded-full"
+                        style={{
+                          backgroundColor: COLORS[index % COLORS.length],
+                        }}
+                      />
+
+                      <p className="text-sm text-gray-600">
+                        {item.name}
+                      </p>
+                    </div>
+
+                    {/* RIGHT */}
+                    <div className="text-sm font-medium text-gray-800">
+                      {percent}%
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
         </div>
       </div>
 

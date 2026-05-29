@@ -63,6 +63,7 @@ const delay = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve,
 
 interface ReportDashboardProps {
   currentUser?: import('../services/userService').UserProfile | null;
+  onSelectContract?: (contract: Contract) => void; 
 }
 
 // ── Convert a raw mock contract to the Contract shape the table expects ────────
@@ -93,7 +94,7 @@ function mockToContract(c: MockContract): Contract {
   };
 }
 
-export function ReportDashboard({ currentUser }: ReportDashboardProps) {
+export function ReportDashboard({ currentUser, onSelectContract }: ReportDashboardProps) {
   const [reportType] = useState('Contract Summary Report');
   const [selectedDepartment, setSelectedDepartment] = useState<number | undefined>(undefined);
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('ALL');
@@ -425,43 +426,84 @@ export function ReportDashboard({ currentUser }: ReportDashboardProps) {
       {/* Report Preview */}
       <div className="bg-white rounded-lg shadow p-6">
         <div className="mb-6 pb-6 border-b border-gray-200">
-          <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="bg-gray-50 p-3 rounded border border-gray-300">
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+
+            {/* Total Contracts */}
+            <div className="bg-white p-4 sm:p-5 rounded-lg shadow hover:shadow transition">
               <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-gray-600">Total Contracts</p>
-                  <p className="mt-1">{summary.totalContracts}</p>
+                <div className="min-w-0">
+                  <p className="text-xs sm:text-sm text-gray-600">
+                    Total Contracts
+                  </p>
+
+                  <p className="mt-1 text-lg sm:text-xl font-semibold text-gray-900">
+                    {summary.totalContracts}
+                  </p>
                 </div>
-                <FileText className="w-8 h-8 text-primary" />
+
+                <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-blue-50">
+                  <FileText className="w-5 h-5 sm:w-6 sm:h-6 text-blue-500" />
+                </div>
               </div>
             </div>
-            <div className="bg-gray-50 p-3 rounded border border-gray-300">
+
+            {/* Total Value */}
+            <div className="bg-white p-4 sm:p-5 rounded-lg shadow hover:shadow transition">
               <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-gray-600">Total Contract Value</p>
-                  <p className="mt-1">{formatCurrency(summary.totalValue)}</p>
+                <div className="min-w-0">
+                  <p className="text-xs sm:text-sm text-gray-600">
+                    Total Contract Value
+                  </p>
+
+                  <p className="mt-1 text-lg sm:text-xl font-semibold text-gray-900 truncate">
+                    {formatCurrency(summary.totalValue)}
+                  </p>
                 </div>
-                <DollarSign className="w-8 h-8 text-green-500" />
+
+                <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-green-50">
+                  <DollarSign className="w-5 h-5 sm:w-6 sm:h-6 text-green-500" />
+                </div>
               </div>
             </div>
-            <div className="bg-gray-50 p-3 rounded border border-gray-300">
+
+            {/* Active */}
+            <div className="bg-white p-4 sm:p-5 rounded-lg shadow hover:shadow transition">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-gray-600">Active</p>
-                  <p className="mt-1">{summary.active}</p>
+                  <p className="text-xs sm:text-sm text-gray-600">
+                    Active
+                  </p>
+
+                  <p className="mt-1 text-lg sm:text-xl font-semibold text-gray-900">
+                    {summary.active}
+                  </p>
                 </div>
-                <CheckCircle className="w-8 h-8 text-green-500" />
+
+                <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-green-50">
+                  <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-green-500" />
+                </div>
               </div>
             </div>
-            <div className="bg-gray-50 p-3 rounded border border-gray-300">
+
+            {/* Expiring Soon */}
+            <div className="bg-white p-4 sm:p-5 rounded-lg shadow hover:shadow transition">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-gray-600">Expiring Soon</p>
-                  <p className="mt-1">{summary.expiringSoon}</p>
+                  <p className="text-xs sm:text-sm text-gray-600">
+                    Expiring Soon
+                  </p>
+
+                  <p className="mt-1 text-lg sm:text-xl font-semibold text-gray-900">
+                    {summary.expiringSoon}
+                  </p>
                 </div>
-                <AlertCircle className="w-8 h-8 text-orange-500" />
+
+                <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-orange-50">
+                  <AlertCircle className="w-5 h-5 sm:w-6 sm:h-6 text-orange-500" />
+                </div>
               </div>
             </div>
+
           </div>
         </div>
 
@@ -498,7 +540,7 @@ export function ReportDashboard({ currentUser }: ReportDashboardProps) {
                 sortedContracts.map((contract) => {
                   const daysRemaining = calculateDaysRemaining(contract.expiryDate);
                   return (
-                    <tr key={contract.id} className="group relative transition-all hover:bg-primary/10 cursor-pointer">
+                    <tr key={contract.id} onClick={() => onSelectContract?.(contract)} className="group relative transition-all hover:bg-primary/10 cursor-pointer">
                       <td className="relative whitespace-nowrap lg:max-w-0" title={contract.contractCode}>
                         <span className="absolute left-0 top-0 h-full w-1 bg-brand-pink opacity-0 group-hover:opacity-100 transition-opacity"></span>
                         {contract.contractCode}

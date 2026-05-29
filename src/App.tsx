@@ -354,7 +354,9 @@ export default function App() {
             onUnreadChange={setUnreadCount}
           />
         )}
-        {activeTab === 'reports' && <ReportDashboard currentUser={user} />}
+        {activeTab === 'reports' && <ReportDashboard currentUser={user} onSelectContract={(contract) => {
+          openContractDetails(contract.contractId, 'details');
+        }} />}
         {permissions.userRead && activeTab === 'users' && (
           <UserManagement
             currentUser={user}

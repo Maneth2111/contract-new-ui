@@ -37,3 +37,9 @@ input[type="password"]::-webkit-strong-password-auto-fill-button {
 .react-datepicker__day--range-end {
   @apply !rounded-full !bg-primary !text-white;
 }
+.styled-select option:hover,
+
+.styled-select option:checked {
+  background: #0fbab5;
+  color: white;
+}

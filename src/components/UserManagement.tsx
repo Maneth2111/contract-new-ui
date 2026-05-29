@@ -188,7 +188,7 @@ export function UserManagement({ currentUser, userPermission, onSelectUser, onRe
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="bg-white p-6 rounded-lg shadow">
           <div className="flex items-center gap-3">
-            <span><Users className="w-10 h-10 " /></span>
+            <span><Users className="w-7 h-7" /></span>
             <div>
               <p className="text-gray-600">Total Users</p>
               <p className="mt-1">{summary.total_users}</p>
@@ -197,7 +197,7 @@ export function UserManagement({ currentUser, userPermission, onSelectUser, onRe
         </div>
         <div className="bg-white p-6 rounded-lg shadow">
           <div className="flex items-center gap-3">
-            <span><Users className="w-10 h-10" /></span>
+            <span><Users className="w-7 h-7" /></span>
             <div>
               <p className="text-gray-600">Active Users</p>
               <p className="mt-1">{summary.active_users}</p>
@@ -206,7 +206,7 @@ export function UserManagement({ currentUser, userPermission, onSelectUser, onRe
         </div>
         <div className="bg-white p-6 rounded-lg shadow">
           <div className="flex items-center gap-3">
-            <span><Users className="w-10 h-10 text-red-500" /></span>
+            <span><Users className="w-7 h-7 text-red-600" /></span>
             <div>
               <p className="text-gray-600">Inactive Users</p>
               <p className="mt-1">{summary.inactive_users}</p>
@@ -215,7 +215,7 @@ export function UserManagement({ currentUser, userPermission, onSelectUser, onRe
         </div>
         <div className="bg-white p-6 rounded-lg shadow">
           <div className="flex items-center gap-3">
-            <span><Users className="w-10 h-10 " /></span>
+            <span><Users className="w-7 h-7" /></span>
             <div>
               <p className="text-gray-600">Administrators</p>
               <p className="mt-1">{summary.administrators}</p>
@@ -226,16 +226,16 @@ export function UserManagement({ currentUser, userPermission, onSelectUser, onRe
 
       {/* Filters */}
       <div className="bg-white p-4 rounded-lg shadow">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-2xl font-medium">User Management</h2>
+        <div className="flex items-center justify-between mb-4 gap-3">
+          <h2 className="text-lg sm:text-2xl font-medium truncate">User Management</h2>
           {userPermission.create && (
             <button
               type="button"
               onClick={() => setShowCreateUser(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 cursor-pointer"
+              className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 cursor-pointer shrink-0"
             >
               <Plus className="w-4 h-4" />
-              Create User
+              <span className="text-sm sm:inline">Create User</span>
             </button>
           )}
         </div>
@@ -271,7 +271,9 @@ export function UserManagement({ currentUser, userPermission, onSelectUser, onRe
               >
                 {!isSingleDepartment && <option value="">All Departments</option>}
                 {allowedDepartments.map((dept) => (
-                  <option key={dept.departmentId} value={dept.departmentId}>{dept.departmentName}</option>
+                  <option key={dept.departmentId} value={dept.departmentId} className="hover:bg-[#0fbab5] hover:text-white">
+                    {dept.departmentName}
+                  </option>
                 ))}
               </select>
               {!isSingleDepartment && (
@@ -463,7 +465,7 @@ export function UserManagement({ currentUser, userPermission, onSelectUser, onRe
         message={`Are you sure you want to inactivate user "${deactivateTarget?.fullName}"?`}
         confirmLabel="Inactivate"
         cancelLabel="Cancel"
-        icon={<UserX className="w-5 h-5 text-red-600" />}
+        icon={<UserX className="w-7 h-7 text-red-600" />}
         confirmIcon={<UserX className="w-4 h-4" />}
         onConfirm={() => {
           handleDeactivate(Number(deactivateTarget!.id));

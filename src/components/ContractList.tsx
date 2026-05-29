@@ -189,60 +189,104 @@ export function ContractList({
   return (
     <div className="space-y-6">
       {/* Notification summary cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-white p-6 rounded-lg  shadow">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+        {/* Overdue */}
+        <div className="bg-white p-4 sm:p-5 rounded-xl shadow-sm border border-gray-100 relative overflow-hidden">
           <div className="flex items-center gap-3">
-            <span><AlertTriangle className="w-10 h-10 text-red-600" /></span>
-            <div>
-              <p className="text-gray-600">Overdue Contract{pluralS(overdueCount)}</p>
-              <p className="mt-1">{overdueCount}</p>
+            <span className="flex items-center justify-center w-11 h-11 rounded-lg bg-red-50 shrink-0">
+              <AlertTriangle className="w-5 h-5 sm:w-6 sm:h-6 text-red-600" />
+            </span>
+
+            <div className="min-w-0">
+              <p className="text-xs sm:text-sm text-gray-600 truncate">
+                Overdue Contract{pluralS(overdueCount)}
+              </p>
+
+              <p className="mt-1 text-lg sm:text-xl font-semibold">
+                {overdueCount}
+              </p>
             </div>
           </div>
+
+          <div className="absolute bottom-0 left-0 w-full h-1 bg-red-500" />
         </div>
 
-        <div className="bg-white p-6 rounded-lg  shadow">
+        {/* 30 Days */}
+        <div className="bg-white p-4 sm:p-5 rounded-xl shadow-sm border border-gray-100 relative overflow-hidden">
           <div className="flex items-center gap-3">
-            <span><Clock className="w-10 h-10 text-red-500" /></span>
-            <div>
-              <p className="text-gray-600">30-Day Warning</p>
-              <p className="mt-1">{notificationSummary.expire30}</p>
+            <span className="flex items-center justify-center w-11 h-11 rounded-lg bg-red-50 shrink-0">
+              <Clock className="w-5 h-5 sm:w-6 sm:h-6 text-red-500" />
+            </span>
+
+            <div className="min-w-0">
+              <p className="text-xs sm:text-sm text-gray-600 truncate">
+                30-Day Warning
+              </p>
+
+              <p className="mt-1 text-lg sm:text-xl font-semibold">
+                {notificationSummary.expire30}
+              </p>
             </div>
           </div>
+
+          <div className="absolute bottom-0 left-0 w-full h-1 bg-red-400" />
         </div>
 
-        <div className="bg-white p-6 rounded-lg  shadow">
+        {/* 60 Days */}
+        <div className="bg-white p-4 sm:p-5 rounded-xl shadow-sm border border-gray-100 relative overflow-hidden">
           <div className="flex items-center gap-3">
-            <span><Clock className="w-10 h-10 text-orange-600" /></span>
-            <div>
-              <p className="text-gray-600">60-Day Warning</p>
-              <p className="mt-1">{notificationSummary.expire60}</p>
+            <span className="flex items-center justify-center w-11 h-11 rounded-lg bg-orange-50 shrink-0">
+              <Clock className="w-5 h-5 sm:w-6 sm:h-6 text-orange-600" />
+            </span>
+
+            <div className="min-w-0">
+              <p className="text-xs sm:text-sm text-gray-600 truncate">
+                60-Day Warning
+              </p>
+
+              <p className="mt-1 text-lg sm:text-xl font-semibold">
+                {notificationSummary.expire60}
+              </p>
             </div>
           </div>
+
+          <div className="absolute bottom-0 left-0 w-full h-1 bg-orange-500" />
         </div>
 
-        <div className="bg-white p-6 rounded-lg shadow">
+        {/* 90 Days */}
+        <div className="bg-white p-4 sm:p-5 rounded-xl shadow-sm border border-gray-100 relative overflow-hidden">
           <div className="flex items-center gap-3">
-            <span><Clock className="w-10 h-10 text-yellow-600" /></span>
-            <div>
-              <p className="text-gray-600">90-Day Warning</p>
-              <p className="mt-1">{notificationSummary.expire90}</p>
+            <span className="flex items-center justify-center w-11 h-11 rounded-lg bg-yellow-50 shrink-0">
+              <Clock className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-600" />
+            </span>
+
+            <div className="min-w-0">
+              <p className="text-xs sm:text-sm text-gray-600 truncate">
+                90-Day Warning
+              </p>
+
+              <p className="mt-1 text-lg sm:text-xl font-semibold">
+                {notificationSummary.expire90}
+              </p>
             </div>
           </div>
+
+          <div className="absolute bottom-0 left-0 w-full h-1 bg-yellow-500" />
         </div>
       </div>
 
       {/* Filters */}
       <div className="bg-white p-4 rounded-lg shadow">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-2xl font-medium">Contract Management</h2>
+        <div className="flex items-center justify-between mb-4 gap-3">
+          <h2 className="text-lg sm:text-2xl font-medium ">Contract Management</h2>
           {contractPermission.create && (
             <button
               type="button"
               onClick={() => setShowRegisterContract(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 cursor-pointer"
+              className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 cursor-pointer shrink-0"
             >
               <FilePlus className="w-4 h-4" />
-              New Contract
+              <span className="text-sm sm:inline">New Contract</span>
             </button>
           )}
         </div>
@@ -312,7 +356,7 @@ export function ContractList({
       </div>
 
       {/* Contract Table */}
-      <div className="bg-white rounded-lg  shadow ">
+      <div className="bg-white rounded-lg shadow ">
         <div
           className={[
             'overflow-x-auto',

@@ -3,13 +3,14 @@ import { ArrowLeft, Edit2, History, Mail, PencilLine, UserPlus } from 'lucide-re
 import type { Audit } from '../services/userService';
 import { User, UserFormValues } from '../types/user';
 import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { editUserSchema } from '../lib/userSchema';
 import { UserForm } from './UserForm';
 import { mapApiUserToUser, UserProfile } from '../services/userService';
 import { getPermissionFlagsFromUser } from '../utils/appProfileHelpers';
 import { mapApiUserToFormValues } from '../utils/userDetailFormMappers';
 import toast from 'react-hot-toast';
 import {
-  mockUsers,
   mockDepartments,
   mockRoles,
   mockContractPermissions,
@@ -31,35 +32,64 @@ interface UserDetailsProps {
 }
 
 const emptyFormValues: UserFormValues = {
-  fullName: '', employeeId: '', email: '', phoneNumber: '',
-  jobTitle: '', status: 'ACTIVE', departmentId: 0,
-  roleNames: [], deptAccessIds: [],
-  contractPermissionIds: [], userPermissionIds: [],
+  fullName: '',
+  employeeId: '',
+  email: '',
+  phoneNumber: '',
+  jobTitle: '',
+  status: 'ACTIVE',
+  departmentId: 0,
+  roleNames: [],
+  deptAccessIds: [],
+  contractPermissionIds: [],
+  userPermissionIds: [],
 };
-
-// ── Helpers (keep the same formatDateTime, formatRelativeTime, getInitials,
-//    buildAuditEvents, AuditEventCard, UserAuditPanel as before) ──────────
 
 function formatDateTime(dateTime: string) {
   if (!dateTime) return 'N/A';
   const date = new Date(dateTime);
   if (Number.isNaN(date.getTime())) return dateTime;
-  return date.toLocaleString('en-US', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+  return date.toLocaleString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
 }
 
 type AuditEventType = 'created' | 'updated';
-interface AuditEvent { id: string; type: AuditEventType; by: string; email: string; at: string; }
+interface AuditEvent {
+  id: string;
+  type: AuditEventType;
+  by: string;
+  email: string;
+  at: string;
+}
 
 function buildAuditEvents(audit: Audit): AuditEvent[] {
   const events: AuditEvent[] = [];
   if (audit.createdDateTime) {
-    events.push({ id: 'created', type: 'created', by: audit.createdBy?.trim() || 'System', email: audit.createdByEmail?.trim() || '', at: audit.createdDateTime });
+    events.push({
+      id: 'created',
+      type: 'created',
+      by: audit.createdBy?.trim() || 'System',
+      email: audit.createdByEmail?.trim() || '',
+      at: audit.createdDateTime,
+    });
   }
-  const hasDistinctUpdate = Boolean(audit.lastUpdatedDateTime) &&
+  const hasDistinctUpdate =
+    Boolean(audit.lastUpdatedDateTime) &&
     (audit.lastUpdatedDateTime !== audit.createdDateTime ||
       (audit.lastUpdatedBy?.trim() || '') !== (audit.createdBy?.trim() || ''));
   if (hasDistinctUpdate && audit.lastUpdatedDateTime) {
-    events.push({ id: 'updated', type: 'updated', by: audit.lastUpdatedBy?.trim() || 'Unknown', email: audit.lastUpdatedByEmail?.trim() || '', at: audit.lastUpdatedDateTime });
+    events.push({
+      id: 'updated',
+      type: 'updated',
+      by: audit.lastUpdatedBy?.trim() || 'Unknown',
+      email: audit.lastUpdatedByEmail?.trim() || '',
+      at: audit.lastUpdatedDateTime,
+    });
   }
   return events;
 }
@@ -70,14 +100,22 @@ function AuditEventCard({ event }: { event: AuditEvent }) {
       <div className="flex items-start gap-3">
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-1">
-            <span className={`px-2 py-0.5 text-xs rounded font-medium ${event.type === 'created' ? 'bg-green-100 text-green-800' : 'bg-primary/10 text-brand-navy'}`}>
+            <span
+              className={`px-2 py-0.5 text-xs rounded font-medium ${event.type === 'created'
+                ? 'bg-green-100 text-green-800'
+                : 'bg-primary/10 text-brand-navy'
+                }`}
+            >
               {event.type === 'created' ? 'Created' : 'Updated'}
             </span>
             <span className="text-gray-500 text-sm">{formatDateTime(event.at)}</span>
           </div>
           <p className="text-gray-500 text-sm mt-1">By: {event.by}</p>
           {event.email && (
-            <a href={`mailto:${event.email}`} className="inline-flex items-center gap-1.5 text-sm text-primary hover:text-brand-navy mt-0.5 truncate max-w-full">
+            <a
+              href={`mailto:${event.email}`}
+              className="inline-flex items-center gap-1.5 text-sm text-primary hover:text-brand-navy mt-0.5 truncate max-w-full"
+            >
               <Mail className="w-3.5 h-3.5 shrink-0" />
               <span className="truncate">{event.email}</span>
             </a>
@@ -97,37 +135,75 @@ function UserAuditPanel({ audit }: { audit: Audit | undefined }) {
       </div>
     );
   }
+
   const events = buildAuditEvents(audit);
   const lastActivityAt = audit.lastUpdatedDateTime || audit.createdDateTime;
 
   return (
     <div className="space-y-8">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div className="rounded-xl border border-gray-200 bg-linear-to-br from-green-50 to-white p-5">
-          <div className="flex items-start gap-4">
-            <div className="w-11 h-11 rounded-xl bg-green-100 text-green-700 flex items-center justify-center shrink-0">
-              <UserPlus className="w-5 h-5" />
+
+        {/* First Created */}
+        <div className="relative rounded-xl border border-gray-200 shadow bg-linear-to-br from-green-50 via-white to-white p-4 sm:p-5">
+
+          {/* Date TOP RIGHT */}
+          <p className="absolute top-4 right-4 text-xs text-green-700/80 font-medium">
+            {formatDateTime(audit.createdDateTime)}
+          </p>
+
+          <div className="flex items-start gap-3 sm:gap-4">
+
+            {/* Icon */}
+            <div className="flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-lg bg-green-100 shrink-0">
+              <UserPlus className="w-5 h-5 text-green-600" />
             </div>
-            <div className="min-w-0">
-              <p className="text-xs font-medium uppercase tracking-wide text-green-800/80">First created</p>
-              <p className="text-sm font-semibold text-gray-900 mt-1">{formatDateTime(audit.createdDateTime)}</p>
-              <p className="text-sm text-gray-600 mt-1 truncate">by {audit.createdBy || 'System'}</p>
+
+            {/* Content */}
+            <div className="min-w-0 pr-16">
+              <p className="text-[11px] sm:text-xs font-medium uppercase tracking-wide text-green-700/80">
+                First created
+              </p>
+
+              <p className="mt-1 text-xs sm:text-sm text-gray-600 truncate">
+                by {audit.createdBy || 'System'}
+              </p>
             </div>
+
           </div>
         </div>
-        <div className="rounded-xl border border-gray-200 bg-linear-to-br from-primary/5 to-white p-5">
-          <div className="flex items-start gap-4">
-            <div className="w-11 h-11 rounded-xl bg-primary/10 text-brand-navy flex items-center justify-center shrink-0">
+
+        {/* Last Activity */}
+        <div className="relative rounded-xl border border-gray-200 shadow bg-linear-to-br from-primary/5 via-white to-white p-4 sm:p-5">
+
+          {/* Date TOP RIGHT */}
+          <p className="absolute top-4 right-4 text-xs text-primary/80 font-medium">
+            {lastActivityAt ? formatDateTime(lastActivityAt) : 'N/A'}
+          </p>
+
+          <div className="flex items-start gap-3 sm:gap-4">
+
+            {/* Icon */}
+            <div className="flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-lg bg-primary/10 shrink-0">
               <PencilLine className="w-5 h-5 text-primary" />
             </div>
-            <div className="min-w-0">
-              <p className="text-xs font-medium uppercase tracking-wide text-brand-navy/80">Last activity</p>
-              <p className="text-sm font-semibold text-gray-900 mt-1">{lastActivityAt ? formatDateTime(lastActivityAt) : 'N/A'}</p>
-              <p className="text-sm text-gray-600 mt-1 truncate">by {audit.lastUpdatedBy || audit.createdBy || '—'}</p>
+
+            {/* Content */}
+            <div className="min-w-0 pr-16">
+              <p className="text-[11px] sm:text-xs font-medium uppercase tracking-wide text-primary/80">
+                Last activity
+              </p>
+
+              <p className="mt-1 text-xs sm:text-sm text-gray-600 truncate">
+                by {audit.lastUpdatedBy || audit.createdBy || '—'}
+              </p>
             </div>
+
           </div>
         </div>
+
+
       </div>
+
       <div>
         <div className="flex items-center gap-2 mb-5">
           <History className="w-5 h-5 text-gray-500" />
@@ -137,13 +213,20 @@ function UserAuditPanel({ audit }: { audit: Audit | undefined }) {
           {[...events].reverse().map((event, index) => {
             const isCreated = event.type === 'created';
             const Icon = isCreated ? UserPlus : PencilLine;
-            const nodeClass = isCreated ? 'bg-green-100 text-green-700 ring-green-200' : 'bg-primary/10 text-primary ring-primary/25';
+            const nodeClass = isCreated
+              ? 'bg-green-100 text-green-700 ring-green-200'
+              : 'bg-primary/10 text-primary ring-primary/25';
             return (
               <div key={event.id} className="relative flex gap-4 pb-8 last:pb-0">
                 {index < events.length - 1 && (
-                  <div className="absolute left-5 top-11 -bottom-1 w-0.5 bg-linear-to-b from-gray-300 to-gray-100" aria-hidden />
+                  <div
+                    className="absolute left-5 top-11 -bottom-1 w-0.5 bg-linear-to-b from-gray-300 to-gray-100"
+                    aria-hidden
+                  />
                 )}
-                <div className={`relative z-10 w-10 h-10 rounded-full flex items-center justify-center shrink-0 ring-2 ${nodeClass}`}>
+                <div
+                  className={`relative z-10 w-10 h-10 rounded-full flex items-center justify-center shrink-0 ring-2 ${nodeClass}`}
+                >
                   <Icon className="w-4 h-4" />
                 </div>
                 <AuditEventCard event={event} />
@@ -156,7 +239,7 @@ function UserAuditPanel({ audit }: { audit: Audit | undefined }) {
   );
 }
 
-// ── Main component ────────────────────────────────────────────────────────
+// ── Main component ─────────────────────────────────────────────────────────
 
 export function UserDetails({
   userId,
@@ -176,7 +259,6 @@ export function UserDetails({
   const contentRef = useRef<HTMLDivElement>(null);
   const depAccessRef = useRef<HTMLDivElement>(null);
 
-  // ── Load user from mock data ──────────────────────────────────────
   const detailResponse = useMemo(() => getUserDetailById(userId), [userId]);
   const detail = detailResponse.success ? detailResponse.payload : null;
 
@@ -184,37 +266,70 @@ export function UserDetails({
   const isOwnProfile = userId === Number(currentUser?.id);
   const isFormActive = formMode === 'edit';
 
-  const form = useForm<UserFormValues>({ defaultValues: emptyFormValues });
+  const form = useForm<UserFormValues>({
+    defaultValues: emptyFormValues,
+    resolver: zodResolver(editUserSchema),
+  });
   const formData = form.watch();
 
-  // ── Permission toggles ────────────────────────────────────────────
-  const allContractOn = mockContractPermissions.every(p => formData.contractPermissionIds.includes(p.id));
-  const allUserOn = mockUserPermissions.every(p => formData.userPermissionIds.includes(p.id));
+  const allContractOn = mockContractPermissions.every(p =>
+    formData.contractPermissionIds.includes(p.id)
+  );
+  const allUserOn = mockUserPermissions.every(p =>
+    formData.userPermissionIds.includes(p.id)
+  );
 
-  const deptAccessLabel = formData.deptAccessIds.length === 0
-    ? 'Select departments'
-    : mockDepartments.filter(d => formData.deptAccessIds.includes(d.departmentId)).map(d => d.departmentName).join(', ');
+  const deptAccessLabel =
+    formData.deptAccessIds.length === 0
+      ? 'Select departments'
+      : mockDepartments
+        .filter(d => formData.deptAccessIds.includes(d.departmentId))
+        .map(d => d.departmentName)
+        .join(', ');
 
   const onDeptAccessToggle = (id: number) => {
     const current = formData.deptAccessIds;
-    form.setValue('deptAccessIds', current.includes(id) ? current.filter(x => x !== id) : [...current, id], { shouldDirty: true, shouldValidate: true });
-  };
-  const onContractToggle = (id: number) => {
-    const current = formData.contractPermissionIds;
-    form.setValue('contractPermissionIds', current.includes(id) ? current.filter(x => x !== id) : [...current, id], { shouldDirty: true, shouldValidate: true });
-  };
-  const onAllContract = () => {
-    form.setValue('contractPermissionIds', allContractOn ? [] : mockContractPermissions.map(p => p.id), { shouldDirty: true, shouldValidate: true });
-  };
-  const onUserToggle = (id: number) => {
-    const current = formData.userPermissionIds;
-    form.setValue('userPermissionIds', current.includes(id) ? current.filter(x => x !== id) : [...current, id], { shouldDirty: true, shouldValidate: true });
-  };
-  const onAllUser = () => {
-    form.setValue('userPermissionIds', allUserOn ? [] : mockUserPermissions.map(p => p.id), { shouldDirty: true, shouldValidate: true });
+    form.setValue(
+      'deptAccessIds',
+      current.includes(id) ? current.filter(x => x !== id) : [...current, id],
+      { shouldDirty: true, shouldValidate: true }
+    );
   };
 
-  // ── Hydrate form when detail loads ───────────────────────────────
+  const onContractToggle = (id: number) => {
+    const current = formData.contractPermissionIds;
+    form.setValue(
+      'contractPermissionIds',
+      current.includes(id) ? current.filter(x => x !== id) : [...current, id],
+      { shouldDirty: true, shouldValidate: true }
+    );
+  };
+
+  const onAllContract = () => {
+    form.setValue(
+      'contractPermissionIds',
+      allContractOn ? [] : mockContractPermissions.map(p => p.id),
+      { shouldDirty: true, shouldValidate: true }
+    );
+  };
+
+  const onUserToggle = (id: number) => {
+    const current = formData.userPermissionIds;
+    form.setValue(
+      'userPermissionIds',
+      current.includes(id) ? current.filter(x => x !== id) : [...current, id],
+      { shouldDirty: true, shouldValidate: true }
+    );
+  };
+
+  const onAllUser = () => {
+    form.setValue(
+      'userPermissionIds',
+      allUserOn ? [] : mockUserPermissions.map(p => p.id),
+      { shouldDirty: true, shouldValidate: true }
+    );
+  };
+
   useEffect(() => {
     if (!detail) return;
     form.reset(mapApiUserToFormValues(detail, mockRoles));
@@ -245,30 +360,43 @@ export function UserDetails({
     setFormKey(k => k + 1);
   };
 
-  const handleBack = () => { if (isFormActive) { exitFormMode(); return; } onClose(); };
+  const handleBack = () => {
+    if (isFormActive) { exitFormMode(); return; }
+    onClose();
+  };
 
   const enterEditMode = () => {
     setActiveTab('user details');
     setFormMode('edit');
     setFormKey(k => k + 1);
-    window.requestAnimationFrame(() => contentRef.current?.scrollTo({ top: 0, behavior: 'smooth' }));
+    window.requestAnimationFrame(() =>
+      contentRef.current?.scrollTo({ top: 0, behavior: 'smooth' })
+    );
   };
 
   const onSubmit = async (data: UserFormValues) => {
     if (!canSubmit) return;
     setUpdating(true);
-    await new Promise(r => setTimeout(r, 400)); // simulate async
-    // toast.success(`User ${data.fullName} has been updated successfully!`);
+    await new Promise(r => setTimeout(r, 400));
     setUpdating(false);
 
     const mapped = detail ? mapApiUserToUser(detail as any) : null;
-    const deptName = mockDepartments.find(d => d.departmentId === data.departmentId)?.departmentName ?? mapped?.department ?? '';
+    const deptName =
+      mockDepartments.find(d => d.departmentId === data.departmentId)?.departmentName ??
+      mapped?.department ??
+      '';
+
     if (mapped) {
       onUpdateUser?.({
         ...mapped,
         ...data,
         department: deptName,
-        status: data.status === 'ACTIVE' ? 'Active' : data.status === 'INACTIVE' ? 'Inactive' : 'Disabled',
+        status:
+          data.status === 'ACTIVE'
+            ? 'Active'
+            : data.status === 'INACTIVE'
+              ? 'Inactive'
+              : 'Disabled',
       });
     }
     onUpdate?.();
@@ -324,32 +452,56 @@ export function UserDetails({
           <div className="px-4 sm:px-6 pt-4 pb-4 w-full">
             <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-4 items-center">
               <div className="flex items-start gap-6 min-w-0">
-                <button type="button" onClick={handleBack}
-                  className="shrink-0 flex items-center justify-center w-10 h-10 rounded-lg text-gray-700 hover:bg-gray-100 cursor-pointer" aria-label="Back">
+                <button
+                  type="button"
+                  onClick={handleBack}
+                  className="shrink-0 flex items-center justify-center w-10 h-10 rounded-lg text-gray-700 hover:bg-gray-100 cursor-pointer"
+                  aria-label="Back"
+                >
                   <ArrowLeft className="w-8 h-5" />
                 </button>
                 <div className="min-w-0 flex-1">
-                  <h2 className="font-medium text-xl">{isFormActive ? 'Edit User' : 'User Details'}</h2>
-                  <p className="text-gray-600 truncate">{displayName}{displayEmployeeId ? ` · ${displayEmployeeId}` : ''}</p>
+                  <h2 className="font-medium text-xl">
+                    {isFormActive ? 'Edit User' : 'User Details'}
+                  </h2>
+                  <p className="text-gray-600 truncate">
+                    {displayName}
+                    {displayEmployeeId ? ` · ${displayEmployeeId}` : ''}
+                  </p>
                 </div>
               </div>
               <div className="flex flex-wrap items-center justify-end gap-2 mr-10 min-w-0">
                 {isFormActive ? (
                   <>
-                    <button type="submit" form={detailsFormId} disabled={updating || !canSubmit}
-                      className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 cursor-pointer text-sm disabled:opacity-50">
-                      Save Changes
-                    </button>
-                    <button type="button" onClick={exitFormMode}
-                      className="px-4 py-2 text-gray-700 rounded-lg bg-gray-200 hover:bg-gray-300 cursor-pointer text-sm transition-colors">
+
+                    <button
+                      type="button"
+                      onClick={exitFormMode}
+                      className="px-4 py-2 text-gray-700 rounded-lg bg-gray-200 hover:bg-gray-300 cursor-pointer text-sm transition-colors"
+                    >
                       Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      form={detailsFormId}
+                      disabled={updating || !canSubmit}
+                      className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 cursor-pointer text-sm disabled:opacity-50"
+                    >
+                      Save Changes
                     </button>
                   </>
                 ) : (
                   canEdit && (
-                    <button type="button" onMouseDown={e => e.preventDefault()}
-                      onClick={e => { e.preventDefault(); e.stopPropagation(); enterEditMode(); }}
-                      className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 cursor-pointer text-sm">
+                    <button
+                      type="button"
+                      onMouseDown={e => e.preventDefault()}
+                      onClick={e => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        enterEditMode();
+                      }}
+                      className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 cursor-pointer text-sm"
+                    >
                       <Edit2 className="w-4 h-4" /> Edit User
                     </button>
                   )
@@ -361,8 +513,15 @@ export function UserDetails({
             <div className="px-4 sm:px-6 max-w-350 mx-auto w-full">
               <div className="flex gap-1">
                 {(['user details', 'audit information'] as const).map(tab => (
-                  <button key={tab} type="button" onClick={() => setActiveTab(tab)}
-                    className={`px-4 py-2 border-b-2 text-sm font-medium transition-colors cursor-pointer capitalize ${activeTab === tab ? 'border-primary text-primary' : 'border-transparent text-gray-600 hover:text-gray-900'}`}>
+                  <button
+                    key={tab}
+                    type="button"
+                    onClick={() => setActiveTab(tab)}
+                    className={`px-4 py-2 border-b-2 text-sm font-medium transition-colors cursor-pointer capitalize ${activeTab === tab
+                      ? 'border-primary text-primary'
+                      : 'border-transparent text-gray-600 hover:text-gray-900'
+                      }`}
+                  >
                     {tab}
                   </button>
                 ))}
@@ -370,8 +529,13 @@ export function UserDetails({
             </div>
           )}
         </div>
-        <div ref={contentRef} className="flex-1 min-h-0 overflow-y-auto px-4 sm:px-6 py-4 max-w-350 mx-auto w-full">
-          {isFormActive || activeTab === 'user details' ? renderForm() : <UserAuditPanel audit={detail?.audit} />}
+        <div
+          ref={contentRef}
+          className="flex-1 min-h-0 overflow-y-auto px-4 sm:px-6 py-4 max-w-350 mx-auto w-full"
+        >
+          {isFormActive || activeTab === 'user details'
+            ? renderForm()
+            : <UserAuditPanel audit={detail?.audit} />}
         </div>
       </div>
     </div>
