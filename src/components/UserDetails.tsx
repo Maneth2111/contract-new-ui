@@ -473,7 +473,6 @@ export function UserDetails({
               <div className="flex flex-wrap items-center justify-end gap-2 mr-10 min-w-0">
                 {isFormActive ? (
                   <>
-
                     <button
                       type="button"
                       onClick={exitFormMode}

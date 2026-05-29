@@ -11,15 +11,15 @@ import { mockUserStatuses } from '../data/mockData';
 
 interface Role { roleId: number; roleName: string; }
 interface Permission { id: number; name: string; }
-export interface Department{
-    departmentId: number,
-    departmentCode: string,
-    departmentName: string,
-    description: string,
-    msChannel: string | null,
-    title: string | null,
-    msWebhookUrl: string | null
-    msChannelUrl: string | null
+export interface Department {
+  departmentId: number,
+  departmentCode: string,
+  departmentName: string,
+  description: string,
+  msChannel: string | null,
+  title: string | null,
+  msWebhookUrl: string | null
+  msChannelUrl: string | null
 }
 
 interface UserFormProps {
@@ -201,7 +201,9 @@ export function UserForm({
           </div>
 
           <div>
-            <label className="block text-gray-700 mb-2">Department {!readOnly && <span className="text-red-500">*</span>}</label>
+            <label className="block text-gray-700 mb-2">
+              Department {!readOnly && <span className="text-red-500">*</span>}
+            </label>
             {readOnly ? (
               <div className={readOnlyBoxClass}>{departmentName}</div>
             ) : (
@@ -212,9 +214,14 @@ export function UserForm({
                     disabled={isSingleDepartment}
                     className={selectClass}
                   >
-                    <option value="">Select Department</option>
+                    {/* Only show placeholder when user has multiple departments to choose from */}
+                    {!isSingleDepartment && (
+                      <option value={0}>Select Department</option>
+                    )}
                     {allowedDepartments.map(dept => (
-                      <option key={dept.departmentId} value={dept.departmentId}>{dept.departmentName}</option>
+                      <option key={dept.departmentId} value={dept.departmentId}>
+                        {dept.departmentName}
+                      </option>
                     ))}
                   </select>
                   {!isSingleDepartment && (

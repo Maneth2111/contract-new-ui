@@ -207,49 +207,49 @@ export function ContractForm({
   const { fields: alertDateFields, append: appendAlertDate, remove: removeAlertDate } = useFieldArray({ control, name: 'manualAlertDates' as any });
 
   // Handle Search Partner if partner exist take Its Id but not create new
-const handlePartnerSearch = async (query: string, index: number) => {
-  const currentPartnerId = watch(`partners.${index}.partnerId`)
-  const hasPartnerId = currentPartnerId !== null && currentPartnerId !== undefined
-  const isEditPartner = editPartner && hasPartnerId
+  const handlePartnerSearch = async (query: string, index: number) => {
+    const currentPartnerId = watch(`partners.${index}.partnerId`)
+    const hasPartnerId = currentPartnerId !== null && currentPartnerId !== undefined
+    const isEditPartner = editPartner && hasPartnerId
 
-  setValue(`partners.${index}.partnerName`, query, { shouldDirty: true, shouldValidate: true })
-  if (!isEditPartner) {
-    setValue(`partners.${index}.partnerId`, null, { shouldDirty: true, shouldValidate: true })
-  }
-  if (!query) {
-    setPartnerOptionsMap(prev => ({ ...prev, [index]: [] }))
-    return
-  }
-  try {
-    const lowerQuery = query.trim().toLowerCase();
-    const items = mockPartners
-      .filter((p) => p.partnerName.toLowerCase().includes(lowerQuery))
-      .slice(0, 5);
-
-    setPartnerOptionsMap(prev => ({ ...prev, [index]: items }))
-
-    const existingPartner = items.find(
-      (p) => p.partnerName.toLowerCase() === lowerQuery
-    );
-
+    setValue(`partners.${index}.partnerName`, query, { shouldDirty: true, shouldValidate: true })
     if (!isEditPartner) {
-      if (existingPartner) {
-        setValue(`partners.${index}.contactPerson`, existingPartner.contactPerson, { shouldDirty: true, shouldValidate: true })
-        setValue(`partners.${index}.contactNumber`, existingPartner.contactNumber, { shouldDirty: true, shouldValidate: true })
-        setValue(`partners.${index}.partnerId`, existingPartner.partnerId, { shouldDirty: true, shouldValidate: true })
+      setValue(`partners.${index}.partnerId`, null, { shouldDirty: true, shouldValidate: true })
+    }
+    if (!query) {
+      setPartnerOptionsMap(prev => ({ ...prev, [index]: [] }))
+      return
+    }
+    try {
+      const lowerQuery = query.trim().toLowerCase();
+      const items = mockPartners
+        .filter((p) => p.partnerName.toLowerCase().includes(lowerQuery))
+        .slice(0, 5);
+
+      setPartnerOptionsMap(prev => ({ ...prev, [index]: items }))
+
+      const existingPartner = items.find(
+        (p) => p.partnerName.toLowerCase() === lowerQuery
+      );
+
+      if (!isEditPartner) {
+        if (existingPartner) {
+          setValue(`partners.${index}.contactPerson`, existingPartner.contactPerson, { shouldDirty: true, shouldValidate: true })
+          setValue(`partners.${index}.contactNumber`, existingPartner.contactNumber, { shouldDirty: true, shouldValidate: true })
+          setValue(`partners.${index}.partnerId`, existingPartner.partnerId, { shouldDirty: true, shouldValidate: true })
+        } else {
+          setValue(`partners.${index}.contactPerson`, '', { shouldDirty: true, shouldValidate: true })
+          setValue(`partners.${index}.contactNumber`, '', { shouldDirty: true, shouldValidate: true })
+        }
+      }
+    } catch (error: any) {
+      if (error?.response?.status === 404) {
+        setPartnerOptionsMap(prev => ({ ...prev, [index]: [] }))
       } else {
-        setValue(`partners.${index}.contactPerson`, '', { shouldDirty: true, shouldValidate: true })
-        setValue(`partners.${index}.contactNumber`, '', { shouldDirty: true, shouldValidate: true })
+        console.error('Failed to search partners', error);
       }
     }
-  } catch (error: any) {
-    if (error?.response?.status === 404) {
-      setPartnerOptionsMap(prev => ({ ...prev, [index]: [] }))
-    } else {
-      console.error('Failed to search partners', error);
-    }
-  }
-};
+  };
 
   const handlePartnerSelect = (partner: any, index: number) => {
     setValue(`partners.${index}.partnerId`, partner.partnerId, { shouldDirty: true, shouldValidate: true });
@@ -541,7 +541,15 @@ const handlePartnerSearch = async (query: string, index: number) => {
                 className={readOnly ? selectClass : `w-full px-4 py-2 border border-gray-300 rounded-lg appearance-none bg-white focus:outline-none focus:ring-2 focus:ring-primary ${isSingleDepartment ? 'cursor-default' : 'cursor-pointer pr-8'}`}
                 disabled={readOnly || isSingleDepartment}
               >
-                {!isSingleDepartment && hasRestrictedAccess && allowedDepartments.length > 1 && (
+                {/* {!isSingleDepartment && hasRestrictedAccess && allowedDepartments.length > 1 && (
+                  <option value="">Select Department</option>
+                )}
+                {filteredDepartments.map((dept) => (
+                  <option key={dept} value={dept}>
+                    {dept}
+                  </option>
+                ))} */}
+                {allowedDepartments.length > 1 && (
                   <option value="">Select Department</option>
                 )}
                 {filteredDepartments.map((dept) => (
