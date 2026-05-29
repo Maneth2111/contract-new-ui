@@ -266,9 +266,9 @@ export function UserDetails({
   const isOwnProfile = userId === Number(currentUser?.id);
   const isFormActive = formMode === 'edit';
 
-  const form = useForm<UserFormValues>({
-    defaultValues: emptyFormValues,
-    resolver: zodResolver(editUserSchema),
+  const form = useForm<UserFormValues,any, UserFormValues>({
+  defaultValues: emptyFormValues,
+  resolver: zodResolver(editUserSchema),
   });
   const formData = form.watch();
 

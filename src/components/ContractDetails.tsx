@@ -6,7 +6,7 @@ import { titleCase } from 'text-case';
 import { ContractFormValues } from '../lib/contractSchema';
 import toast from 'react-hot-toast';
 import { type ContractDetailTab } from '../utils/contractDetailRoute';
-import { calculateRenewalFrequencyMonths, formatContractApiError } from '../utils/contractFormHelpers';
+import { formatContractApiError } from '../utils/contractFormHelpers';
 import { ContractForm, type UploadedFile } from './ContractForm';
 import { UserProfile } from '../types/user';
 
@@ -307,26 +307,18 @@ export function ContractDetails({
     department: detail.department?.departmentName ?? '',
     personInCharge: detail.personInCharge,
     partnerName: detail.partners?.[0]?.partnerName ?? '',
+    partnerId: detail.partners?.[0]?.partnerId ?? null,           // ← add
+    partnerContact: detail.partners?.[0]?.contactPerson ?? '',    // ← add
+    partnerContactNumber: detail.partners?.[0]?.contactNumber ?? '', // ← add
     effectiveDate: detail.effectiveDate,
     expiryDate: detail.expireDate,
+    contractTerms: detail.contractTerm ?? '',                     // ← add
     contractValue: detail.contractValue,
     remainingDays: detail.remainingDays ?? calculateDaysRemaining(detail.expireDate),
-    status: (
-      detail.status === 'ACTIVE'
-        ? 'Active'
-        : detail.status === 'OVERDUE'
-          ? 'Overdue'
-          : detail.status === 'EXPIRED'
-            ? 'Expired'
-            : detail.status === 'EXPIRING_SOON'
-              ? 'Expiring Soon'
-              : detail.status === 'CLOSED'
-                ? 'Closed'
-                : detail.status
-    ) as ContractStatus,
     confidential: false,
     autoRenew: false,
     alertDays: detail.alertDays ?? 0,
+    alerts: detail.alerts ?? null,                                // ← add
     partners: detail.partners ?? [],
     remarks: detail.remark ?? '',
   } : contract;
