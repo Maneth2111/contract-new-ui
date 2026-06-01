@@ -7,7 +7,6 @@ import path from 'path';
 
 export default defineConfig({
   plugins: [react(), tailwindcss()],
-   base: '/contract-new-ui/',
 
   resolve: {
     dedupe: ['react', 'react-dom'],
