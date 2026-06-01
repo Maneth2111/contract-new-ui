@@ -22,6 +22,7 @@ import {
   mockUserListResponse,
   type User as MockUser,
 } from '../data/mockData'; // adjust path to wherever you placed the mock data file
+import { CustomSelect, SelectOption } from './ui/CustomSelect';
 
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -59,7 +60,7 @@ export function UserManagement({ currentUser, userPermission, onSelectUser, onRe
   const [searchText, setSearchText] = useState('');
   const [selectedDepartmentId, setSelectedDepartmentId] = useState<number | undefined>(undefined);
   const [selectedRoleName, setSelectedRoleName] = useState<string | undefined>(undefined);
-  const [selectedStatusKey, setSelectedStatusKey] = useState<string | undefined>(undefined);
+  const [selectedStatusKey, setSelectedStatusKey] = useState<string | null>(null);
   const [showCreateUser, setShowCreateUser] = useState(false);
   const [deactivateTarget, setDeactivateTarget] = useState<User | null>(null);
 
@@ -153,10 +154,7 @@ export function UserManagement({ currentUser, userPermission, onSelectUser, onRe
     goToPage(1);
   };
 
-  const handleStatusChange = (e: ChangeEvent<HTMLSelectElement>) => {
-    setSelectedStatusKey(e.target.value === '' ? undefined : e.target.value);
-    goToPage(1);
-  };
+
 
   const getStatusColor = (status: User['status']) => {
     switch (status) {
@@ -180,44 +178,54 @@ export function UserManagement({ currentUser, userPermission, onSelectUser, onRe
     );
     toast.success('User has been inactivated.');
   };
+  const statusOptions: SelectOption[] = userStatus.map((status) => ({
+    key: status.key,
+    label: titleCase(status.label),
+  }));
+
+  // Handle onChange — receives the key string directly (not a DOM event)
+  const handleStatusChange = (value: string) => {
+    setSelectedStatusKey(value || null);
+    goToPage(1);
+  };
 
   // ── Render ────────────────────────────────────────────────────────────────
   return (
     <div className="space-y-6">
       {/* Summary cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-white p-6 rounded-lg shadow">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="bg-white p-6 rounded-lg shadow hover:scale-[1.02] transition-transform duration-200">
           <div className="flex items-center gap-3">
             <span><Users className="w-7 h-7" /></span>
             <div>
-              <p className="text-gray-600">Total Users</p>
+              <p className="text-gray-600 text-sm lg:text-base">Total Users</p>
               <p className="mt-1">{summary.total_users}</p>
             </div>
           </div>
         </div>
-        <div className="bg-white p-6 rounded-lg shadow">
+        <div className="bg-white p-6 rounded-lg shadow hover:scale-[1.02] transition-transform duration-200">
           <div className="flex items-center gap-3">
             <span><Users className="w-7 h-7" /></span>
             <div>
-              <p className="text-gray-600">Active Users</p>
+              <p className="text-gray-600 text-sm lg:text-base">Active Users</p>
               <p className="mt-1">{summary.active_users}</p>
             </div>
           </div>
         </div>
-        <div className="bg-white p-6 rounded-lg shadow">
+        <div className="bg-white p-6 rounded-lg shadow hover:scale-[1.02] transition-transform duration-200">
           <div className="flex items-center gap-3">
             <span><Users className="w-7 h-7 text-red-600" /></span>
             <div>
-              <p className="text-gray-600">Inactive Users</p>
+              <p className="text-gray-600 text-sm lg:text-base">Inactive Users</p>
               <p className="mt-1">{summary.inactive_users}</p>
             </div>
           </div>
         </div>
-        <div className="bg-white p-6 rounded-lg shadow">
+        <div className="bg-white p-6 rounded-lg shadow hover:scale-[1.02] transition-transform duration-200">
           <div className="flex items-center gap-3">
             <span><Users className="w-7 h-7" /></span>
             <div>
-              <p className="text-gray-600">Administrators</p>
+              <p className="text-gray-600 text-sm lg:text-base">Administrators</p>
               <p className="mt-1">{summary.administrators}</p>
             </div>
           </div>
@@ -243,7 +251,7 @@ export function UserManagement({ currentUser, userPermission, onSelectUser, onRe
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           {/* Search */}
           <div>
-            <label className="block text-gray-700 mb-2">Search Users</label>
+            <label className="block text-gray-700 mb-2 font-medium">Search Users</label>
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500" />
               <input
@@ -251,77 +259,50 @@ export function UserManagement({ currentUser, userPermission, onSelectUser, onRe
                 placeholder="Employee ID, Name, Email..."
                 value={searchText}
                 onChange={handleSearchChange}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg"
+                className="w-full pl-10 pr-4 py-1.5 border border-gray-300 rounded-lg"
               />
             </div>
           </div>
 
           {/* Department */}
-          <div>
-            <label className="block text-gray-700 mb-2">Department</label>
-            <div className="relative">
-              <select
-                value={selectedDepartmentId ?? ''}
-                disabled={isSingleDepartment}
-                onChange={(e) => {
-                  setSelectedDepartmentId(e.target.value === '' ? undefined : Number(e.target.value));
-                  goToPage(1);
-                }}
-                className={`w-full px-4 py-2 border border-gray-300 rounded-lg appearance-none bg-white ${isSingleDepartment ? 'cursor-default' : 'cursor-pointer pr-8'}`}
-              >
-                {!isSingleDepartment && <option value="">All Departments</option>}
-                {allowedDepartments.map((dept) => (
-                  <option key={dept.departmentId} value={dept.departmentId} className="hover:bg-[#0fbab5] hover:text-white">
-                    {dept.departmentName}
-                  </option>
-                ))}
-              </select>
-              {!isSingleDepartment && (
-                <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
-              )}
-            </div>
-          </div>
+          <CustomSelect
+            label="Department"
+            value={selectedDepartmentId?.toString() ?? ''}
+            onChange={(value) => {
+              setSelectedDepartmentId(value === '' ? undefined : Number(value));
+              goToPage(1);
+            }}
+            options={allowedDepartments.map((dept) => ({
+              key: dept.departmentId.toString(),
+              label: dept.departmentName,
+            }))}
+            placeholder="All Departments"
+            disabled={isSingleDepartment}
+          />
 
           {/* Role */}
-          <div>
-            <label className="block text-gray-700 mb-2">Role</label>
-            <div className="relative">
-              <select
-                value={selectedRoleName ?? ''}
-                onChange={(e) => {
-                  setSelectedRoleName(e.target.value === '' ? undefined : e.target.value);
-                  goToPage(1);
-                }}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg appearance-none bg-white pr-8 cursor-pointer"
-              >
-                <option value="">All Roles</option>
-                {roles.map((role) => (
-                  <option key={role.roleId} value={role.roleName}>
-                    {titleCase(role.roleName).replace('Role', '')}
-                  </option>
-                ))}
-              </select>
-              <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
-            </div>
-          </div>
+          <CustomSelect
+            label="Role"
+            value={selectedRoleName ?? ''}
+            onChange={(value) => {
+              setSelectedRoleName(value === '' ? undefined : value);
+              goToPage(1);
+            }}
+            options={roles.map((role) => ({
+              key: role.roleName,
+              label: titleCase(role.roleName).replace('Role', ''),
+            }))}
+            placeholder="All Roles"
+          />
 
           {/* Status */}
-          <div>
-            <label className="block text-gray-700 mb-2">Status</label>
-            <div className="relative">
-              <select
-                value={selectedStatusKey ?? ''}
-                onChange={handleStatusChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg appearance-none bg-white pr-8 cursor-pointer"
-              >
-                <option value="">All Status</option>
-                {userStatus.map((status) => (
-                  <option key={status.key} value={status.key}>{titleCase(status.label)}</option>
-                ))}
-              </select>
-              <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
-            </div>
-          </div>
+          <CustomSelect
+            label="Status"
+            value={selectedStatusKey ?? ''}
+            onChange={handleStatusChange}
+            options={statusOptions}
+            placeholder="All Status"
+          />
         </div>
       </div>
 
@@ -333,7 +314,7 @@ export function UserManagement({ currentUser, userPermission, onSelectUser, onRe
             sortedUsers.length > 10 ? 'overflow-y-auto max-h-[70vh]' : '',
           ].join(' ').trim()}
         >
-          <table className={`w-full min-w-max text-sm [&_th]:px-4 [&_th]:py-5 [&_th]:whitespace-nowrap [&_td]:px-4 [&_td]:py-3 ${tableRowHover}`}>
+          <table className={`w-full min-w-max text-sm rounded-t-lg overflow-hidden [&_th]:px-4 [&_th]:py-5 [&_th]:whitespace-nowrap [&_td]:px-4 [&_td]:py-3 ${tableRowHover}`}>
             <thead className={tableTheadClass}>
               <tr>
                 <SortableTableHead label="Employee ID" columnKey="employeeId" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="w-10" />
@@ -366,7 +347,7 @@ export function UserManagement({ currentUser, userPermission, onSelectUser, onRe
                   >
 
                     <td className="relative">
-                      <span className="absolute left-0 top-0 h-full w-1 bg-brand-pink opacity-0 group-hover:opacity-100 transition-opacity"></span>
+                      <span className="absolute left-0 text-left top-0 h-full w-1 bg-brand-pink opacity-0 group-hover:opacity-100 transition-opacity"></span>
                       {user.employeeId}
                     </td>
 

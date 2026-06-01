@@ -97,9 +97,9 @@ export default function Dashboard() {
       {/* Summary Metrics */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-4 gap-x-8">
         {/* Expiring Soon */}
-        <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex">
+        <div className="bg-white p-4 rounded-xl shadow flex hover:scale-[1.02] transition-transform duration-200 ">
           {/* LEFT LINE */}
-          <div className="w-1 rounded-l-xl bg-orange-500 mr-4" />
+          {/* <div className="w-1 rounded-l-xl bg-orange-500 mr-4" /> */}
 
           <div className="flex-1 flex items-center justify-between">
             <div>
@@ -107,7 +107,7 @@ export default function Dashboard() {
                 Expiring Soon (90 days)
               </p>
 
-              <p className="mt-2 text-2xl font-bold text-gray-900">
+              <p className="mt-2 text-xl font-medium text-gray-900">
                 {expiringSoon}
               </p>
 
@@ -123,8 +123,8 @@ export default function Dashboard() {
         </div>
 
         {/* Overdue */}
-        <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex">
-          <div className="w-1 rounded-l-xl bg-red-500 mr-4" />
+        <div className="bg-white p-4 rounded-xl shadow flex hover:scale-[1.02] transition-transform duration-200">
+          {/* <div className="w-1 rounded-l-xl bg-red-500 mr-4" /> */}
 
           <div className="flex-1 flex items-center justify-between">
             <div>
@@ -132,7 +132,7 @@ export default function Dashboard() {
                 Overdue Contract{pluralS(overdueContracts)}
               </p>
 
-              <p className="mt-2 text-2xl font-bold text-gray-900">
+              <p className="mt-2 text-xl font-medium text-gray-900">
                 {overdueContracts}
               </p>
 
@@ -148,8 +148,8 @@ export default function Dashboard() {
         </div>
 
         {/* Active */}
-        <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex">
-          <div className="w-1 rounded-l-xl bg-green-500 mr-4" />
+        <div className="bg-white p-4 rounded-xl shadow flex hover:scale-[1.02] transition-transform duration-200">
+          {/* <div className="w-1 rounded-l-xl bg-green-500 mr-4" /> */}
 
           <div className="flex-1 flex items-center justify-between">
             <div>
@@ -157,7 +157,7 @@ export default function Dashboard() {
                 Active Contract{pluralS(activeContracts)}
               </p>
 
-              <p className="mt-2 text-2xl font-bold text-gray-900">
+              <p className="mt-2 text-xl font-medium text-gray-900">
                 {activeContracts}
               </p>
 
@@ -173,8 +173,8 @@ export default function Dashboard() {
         </div>
 
         {/* Total Contracts */}
-        <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex">
-          <div className="w-1 rounded-l-xl bg-blue-500 mr-4" />
+        <div className="bg-white p-4 rounded-xl shadow flex hover:scale-[1.02] transition-transform duration-200">
+          {/* <div className="w-1 rounded-l-xl bg-blue-500 mr-4" /> */}
 
           <div className="flex-1 flex items-center justify-between">
             <div>
@@ -182,7 +182,7 @@ export default function Dashboard() {
                 Total Contract{pluralS(totalContracts)}
               </p>
 
-              <p className="mt-2 text-2xl font-bold text-gray-900">
+              <p className="mt-2 text-xl font-medium text-gray-900">
                 {totalContracts}
               </p>
 
@@ -198,8 +198,8 @@ export default function Dashboard() {
         </div>
 
         {/* Total Value */}
-        <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex">
-          <div className="w-1 rounded-l-xl bg-green-500 mr-4" />
+        <div className="bg-white p-4 rounded-xl shadow flex hover:scale-[1.02] transition-transform duration-200">
+          {/* <div className="w-1 rounded-l-xl bg-green-500 mr-4" /> */}
 
           <div className="flex-1 flex items-center justify-between">
             <div>
@@ -207,7 +207,7 @@ export default function Dashboard() {
                 Total Contract Value
               </p>
 
-              <p className="mt-2 text-2xl font-bold text-gray-900">
+              <p className="mt-2 text-xl font-medium text-gray-900">
                 {formatCurrency(totalValue)}
               </p>
 
@@ -223,8 +223,8 @@ export default function Dashboard() {
         </div>
 
         {/* Partners */}
-        <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex">
-          <div className="w-1 rounded-l-xl bg-purple-500 mr-4" />
+        <div className="bg-white p-4 rounded-xl shadow flex hover:scale-[1.02] transition-transform duration-200">
+          {/* <div className="w-1 rounded-l-xl bg-purple-500 mr-4" /> */}
 
           <div className="flex-1 flex items-center justify-between">
             <div>
@@ -232,7 +232,7 @@ export default function Dashboard() {
                 Total Partner{pluralS(uniquePartners)}
               </p>
 
-              <p className="mt-2 text-2xl font-bold text-gray-900">
+              <p className="mt-2 text-xl font-medium text-gray-900">
                 {uniquePartners}
               </p>
 
@@ -248,12 +248,10 @@ export default function Dashboard() {
         </div>
       </div>
 
-
-
       {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Contracts by Department */}
-        <div className="bg-white p-6 rounded-lg shadow shadow-sm">
+        <div className="bg-white p-6 rounded-lg shadow-sm hover:scale-[1.02] transition-transform duration-200">
           <div className="flex items-center justify-between gap-4 mb-6">
             <h3 className="font-medium text-gray-900">Contracts by Department</h3>
             <span className="text-sm text-gray-500 shrink-0">By contract count</span>
@@ -301,7 +299,7 @@ export default function Dashboard() {
         </div>
 
         {/* Status Distribution */}
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+        <div className="bg-white p-6 rounded-xl shadow-sm hover:scale-[1.02] transition-transform duration-200">
           <h3 className="mb-4 text-gray-700 font-semibold">
             Status Distribution
           </h3>
@@ -371,8 +369,8 @@ export default function Dashboard() {
       </div>
 
       {/* Upcoming Expirations by Month */}
-      <div className="bg-white p-6 rounded-lg shadow">
-        <h3 className="mb-4">Upcoming Expirations by Month</h3>
+      <div className="bg-white p-6 rounded-lg shadow-sm hover:scale-[1.02] transition-transform duration-200">
+        <h3 className="mb-4 font-medium">Upcoming Expirations by Month</h3>
         <ResponsiveContainer width="100%" height={300}>
           <BarChart data={expiringByMonth}>
             <CartesianGrid strokeDasharray="3 3" />

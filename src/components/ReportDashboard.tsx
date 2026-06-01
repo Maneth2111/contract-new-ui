@@ -21,6 +21,7 @@ import {
   type Contract as MockContract,
   type ContractStatus,
 } from '../data/mockData'; // adjust path to wherever you placed the mock data file
+import { CustomSelect } from './ui/CustomSelect';
 
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -63,7 +64,7 @@ const delay = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve,
 
 interface ReportDashboardProps {
   currentUser?: import('../services/userService').UserProfile | null;
-  onSelectContract?: (contract: Contract) => void; 
+  onSelectContract?: (contract: Contract) => void;
 }
 
 // ── Convert a raw mock contract to the Contract shape the table expects ────────
@@ -357,34 +358,25 @@ export function ReportDashboard({ currentUser, onSelectContract }: ReportDashboa
 
           {/* Department */}
           <div>
-            <label className="block text-gray-700 mb-2">Department</label>
-            <div className="relative">
-              <select
-                value={selectedDepartment ?? ''}
-                disabled={isSingleDepartment}
-
-                onChange={(e) => {
-                  setSelectedDepartment(e.target.value === '' ? undefined : Number(e.target.value));
-                  goToPage(1);
-                }}
-                className={`w-full px-4 py-2 border  border-gray-300 rounded-lg appearance-none bg-white ${isSingleDepartment ? 'cursor-default' : 'cursor-pointer pr-8'}`}
-              >
-                {!isSingleDepartment && <option value="">All Departments</option>}
-                {allowedDepartments.map((dept) => (
-                  <option key={dept.departmentId} value={dept.departmentId}>
-                    {dept.departmentName}
-                  </option>
-                ))}
-              </select>
-              {!isSingleDepartment && (
-                <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
-              )}
-            </div>
+            <label className="block text-gray-700 mb-2 font-medium">Department</label>
+            <CustomSelect
+              value={selectedDepartment?.toString() ?? ''}
+              disabled={isSingleDepartment}
+              onChange={(value) => {
+                setSelectedDepartment(value === '' ? undefined : Number(value));
+                goToPage(1);
+              }}
+              options={allowedDepartments.map((dept) => ({
+                key: dept.departmentId.toString(),
+                label: dept.departmentName,
+              }))}
+              placeholder="All Departments"
+            />
           </div>
 
           {/* Creation Date Range */}
           <div>
-            <label className="block text-gray-700 mb-2">Creation Date</label>
+            <label className="block text-gray-700 mb-2 font-medium">Creation Date</label>
             <DateRangePicker
               value={createRange}
               onChange={(range) => { setCreateRange(range); goToPage(1); }}
@@ -394,7 +386,7 @@ export function ReportDashboard({ currentUser, onSelectContract }: ReportDashboa
 
           {/* Expiration Date Range */}
           <div>
-            <label className="block text-gray-700 mb-2">Expiration Date</label>
+            <label className="block text-gray-700 mb-2 font-medium">Expiration Date</label>
             <DateRangePicker
               value={expireRange}
               onChange={(range) => { setExpireRange(range); goToPage(1); }}
@@ -402,23 +394,20 @@ export function ReportDashboard({ currentUser, onSelectContract }: ReportDashboa
             />
           </div>
 
-          {/* Status */}
           <div>
-            <label className="block text-gray-700 mb-2">Status</label>
-            <div className="relative">
-              <select
-                value={statusFilter}
-                onChange={(e) => { setStatusFilter(e.target.value as StatusFilter); goToPage(1); }}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg appearance-none bg-white pr-8 cursor-pointer"
-              >
-                {STATUS_FILTER_OPTIONS.map((value) => (
-                  <option key={value} value={value}>
-                    {getStatusFilterLabel(value, summary)}
-                  </option>
-                ))}
-              </select>
-              <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
-            </div>
+            <label className="block text-gray-700 mb-2 font-medium">Status</label>
+            <CustomSelect
+              value={statusFilter}
+              onChange={(value) => {
+                setStatusFilter(value as StatusFilter);
+                goToPage(1);
+              }}
+              options={STATUS_FILTER_OPTIONS.map((value) => ({
+                key: value,
+                label: getStatusFilterLabel(value, summary),
+              }))}
+              showPlaceholder={false}
+            />
           </div>
         </div>
       </div>
@@ -426,10 +415,10 @@ export function ReportDashboard({ currentUser, onSelectContract }: ReportDashboa
       {/* Report Preview */}
       <div className="bg-white rounded-lg shadow p-6">
         <div className="mb-6 pb-6 border-b border-gray-200">
-          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-4">
 
             {/* Total Contracts */}
-            <div className="bg-white p-4 sm:p-5 rounded-lg shadow hover:shadow transition">
+            <div className="bg-white p-4 sm:p-5 rounded-lg shadow hover:shadow transition hover:scale-[1.02] transition-transform duration-200">
               <div className="flex items-center justify-between">
                 <div className="min-w-0">
                   <p className="text-xs sm:text-sm text-gray-600">
@@ -448,7 +437,7 @@ export function ReportDashboard({ currentUser, onSelectContract }: ReportDashboa
             </div>
 
             {/* Total Value */}
-            <div className="bg-white p-4 sm:p-5 rounded-lg shadow hover:shadow transition">
+            <div className="bg-white p-4 sm:p-5 rounded-lg shadow hover:shadow transition hover:scale-[1.02] transition-transform duration-200">
               <div className="flex items-center justify-between">
                 <div className="min-w-0">
                   <p className="text-xs sm:text-sm text-gray-600">
@@ -467,7 +456,7 @@ export function ReportDashboard({ currentUser, onSelectContract }: ReportDashboa
             </div>
 
             {/* Active */}
-            <div className="bg-white p-4 sm:p-5 rounded-lg shadow hover:shadow transition">
+            <div className="bg-white p-4 sm:p-5 rounded-lg shadow hover:shadow transition hover:scale-[1.02] transition-transform duration-200">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-xs sm:text-sm text-gray-600">
@@ -486,7 +475,7 @@ export function ReportDashboard({ currentUser, onSelectContract }: ReportDashboa
             </div>
 
             {/* Expiring Soon */}
-            <div className="bg-white p-4 sm:p-5 rounded-lg shadow hover:shadow transition">
+            <div className="bg-white p-4 sm:p-5 rounded-lg shadow hover:shadow hover:scale-[1.02] transition-transform duration-200">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-xs sm:text-sm text-gray-600">
@@ -514,17 +503,17 @@ export function ReportDashboard({ currentUser, onSelectContract }: ReportDashboa
             sortedContracts.length > 10 ? 'overflow-y-auto max-h-[70vh]' : '',
           ].join(' ').trim() || undefined}
         >
-          <table className={`w-full min-w-max text-sm [&_th]:px-2 [&_th]:py-5 [&_th]:whitespace-nowrap [&_td]:px-2 [&_td]:py-3.5 ${tableRowHover}`}>
+          <table className={`w-full min-w-max text-sm rounded-t-lg overflow-hidden [&_th]:px-2 [&_th]:py-5 [&_th]:whitespace-nowrap [&_td]:px-2 [&_td]:py-3.5 ${tableRowHover}`}>
             <thead className={tableTheadClass}>
               <tr>
                 <SortableTableHead label="Contract ID" columnKey="id" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="w-fit" />
                 <SortableTableHead label="Title" columnKey="title" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="w-40" />
                 <SortableTableHead label="Department" columnKey="department" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="w-38" />
-                <SortableTableHead label="Person In Charge" columnKey="personInCharge" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="w-30" />
+                <SortableTableHead label="Person In Charge" columnKey="personInCharge" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="w-28" />
                 <SortableTableHead label="Partner" columnKey="partnerName" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="w-32" />
                 <SortableTableHead label="Effective" columnKey="effectiveDate" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="w-28" />
                 <SortableTableHead label="Expiry" columnKey="expiryDate" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="w-28" />
-                <SortableTableHead label="Days Left" columnKey="daysRemaining" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="w-24" />
+                <SortableTableHead label="Days Left" columnKey="daysRemaining" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="w-15" />
                 <SortableTableHead label="Status" columnKey="status" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="w-fit" align="center" />
                 <SortableTableHead label="Total Contract Value" columnKey="contractValue" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="w-fit" />
               </tr>
@@ -572,7 +561,7 @@ export function ReportDashboard({ currentUser, onSelectContract }: ReportDashboa
                           {daysRemaining} days
                         </span>
                       </td>
-                      <td className="whitespace-nowrap text-center">
+                      <td className="whitespace-nowrap text-left">
                         <span
                           className={`inline-block px-1.5 py-0.5 rounded-full text-xs whitespace-nowrap ${getStatusColor(contract.status)}`}
                           title={contract.status}

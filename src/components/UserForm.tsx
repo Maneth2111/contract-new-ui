@@ -8,6 +8,8 @@ import { PermissionFlags } from '../utils/appProfileHelpers';
 import { getAllowedDepartments, type ModuleAccessItem } from '../utils/departmentAccess'
 import { formatPermissionLabel } from '../utils/permissionLabels'
 import { mockUserStatuses } from '../data/mockData';
+import { CustomSelect } from './ui/CustomSelect';
+import { CustomCheckbox } from './ui/checkBox';
 
 interface Role { roleId: number; roleName: string; }
 interface Permission { id: number; name: string; }
@@ -208,26 +210,24 @@ export function UserForm({
               <div className={readOnlyBoxClass}>{departmentName}</div>
             ) : (
               <>
-                <div className="relative">
-                  <select
-                    {...register('departmentId', { valueAsNumber: true })}
-                    disabled={isSingleDepartment}
-                    className={selectClass}
-                  >
-                    {/* Only show placeholder when user has multiple departments to choose from */}
-                    {!isSingleDepartment && (
-                      <option value={0}>Select Department</option>
-                    )}
-                    {allowedDepartments.map(dept => (
-                      <option key={dept.departmentId} value={dept.departmentId}>
-                        {dept.departmentName}
-                      </option>
-                    ))}
-                  </select>
-                  {!isSingleDepartment && (
-                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
+                <Controller
+                  name="departmentId"
+                  control={control}
+                  render={({ field }) => (
+                    <CustomSelect
+                      value={field.value ? String(field.value) : ''}
+                      onChange={(value) => field.onChange(value === '' ? 0 : Number(value))}
+                      options={allowedDepartments.map((dept) => ({
+                        key: String(dept.departmentId),
+                        label: dept.departmentName,
+                      }))}
+                      placeholder="Select Department"
+                      showPlaceholder={false}
+                      disabled={isSingleDepartment}
+
+                    />
                   )}
-                </div>
+                />
                 <ErrorMsg message={errors.departmentId?.message} />
               </>
             )}
@@ -302,32 +302,29 @@ export function UserForm({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
           <div>
-            <label className="block text-gray-700 mb-2">System Role {!readOnly && <span className="text-red-500">*</span>}</label>
+            <label className="block text-gray-700 mb-2">
+              System Role {!readOnly && <span className="text-red-500">*</span>}
+            </label>
             {readOnly ? (
               <div className={readOnlyBoxClass}>{roleLabel}</div>
             ) : (
               <>
-                <div className="relative">
-                  <Controller
-                    name="roleNames"
-                    control={control}
-                    render={({ field }) => (
-                      <select
-                        value={field.value[0] ?? ''}
-                        onChange={e => field.onChange(e.target.value ? [e.target.value] : [])}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg appearance-none bg-white pr-8 cursor-pointer"
-                      >
-                        <option value="">Select Role</option>
-                        {roles?.map(role => (
-                          <option key={role.roleId} value={role.roleName}>
-                            {titleCase(role.roleName).replace('Role', '')}
-                          </option>
-                        ))}
-                      </select>
-                    )}
-                  />
-                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
-                </div>
+                <Controller
+                  name="roleNames"
+                  control={control}
+                  render={({ field }) => (
+                    <CustomSelect
+                      value={field.value[0] ?? ''}
+                      onChange={(value) => field.onChange(value ? [value] : [])}
+                      options={roles?.map((role) => ({
+                        key: role.roleName,
+                        label: titleCase(role.roleName).replace('Role', ''),
+                      })) ?? []}
+                      placeholder="Select Role"
+                      showPlaceholder={false}
+                    />
+                  )}
+                />
                 <ErrorMsg message={errors.roleNames?.message} />
               </>
             )}
@@ -365,11 +362,9 @@ export function UserForm({
                     <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-52 overflow-y-auto">
                       {allowedDepartments.map(dept => (
                         <label key={dept.departmentId} className="flex items-center gap-3 px-4 py-2 hover:bg-gray-50 cursor-pointer">
-                          <input
-                            type="checkbox"
+                          <CustomCheckbox
                             checked={formData.deptAccessIds.includes(dept.departmentId)}
                             onChange={() => onDeptAccessToggle(dept.departmentId)}
-                            className="w-4 h-4 text-primary rounded"
                           />
                           <span className="text-gray-700">{dept.departmentName}</span>
                         </label>
@@ -389,7 +384,7 @@ export function UserForm({
       <div className="space-y-4">
         <h3>
           Contract Access
-          {!readOnly && <> (Select at least one) <span className="text-red-500">*</span></>}
+          {!readOnly && <> (Select at least one) <span className="text-red-500 text-normal">*</span></>}
         </h3>
         {readOnly ? (
           renderPermissionTags(formData.contractPermissionIds, contractItems, 'CONTRACT')
@@ -397,16 +392,14 @@ export function UserForm({
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <label className="flex items-center space-x-2">
-                <input type="checkbox" checked={allContractOn} onChange={onAllContract} className="w-4 h-4 text-primary border-gray-300 rounded cursor-pointer" />
+                <CustomCheckbox checked={allContractOn} onChange={onAllContract} />
                 <span className="text-gray-700">Full Access</span>
               </label>
               {contractItems.map(perm => (
                 <label key={perm.id} className="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
+                  <CustomCheckbox
                     checked={formData.contractPermissionIds.includes(perm.id)}
                     onChange={() => onContractToggle(perm.id)}
-                    className="w-4 h-4 text-primary border-gray-300 rounded cursor-pointer"
                   />
                   <span className="text-gray-700">{formatPermissionLabel(perm.name, 'CONTRACT')}</span>
                 </label>
@@ -418,29 +411,22 @@ export function UserForm({
       </div>
 
       {/* User Access */}
-      <div className="space-y-4">
+      <div className="space-y-4 ">
         <h3>User Access</h3>
         {readOnly ? (
           renderPermissionTags(formData.userPermissionIds, userItems, 'USER')
         ) : (
           <>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-normal">
               <label className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  checked={allUserOn}
-                  onChange={onAllUser}
-                  className="w-4 h-4 text-primary border-gray-300 rounded cursor-pointer"
-                />
-                <span className="text-gray-700">Full Access</span>
+                <CustomCheckbox checked={allUserOn} onChange={onAllUser} />
+                <span className="text-gray-700 accent-primary">Full Access</span>
               </label>
               {userItems.map(perm => (
                 <label key={perm.id} className="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
+                  <CustomCheckbox
                     checked={formData.userPermissionIds.includes(perm.id) ?? false}
                     onChange={() => onUserToggle(perm.id)}
-                    className="w-4 h-4 text-primary border-gray-300 rounded cursor-pointer"
                   />
                   <span className="text-gray-700">{formatPermissionLabel(perm.name, 'USER')}</span>
                 </label>

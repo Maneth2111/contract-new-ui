@@ -22,6 +22,7 @@ import { calculateDaysRemaining, formatDate, pluralS } from '../utils/contractUt
 import toast from 'react-hot-toast';
 import type { UserProfile } from '../services/userService';
 import { mockContractStatuses, mockPartners } from '../data/mockData';
+import { CustomSelect } from './ui/CustomSelect';
 
 type ContractFormRHFValues = Omit<ContractFormValues, 'attachments'> & {
   attachments?: File[]
@@ -501,30 +502,31 @@ export function ContractForm({
           </div>
 
           {/* Contract Type */}
-          <div>
+          <div className='min-w-0'>
             <label className="block text-gray-700 mb-2">
               Contract Type <span className="text-red-500">*</span>
             </label>
-            <div className="relative">
-              <select
-                {...register('contractType')}
-                value={watchedContractType}
-                disabled={readOnly}
-                className={readOnly ? selectClass : selectClass}
-              >
-                {!watchedDepartment && (
-                  <option value="">Select Department First</option>
+            {readOnly ? (
+              <div className={readOnlyBoxClass}>{watchedContractType || 'N/A'}</div>
+            ) : (
+              <Controller
+                name="contractType"
+                control={control}
+                render={({ field }) => (
+                  <CustomSelect
+                    value={field.value ?? ''}
+                    onChange={(value) => field.onChange(value)}
+                    options={(contractTypesByDepartment[watchedDepartment] ?? []).map((type) => ({
+                      key: type,
+                      label: type,
+                    }))}
+                    placeholder={!watchedDepartment ? 'Select Department First' : 'Select Contract Type'}
+                    showPlaceholder={false}
+                    disabled={!watchedDepartment}
+                  />
                 )}
-                {(contractTypesByDepartment[watchedDepartment] ?? []).map((type) => (
-                  <option key={type} value={type}>
-                    {type}
-                  </option>
-                ))}
-              </select>
-              {!readOnly && (
-                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
-              )}
-            </div>
+              />
+            )}
             <ErrorMsg message={errors.contractType?.message} />
           </div>
 
@@ -533,35 +535,30 @@ export function ContractForm({
             <label className="block text-gray-700 mb-2">
               Department <span className="text-red-500">*</span>
             </label>
-            <div className="relative">
-              <select
-                {...register('department')}
-                value={watchedDepartment}
-                onChange={(e) => handleDepartmentChange(e.target.value)}
-                className={readOnly ? selectClass : `w-full px-4 py-2 border border-gray-300 rounded-lg appearance-none bg-white focus:outline-none focus:ring-2 focus:ring-primary ${isSingleDepartment ? 'cursor-default' : 'cursor-pointer pr-8'}`}
-                disabled={readOnly || isSingleDepartment}
-              >
-                {/* {!isSingleDepartment && hasRestrictedAccess && allowedDepartments.length > 1 && (
-                  <option value="">Select Department</option>
+            {readOnly ? (
+              <div className={readOnlyBoxClass}>{watchedDepartment || 'N/A'}</div>
+            ) : (
+              <Controller
+                name="department"
+                control={control}
+                render={({ field }) => (
+                  <CustomSelect
+                    value={field.value ?? ''}
+                    onChange={(value) => {
+                      field.onChange(value);
+                      handleDepartmentChange(value);
+                    }}
+                    options={filteredDepartments.map((dept) => ({
+                      key: dept,
+                      label: dept,
+                    }))}
+                    placeholder="Select Department"
+                    showPlaceholder={false}
+                    disabled={isSingleDepartment}
+                  />
                 )}
-                {filteredDepartments.map((dept) => (
-                  <option key={dept} value={dept}>
-                    {dept}
-                  </option>
-                ))} */}
-                {allowedDepartments.length > 1 && (
-                  <option value="">Select Department</option>
-                )}
-                {filteredDepartments.map((dept) => (
-                  <option key={dept} value={dept}>
-                    {dept}
-                  </option>
-                ))}
-              </select>
-              {!readOnly && !isSingleDepartment && (
-                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
-              )}
-            </div>
+              />
+            )}
             <ErrorMsg message={errors.department?.message} />
           </div>
 

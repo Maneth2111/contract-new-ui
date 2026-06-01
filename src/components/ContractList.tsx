@@ -23,6 +23,7 @@ import {
   mockContractStatuses,
   type Contract as MockContract,
 } from '../data/mockData'; // adjust path to wherever you placed the mock data file
+import { CustomSelect } from './ui/CustomSelect';
 
 // Map raw mock contracts once to the Contract shape ContractList expects
 const MOCK_CONTRACTS: Contract[] = RAW_CONTRACTS.map((c: MockContract) =>
@@ -189,9 +190,9 @@ export function ContractList({
   return (
     <div className="space-y-6">
       {/* Notification summary cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 gap-4">
         {/* Overdue */}
-        <div className="bg-white p-4 sm:p-5 rounded-xl shadow-sm border border-gray-100 relative overflow-hidden">
+        <div className="bg-white p-4 sm:p-5 rounded-xl shadow-sm relative overflow-hidden hover:scale-[1.02] transition-transform duration-200">
           <div className="flex items-center gap-3">
             <span className="flex items-center justify-center w-11 h-11 rounded-lg bg-red-50 shrink-0">
               <AlertTriangle className="w-5 h-5 sm:w-6 sm:h-6 text-red-600" />
@@ -208,11 +209,11 @@ export function ContractList({
             </div>
           </div>
 
-          <div className="absolute bottom-0 left-0 w-full h-1 bg-red-500" />
+          {/* <div className="absolute bottom-0 left-0 w-full h-1 bg-red-500" /> */}
         </div>
 
         {/* 30 Days */}
-        <div className="bg-white p-4 sm:p-5 rounded-xl shadow-sm border border-gray-100 relative overflow-hidden">
+        <div className="bg-white p-4 sm:p-5 rounded-xl shadow-sm relative overflow-hidden hover:scale-[1.02] transition-transform duration-200">
           <div className="flex items-center gap-3">
             <span className="flex items-center justify-center w-11 h-11 rounded-lg bg-red-50 shrink-0">
               <Clock className="w-5 h-5 sm:w-6 sm:h-6 text-red-500" />
@@ -229,11 +230,11 @@ export function ContractList({
             </div>
           </div>
 
-          <div className="absolute bottom-0 left-0 w-full h-1 bg-red-400" />
+          {/* <div className="absolute bottom-0 left-0 w-full h-1 bg-red-400" /> */}
         </div>
 
         {/* 60 Days */}
-        <div className="bg-white p-4 sm:p-5 rounded-xl shadow-sm border border-gray-100 relative overflow-hidden">
+        <div className="bg-white p-4 sm:p-5 rounded-xl shadow-sm relative overflow-hidden hover:scale-[1.02] transition-transform duration-200">
           <div className="flex items-center gap-3">
             <span className="flex items-center justify-center w-11 h-11 rounded-lg bg-orange-50 shrink-0">
               <Clock className="w-5 h-5 sm:w-6 sm:h-6 text-orange-600" />
@@ -250,11 +251,11 @@ export function ContractList({
             </div>
           </div>
 
-          <div className="absolute bottom-0 left-0 w-full h-1 bg-orange-500" />
+          {/* <div className="absolute bottom-0 left-0 w-full h-1 bg-orange-500" /> */}
         </div>
 
         {/* 90 Days */}
-        <div className="bg-white p-4 sm:p-5 rounded-xl shadow-sm border border-gray-100 relative overflow-hidden">
+        <div className="bg-white p-4 sm:p-5 rounded-xl shadow-sm relative overflow-hidden hover:scale-[1.02] transition-transform duration-200">
           <div className="flex items-center gap-3">
             <span className="flex items-center justify-center w-11 h-11 rounded-lg bg-yellow-50 shrink-0">
               <Clock className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-600" />
@@ -271,7 +272,7 @@ export function ContractList({
             </div>
           </div>
 
-          <div className="absolute bottom-0 left-0 w-full h-1 bg-yellow-500" />
+          {/* <div className="absolute bottom-0 left-0 w-full h-1 bg-yellow-500" /> */}
         </div>
       </div>
 
@@ -293,54 +294,43 @@ export function ContractList({
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* Department */}
           <div>
-            <label className="block text-gray-700 mb-2">Department</label>
-            <div className="relative">
-              <select
-                value={selectedDepartmentId ?? ''}
-                disabled={isSingleDepartment}
-                onChange={(e) => {
-                  setSelectedDepartmentId(e.target.value === '' ? undefined : Number(e.target.value));
-                  goToPage(1);
-                }}
-                className={`w-full px-4 py-2 border border-gray-300 rounded-lg appearance-none bg-white ${isSingleDepartment ? 'cursor-default' : 'cursor-pointer pr-8'
-                  }`}
-              >
-                {!isSingleDepartment && <option value="">All Departments</option>}
-                {allowedDepartments.map((dept) => (
-                  <option key={dept.departmentId} value={dept.departmentId}>
-                    {dept.departmentName}
-                  </option>
-                ))}
-              </select>
-              {!isSingleDepartment && (
-                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
-              )}
-            </div>
+            <label className="block text-gray-700 mb-2 font-medium">Department</label>
+            <CustomSelect
+              value={selectedDepartmentId?.toString() ?? ''}
+              disabled={isSingleDepartment}
+              onChange={(value) => {
+                setSelectedDepartmentId(value === '' ? undefined : Number(value));
+                goToPage(1);
+              }}
+              options={allowedDepartments.map((dept) => ({
+                key: dept.departmentId.toString(),
+                label: dept.departmentName,
+              }))}
+              placeholder="All Departments"
+              showPlaceholder={!isSingleDepartment}
+            />
           </div>
 
           {/* Status */}
           <div>
-            <label className="block text-gray-700 mb-2">Status</label>
-            <div className="relative">
-              <select
-                value={selectedStatus}
-                onChange={(e) => { setSelectedStatus(e.target.value); goToPage(1); }}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg appearance-none bg-white pr-8 cursor-pointer"
-              >
-                <option value="">All Status</option>
-                {statuses.map((status) => (
-                  <option key={status.key} value={status.key}>
-                    {titleCase(status.label)}
-                  </option>
-                ))}
-              </select>
-              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
-            </div>
+            <label className="block text-gray-700 mb-2 font-medium">Status</label>
+            <CustomSelect
+              value={selectedStatus}
+              onChange={(value) => {
+                setSelectedStatus(value);
+                goToPage(1);
+              }}
+              options={statuses.map((status) => ({
+                key: status.key,
+                label: titleCase(status.label),
+              }))}
+              placeholder="All Status"
+            />
           </div>
 
           {/* Search */}
           <div>
-            <label className="block text-gray-700 mb-2">Search</label>
+            <label className="block text-gray-700 mb-2 font-medium">Search</label>
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
               <input
@@ -348,7 +338,7 @@ export function ContractList({
                 placeholder="Contract ID, Title, Partner..."
                 value={searchText}
                 onChange={(e) => { setSearchText(e.target.value); goToPage(1); }}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg"
+                className="w-full pl-10 pr-4 py-1.5 border border-gray-300 rounded-lg"
               />
             </div>
           </div>
@@ -363,7 +353,7 @@ export function ContractList({
             pagedContracts.length > 10 ? 'overflow-y-auto max-h-[70vh] lg:overflow-y-hidden' : '',
           ].join(' ').trim() || undefined}
         >
-          <table className={`w-full min-w-max text-sm [&_th]:px-2 [&_th]:py-5 [&_th]:whitespace-nowrap [&_td]:px-2 [&_td]:py-3.5 ${tableRowHover}`}>
+          <table className={`w-full min-w-max text-sm rounded-t-lg overflow-hidden [&_th]:px-2 [&_th]:py-5 [&_th]:whitespace-nowrap [&_td]:px-2 [&_td]:py-3.5 ${tableRowHover}`}>
             <thead className={tableTheadClass}>
               <tr>
                 <SortableTableHead label="Contract ID" columnKey="id" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="w-fit" />
@@ -438,10 +428,10 @@ export function ContractList({
                             <button
                               type="button"
                               onClick={(e) => { e.stopPropagation(); handleViewContractDetails(contract, 'edit'); }}
-                              className="p-1.5 hover:bg-gray-100 rounded-lg text-primary cursor-pointer"
+                              className="p-1.5 hover:bg-gray-100 rounded-lg text-primary cursor-pointer "
                               title="Edit"
                             >
-                              <Edit2 className="w-4 h-4" />
+                              <Edit2 className="w-4 h-4 " />
                             </button>
                           )}
                           {contractPermission.delete && (

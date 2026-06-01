@@ -317,6 +317,7 @@ export function ContractDetails({
     remainingDays: detail.remainingDays ?? calculateDaysRemaining(detail.expireDate),
     confidential: false,
     autoRenew: false,
+    status: detail.status, 
     alertDays: detail.alertDays ?? 0,
     alerts: detail.alerts ?? null,                                // ← add
     partners: detail.partners ?? [],
@@ -329,7 +330,7 @@ export function ContractDetails({
     canRenew &&
     c.status !== 'Closed' &&
     (['Expired', 'Expiring Soon', 'Overdue'].includes(c.status) ||
-      ['EXPIRED', 'EXPIRING_SOON', 'OVERDUE'].includes(apiStatus));
+    ['EXPIRED', 'EXPIRING_SOON', 'OVERDUE'].includes(apiStatus));
 
   const handleEditSubmit = async (data: ContractFormValues) => {
     try {

@@ -52,8 +52,8 @@ const MOCK_PROFILE: UserProfile = {
   fullName: rawMockUser.fullName,
   employeeId: rawMockUser.employeeId,
   email: rawMockUser.email,
-  phoneNumber: rawMockUser.phoneNumber ?? undefined,
-  jobTitle: rawMockUser.jobTitle ?? undefined,
+  phoneNumber: rawMockUser.phoneNumber,
+  jobTitle: rawMockUser.jobTitle ,
   status: rawMockUser.status,
   moduleAccess: rawMockUser.moduleAccess,
   department: rawMockUser.department,
@@ -288,7 +288,7 @@ export default function App() {
                 </button>
 
                 {profileMenuOpen && (
-                  <div className="absolute right-0 top-full mt-1.5 px-1 rounded-xl border border-gray-200 bg-white shadow-lg py-1 z-50">
+                  <div className="absolute right-0 top-full mt-1.5 rounded-xl border border-gray-200 bg-white shadow-lg z-50">
                     {/* My Profile */}
                     <button
                       type="button"
@@ -349,7 +349,7 @@ export default function App() {
           <NotificationCenter
             isLoggedIn={true}
             onSelectContract={(id) => {
-              openContractDetails(id, 'details', { hideRenew: true });
+              openContractDetails(id, 'details');
             }}
             onUnreadChange={setUnreadCount}
           />
