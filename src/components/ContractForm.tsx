@@ -267,22 +267,34 @@ export function ContractForm({
   const watchedRemarks = watch('remarks') ?? '';
   const watchedContractTerms = watch('contractTerms') ?? '';
 
-  const moduleAccess = currentUser?.moduleAccess ?? []
+
+  const moduleAccess = useMemo(
+    () => currentUser?.moduleAccess ?? [],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [currentUser?.moduleAccess?.map((m) => m.id).join(',')]
+  )
+
   const {
     allowedDepartments,
     isSingleDepartment,
     hasRestrictedAccess,
-  } = getAllowedDepartments(departmentList, moduleAccess)
+  } = useMemo(
+    () => getAllowedDepartments(departmentList, moduleAccess),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [departmentList.map((d) => d.departmentId).join(','), moduleAccess]
+  )
 
   const selectableDepartmentNames = useMemo(
     () => allowedDepartments.map((d) => d.departmentName),
     [allowedDepartments.map((d) => d.departmentName).join(',')]
   )
+
   const filteredDepartments = useMemo(
     () => hasRestrictedAccess
       ? selectableDepartmentNames
       : departments.filter((d) => d !== 'All Departments'),
-    [selectableDepartmentNames.join(','), hasRestrictedAccess, departments.join?.(',')]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [selectableDepartmentNames.join(','), hasRestrictedAccess, departments.join(',')]
   )
 
   const singleDepartmentName =
@@ -322,7 +334,6 @@ export function ContractForm({
   }, [
     contractTypesByDepartment,
     !!defaultValues,
-    filteredDepartments,
     isSingleDepartment,
     allowedDepartments.length,
     hasRestrictedAccess,

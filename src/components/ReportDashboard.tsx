@@ -503,13 +503,13 @@ export function ReportDashboard({ currentUser, onSelectContract }: ReportDashboa
             sortedContracts.length > 10 ? 'overflow-y-auto max-h-[70vh]' : '',
           ].join(' ').trim() || undefined}
         >
-          <table className={`w-full min-w-max text-sm rounded-t-lg overflow-hidden [&_th]:px-2 [&_th]:py-5 [&_th]:whitespace-nowrap [&_td]:px-2 [&_td]:py-3.5 ${tableRowHover}`}>
+          <table className={`w-full text-sm rounded-t-lg overflow-hidden [&_th]:px-2 [&_th]:py-5 [&_th]:whitespace-nowrap [&_td]:px-2 [&_td]:py-3.5 ${tableRowHover}`}>
             <thead className={tableTheadClass}>
               <tr>
                 <SortableTableHead label="Contract ID" columnKey="id" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="w-fit" />
                 <SortableTableHead label="Title" columnKey="title" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="w-40" />
                 <SortableTableHead label="Department" columnKey="department" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="w-38" />
-                <SortableTableHead label="Person In Charge" columnKey="personInCharge" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="w-28" />
+                <SortableTableHead label="Person In Charge" columnKey="personInCharge" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="w-26" />
                 <SortableTableHead label="Partner" columnKey="partnerName" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="w-32" />
                 <SortableTableHead label="Effective" columnKey="effectiveDate" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="w-28" />
                 <SortableTableHead label="Expiry" columnKey="expiryDate" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="w-28" />
@@ -551,7 +551,11 @@ export function ReportDashboard({ currentUser, onSelectContract }: ReportDashboa
                       </td>
                       <td className="whitespace-nowrap lg:truncate lg:max-w-0" title={contract.partnerName}>
                         <div className="flex items-center gap-1 min-w-0">
-                          <span className="whitespace-nowrap lg:truncate">{contract.partnerName}</span>
+                          <span className="whitespace-nowrap lg:truncate">
+                            {contract.partnerName.includes(',')
+                              ? `${contract.partnerName.split(',')[0].trim()}`
+                              : contract.partnerName}
+                          </span>
                         </div>
                       </td>
                       <td className="whitespace-nowrap">{formatDate(contract.effectiveDate)}</td>

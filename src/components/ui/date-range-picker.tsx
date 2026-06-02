@@ -131,7 +131,7 @@ export const DateRangePicker = React.forwardRef<HTMLDivElement, DateRangePickerP
           <button
             type="button"
             className={cn(
-              'flex w-full items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-3 text-left text-sm',
+              'flex w-full items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-left text-sm',
               'text-gray-900 transition-colors ',
               !value?.from && 'text-gray-500',
               isDisabled && 'pointer-events-none opacity-50',

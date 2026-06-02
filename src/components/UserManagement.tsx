@@ -259,7 +259,7 @@ export function UserManagement({ currentUser, userPermission, onSelectUser, onRe
                 placeholder="Employee ID, Name, Email..."
                 value={searchText}
                 onChange={handleSearchChange}
-                className="w-full pl-10 pr-4 py-1.5 border border-gray-300 rounded-lg"
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg"
               />
             </div>
           </div>
