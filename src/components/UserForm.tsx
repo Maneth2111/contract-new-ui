@@ -51,7 +51,7 @@ interface UserFormProps {
   insideModal?: boolean;
 }
 
-const readOnlyBoxClass = 'px-4 py-2 border border-gray-200 rounded-lg bg-gray-50 min-h-11 text-gray-800'
+const readOnlyBoxClass = 'px-4 py-2  rounded-lg bg-gray-50 min-h-11 text-gray-800'
 
 const ErrorMsg = ({ message }: { message?: string }) =>
   message ? <p className="text-red-500 text-sm mt-1">{message}</p> : null;
@@ -136,7 +136,7 @@ export function UserForm({
     const isContract = group === 'CONTRACT'
     const tagClass = isContract
       ? 'bg-primary/8 text-primary border border-primary/20'
-      : 'bg-brand-navy/8 text-brand-navy border border-brand-navy/20'
+      : 'bg-brand-navy/8 text-brand-navy border border-brand-navy/5'
     const dotClass = isContract ? 'bg-brand-navy' : 'bg-brand-pink'
     const fadeColor = isContract ? 'from-transparent to-white' : 'from-transparent to-white'
 

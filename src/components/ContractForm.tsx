@@ -91,7 +91,7 @@ const DEFAULT_VALUES: ContractFormValues = {
 const ErrorMsg = ({ message }: { message?: string }) =>
   message ? <p className="text-red-500 text-sm mt-1">{message}</p> : null;
 
-const readOnlyBoxClass = 'px-4 py-2 border border-gray-200 rounded-lg bg-gray-50 min-h-11'
+const readOnlyBoxClass = 'px-4 py-2 rounded-lg bg-gray-50 min-h-11'
 
 const ReadOnlyTextBlock = ({ value, emptyLabel = 'N/A' }: { value: string; emptyLabel?: string }) => {
   const text = value.trim()
@@ -483,7 +483,7 @@ export function ContractForm({
     : 'flex gap-3 pt-4';
 
   const fieldClass = readOnly
-    ? 'w-full px-4 py-2 border border-gray-200 rounded-lg bg-gray-50 text-gray-900 cursor-default focus:outline-none'
+    ? 'w-full px-4 py-2 rounded-lg bg-gray-50 text-gray-900 cursor-default focus:outline-none'
     : 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary'
 
   const selectClass = readOnly
@@ -604,17 +604,17 @@ export function ContractForm({
                     href={viewMeta.msChannelUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="block px-4 py-2 border border-gray-200 rounded-lg bg-gray-50 text-primary hover:underline break-all"
+                    className="block px-4 py-2 rounded-lg bg-gray-50 text-primary hover:underline break-all"
                   >
                     {viewMeta.msChannelTitle ?? 'N/A'}
                   </a>
                 ) : (
-                  <p className="px-4 py-2 border border-gray-200 rounded-lg bg-gray-50 text-gray-500">N/A</p>
+                  <p className="px-4 py-2  rounded-lg bg-gray-50 text-gray-500">N/A</p>
                 )}
               </div>
               <div>
                 <label className="block text-gray-700 mb-2">Alert Days</label>
-                <p className="px-4 py-2 border border-gray-200 rounded-lg bg-gray-50 text-gray-900">
+                <p className="px-4 py-2  rounded-lg bg-gray-50 text-gray-900">
                   {viewMeta.alertDays != null && viewMeta.alertDays !== ''
                     ? String(viewMeta.alertDays)
                     : 'N/A'}
