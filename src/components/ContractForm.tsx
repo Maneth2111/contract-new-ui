@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useForm, useFieldArray, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Plus, Trash2, Upload, ChevronDown, X, FileText, Loader2 } from 'lucide-react';
@@ -274,10 +274,16 @@ export function ContractForm({
     hasRestrictedAccess,
   } = getAllowedDepartments(departmentList, moduleAccess)
 
-  const selectableDepartmentNames = allowedDepartments.map((d) => d.departmentName)
-  const filteredDepartments = hasRestrictedAccess
-    ? selectableDepartmentNames
-    : departments.filter((d) => d !== 'All Departments')
+  const selectableDepartmentNames = useMemo(
+    () => allowedDepartments.map((d) => d.departmentName),
+    [allowedDepartments.map((d) => d.departmentName).join(',')]
+  )
+  const filteredDepartments = useMemo(
+    () => hasRestrictedAccess
+      ? selectableDepartmentNames
+      : departments.filter((d) => d !== 'All Departments'),
+    [selectableDepartmentNames.join(','), hasRestrictedAccess, departments.join?.(',')]
+  )
 
   const singleDepartmentName =
     isSingleDepartment && allowedDepartments[0]
@@ -315,12 +321,12 @@ export function ContractForm({
     if (initialType) setValue('contractType', initialType, { shouldDirty: true, shouldValidate: true })
   }, [
     contractTypesByDepartment,
-    defaultValues,
+    !!defaultValues,
     filteredDepartments,
     isSingleDepartment,
     allowedDepartments.length,
     hasRestrictedAccess,
-    selectableDepartmentNames,
+    selectableDepartmentNames.join(','),
     watchedDepartment,
     setValue,
     singleDepartmentName,
