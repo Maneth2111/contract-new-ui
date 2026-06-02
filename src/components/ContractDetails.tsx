@@ -232,13 +232,15 @@ export function ContractDetails({
     setFormMode(initialFormMode);
   }, [contract.contractId, initialFormMode]);
 
+  const apiFileIds = apiFiles.map((f) => f.id).join(',')
+
   useEffect(() => {
     if (apiFiles.length === 0) {
       setUploadedFiles([]);
       return;
     }
     setUploadedFiles(apiFiles);
-  }, [apiFiles]);
+  }, [apiFileIds])
 
   const editDefaults = useMemo(
     () =>
@@ -264,10 +266,15 @@ export function ContractDetails({
     () =>
       detail
         ? {
-          effectiveDate: detail.expireDate,
+          title: detail.contractTitle,
+          personInCharge: detail.personInCharge,
+          effectiveDate: '',
           expiryDate: '',
           contractValue: String(detail.contractValue),
+          contractTerms: detail.contractTerm ?? '',
           remarks: detail.remark ?? '',
+          department: detail.department?.departmentName ?? '',
+          contractType: detail.contractType?.contractTypeName ?? '',
           status: detail.status,
           partners: detail.partners ?? [],
         }
@@ -317,7 +324,7 @@ export function ContractDetails({
     remainingDays: detail.remainingDays ?? calculateDaysRemaining(detail.expireDate),
     confidential: false,
     autoRenew: false,
-    status: detail.status, 
+    status: detail.status,
     alertDays: detail.alertDays ?? 0,
     alerts: detail.alerts ?? null,                                // ← add
     partners: detail.partners ?? [],
@@ -330,7 +337,7 @@ export function ContractDetails({
     canRenew &&
     c.status !== 'Closed' &&
     (['Expired', 'Expiring Soon', 'Overdue'].includes(c.status) ||
-    ['EXPIRED', 'EXPIRING_SOON', 'OVERDUE'].includes(apiStatus));
+      ['EXPIRED', 'EXPIRING_SOON', 'OVERDUE'].includes(apiStatus));
 
   const handleEditSubmit = async (data: ContractFormValues) => {
     try {
@@ -490,7 +497,7 @@ export function ContractDetails({
                   <button
                     type="button"
                     onClick={exitFormMode}
-                    className="px-4 py-2 text-gray-700 rounded-lg bg-gray-200 hover:bg-gray-300 cursor-pointer text-sm transition-colors"
+                    className="px-4 py-2 text-primary rounded-lg bg-white border border-primary hover:bg-primary/10 cursor-pointer text-sm transition-colors"
                   >
                     Cancel
                   </button>

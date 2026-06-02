@@ -131,15 +131,33 @@ export function UserForm({
 
   const renderPermissionTags = (ids: number[], items: Permission[], group: 'CONTRACT' | 'USER') => {
     const selected = items.filter((p) => ids.includes(p.id))
-    if (selected.length === 0) return <p className="text-sm text-gray-500">N/A</p>
-    const tagClass = group === 'CONTRACT' ? 'bg-brand-navy text-white text-center' : 'bg-brand-pink text-white text-center'
+    if (selected.length === 0) return <p className="text-sm text-gray-400 italic">No permissions assigned</p>
+
+    const isContract = group === 'CONTRACT'
+    const tagClass = isContract
+      ? 'bg-primary/8 text-primary border border-primary/20'
+      : 'bg-brand-navy/8 text-brand-navy border border-brand-navy/20'
+    const dotClass = isContract ? 'bg-brand-navy' : 'bg-brand-pink'
+    const fadeColor = isContract ? 'from-transparent to-white' : 'from-transparent to-white'
+
     return (
-      <div className="flex flex-wrap gap-2">
-        {selected.map((p) => (
-          <span key={p.id} className={`px-3 py-1 rounded-full text-xs ${tagClass}`}>
-            {formatPermissionLabel(p.name, group)}
-          </span>
-        ))}
+      <div className="relative">
+        {/* scrollable tag row */}
+        <div className="flex gap-1.5 overflow-x-auto scrollbar-none pb-0.5">
+          {selected.map((p) => (
+            <span
+              key={p.id}
+              className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium whitespace-nowrap shrink-0 ${tagClass}`}
+            >
+              {formatPermissionLabel(p.name, group)}
+            </span>
+          ))}
+        </div>
+
+        {/* right fade overlay — only shows when there are enough tags to overflow */}
+        {selected.length > 3 && (
+          <div className={`absolute right-0 top-0 h-full w-12 bg-linear-to-r ${fadeColor} pointer-events-none`} />
+        )}
       </div>
     )
   }
@@ -153,7 +171,7 @@ export function UserForm({
 
       {/* User Information */}
       <div className="space-y-3">
-        <h3>User Information</h3>
+        <h3 className='font-medium'>User Information</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
           <div>
@@ -179,7 +197,7 @@ export function UserForm({
               <div className={readOnlyBoxClass}>{formData.employeeId || 'N/A'}</div>
             ) : (
               <>
-                <input {...register('employeeId')} placeholder="e.g. 1010" className={fieldClass} />
+                <input {...register('employeeId')} placeholder="e.g. 1010" className={fieldClass} disabled />
                 <ErrorMsg message={errors.employeeId?.message} />
               </>
             )}
@@ -275,21 +293,22 @@ export function UserForm({
 
           {(readOnly || (isEdit && !isOwnProfile && currentUserPermissions?.userUpdate && currentUserPermissions?.userDelete)) && (
             <div>
-              <label className="block text-gray-700 mb-2">Account Status</label>
               {readOnly ? (
-                <div className={readOnlyBoxClass}>{statusLabel}</div>
+                <>
+                  <label className="block text-gray-700 mb-2 ">Account Status</label>
+                  <div className={readOnlyBoxClass}>{statusLabel}</div>
+                </>
               ) : (
-                <div className="relative">
-                  <select
-                    {...register('status')}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg appearance-none bg-white pr-8 cursor-pointer"
-                  >
-                    {userStatus?.map(status => (
-                      <option key={status.key} value={status.key}>{titleCase(status.label)}</option>
-                    ))}
-                  </select>
-                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
-                </div>
+                <CustomSelect
+                  label="Account Status"
+                  value={watch('status') ?? ''}
+                  onChange={(val) => setValue('status', val)}
+                  showPlaceholder={false}
+                  options={userStatus?.map(status => ({
+                    key: status.key,
+                    label: titleCase(status.label),
+                  })) ?? []}
+                />
               )}
             </div>
           )}
@@ -298,7 +317,7 @@ export function UserForm({
 
       {/* Role & Permissions */}
       <div className="space-y-4">
-        <h3>Role & Permissions</h3>
+        <h3 className='font-medium'>Role & Permissions</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
           <div>
@@ -333,15 +352,23 @@ export function UserForm({
           <div>
             <label className="block text-gray-700 mb-2">Department Access {!readOnly && <span className="text-red-500">*</span>}</label>
             {readOnly ? (
-              <div className="flex flex-wrap gap-2 mt-1">
-                {selectedDeptNames.length === 0 ? (
-                  <p className="text-sm text-gray-500">N/A</p>
-                ) : (
-                  selectedDeptNames.map((name) => (
-                    <span key={name} className="px-3 py-1 bg-primary text-white rounded-full text-xs text-medium text-center">
-                      {name}
-                    </span>
-                  ))
+              <div className="relative mt-1">
+                <div className="flex gap-1.5 overflow-x-auto scrollbar-none pb-0.5">
+                  {selectedDeptNames.length === 0 ? (
+                    <p className="text-sm text-gray-400 italic">No departments assigned</p>
+                  ) : (
+                    selectedDeptNames.map((name) => (
+                      <span
+                        key={name}
+                        className="inline-flex items-center px-2.5 py-1 bg-primary/8 text-primary border border-primary/20 rounded-md text-xs font-medium whitespace-nowrap shrink-0"
+                      >
+                        {name}
+                      </span>
+                    ))
+                  )}
+                </div>
+                {selectedDeptNames.length > 3 && (
+                  <div className="absolute right-0 top-0 h-full w-12 bg-linear-to-r from-transparent to-white pointer-events-none" />
                 )}
               </div>
             ) : (

@@ -86,7 +86,7 @@ export default function Dashboard() {
   const statusTotal = statusData.reduce((sum, d) => sum + d.value, 0);
 
   const COLORS = ['#22c55e', '#eab308', '#f97316', '#ef4444', '#6b7280'];
-  const DEPARTMENT_COLORS = ['#0fbab5', '#052744', '#de6ea0', '#00A693'] as const;
+  const DEPARTMENT_COLORS = ['#0fbab5', '#32527b', '#de6ea0', '#00A693'] as const;
 
   const maxExpirationCount = Math.max(...expiringByMonth.map(d => d.count), 0);
   const expirationYAxisMax = Math.max(maxExpirationCount, 3);

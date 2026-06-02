@@ -183,18 +183,18 @@ export function ContractForm({
 
   useEffect(() => {
     if (defaultValues) reset({ ...DEFAULT_VALUES, ...defaultValues });
-    const files = uploadedFiles.map((f) => f.file)
-    setValue('attachments', files, { shouldValidate: true })
-  }, [defaultValues, reset, setValue, uploadedFiles]);
+  }, [defaultValues, reset]);
+
+  const uploadedFileIds = uploadedFiles.map((f) => f.id).join(',')
 
   useEffect(() => {
     const files = uploadedFiles.map((f) => f.file)
     setValue('attachments', files, { shouldValidate: true })
-  }, [setValue, uploadedFiles])
+  }, [uploadedFileIds, setValue])
 
   useEffect(() => {
     if (uploadedFiles.length > 0 && fileError) setFileError(null)
-  }, [uploadedFiles.length, fileError])
+  }, [uploadedFileIds, fileError])
 
   const {
     fields: partnerFields,
@@ -607,36 +607,28 @@ export function ContractForm({
           )}
 
           {/* Contract status */}
-          {defaultValues && Object.keys(defaultValues).length > 0 && !hideStatus && (
+          {defaultValues && Object.keys(defaultValues).length > 0 && !hideStatus && !readOnly && (
             <div>
-              <label className="block text-gray-700 mb-2">
-                Status
-              </label>
-              <div className="relative">
-                <select
-                  {...register('status')}
-                  disabled={readOnly}
-                  className={readOnly ? selectClass : 'w-full px-4 py-2 border border-gray-300 rounded-lg appearance-none bg-white pr-8 focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer'}
-                >
-                  {statuses
-                    .filter(status => {
-                      const current = defaultValues?.status;
-                      if (current) {
-                        return status.key === current || status.key === 'CLOSED'
-                      }
+              <CustomSelect
+                label="Status"
+                value={watch('status') ?? ''}
+                onChange={(val) => setValue('status', val)}
+                disabled={readOnly}
+                showPlaceholder={false}
+                options={statuses
+                  .filter(status => {
+                    const current = defaultValues?.status;
+                    if (current) {
+                      return status.key === current || status.key === 'CLOSED';
                     }
-                    )
-                    .map(status => (
-                      <option key={status.key} value={status.key}>
-                        {titleCase(status.label)}
-                      </option>
-                    ))
-                  }
-                </select>
-                {!readOnly && (
-                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
-                )}
-              </div>
+                    return false;
+                  })
+                  .map(status => ({
+                    key: status.key,
+                    label: titleCase(status.label),
+                  }))
+                }
+              />
               <ErrorMsg message={errors.status?.message} />
             </div>
           )}
@@ -1090,7 +1082,7 @@ export function ContractForm({
             <button
               type="button"
               onClick={onSecondaryAction}
-              className="px-6 py-2 text-gray-700 rounded-lg bg-gray-200 hover:bg-gray-300 cursor-pointer transition-colors"
+              className="px-6 py-2 text-primary rounded-lg bg-white border border-primary hover:bg-primary/10 cursor-pointer transition-colors"
             >
               {secondaryLabel}
             </button>

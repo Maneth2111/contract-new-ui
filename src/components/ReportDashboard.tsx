@@ -418,7 +418,7 @@ export function ReportDashboard({ currentUser, onSelectContract }: ReportDashboa
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-4">
 
             {/* Total Contracts */}
-            <div className="bg-white p-4 sm:p-5 rounded-lg shadow hover:shadow transition hover:scale-[1.02] transition-transform duration-200">
+            <div className="bg-white p-4 sm:p-5 rounded-lg shadow hover:shadow hover:scale-[1.02] transition-transform duration-200">
               <div className="flex items-center justify-between">
                 <div className="min-w-0">
                   <p className="text-xs sm:text-sm text-gray-600">
@@ -437,7 +437,7 @@ export function ReportDashboard({ currentUser, onSelectContract }: ReportDashboa
             </div>
 
             {/* Total Value */}
-            <div className="bg-white p-4 sm:p-5 rounded-lg shadow hover:shadow transition hover:scale-[1.02] transition-transform duration-200">
+            <div className="bg-white p-4 sm:p-5 rounded-lg shadow hover:shadow hover:scale-[1.02] transition-transform duration-200">
               <div className="flex items-center justify-between">
                 <div className="min-w-0">
                   <p className="text-xs sm:text-sm text-gray-600">
@@ -456,7 +456,7 @@ export function ReportDashboard({ currentUser, onSelectContract }: ReportDashboa
             </div>
 
             {/* Active */}
-            <div className="bg-white p-4 sm:p-5 rounded-lg shadow hover:shadow transition hover:scale-[1.02] transition-transform duration-200">
+            <div className="bg-white p-4 sm:p-5 rounded-lg shadow hover:shadow hover:scale-[1.02] transition-transform duration-200">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-xs sm:text-sm text-gray-600">

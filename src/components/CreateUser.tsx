@@ -169,7 +169,7 @@ export function CreateUser({ currentUser, onCancel, onSuccess }: CreateUserProps
             <button
               type="button"
               onClick={onCancel}
-              className="px-6 py-2 border border-gray-300 rounded-lg cursor-pointer"
+              className="px-6 py-2 border border-primary text-primary rounded-lg hover:bg-primary/10 cursor-pointer"
             >
               Cancel
             </button>
