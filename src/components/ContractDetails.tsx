@@ -75,7 +75,7 @@ const mockDepartments: MockDepartment[] = [
   { departmentId: 1, departmentCode: 'IT', departmentName: 'IT Department', description: 'Handles IT systems and infrastructure', msChannel: 'Contract Management Alert', title: 'Contract Management Alert', msWebhookUrl: 'https://example.webhook.office.com/it', msChannelUrl: 'https://teams.microsoft.com/it-channel' },
   { departmentId: 3, departmentCode: 'LC', departmentName: 'Legal and Compliance', description: 'Description', msChannel: 'Legal and Compliance Channel', title: 'Legal and Compliance Department', msWebhookUrl: 'https://example.webhook.office.com/lc', msChannelUrl: 'https://teams.microsoft.com/lc-channel' },
   { departmentId: 5, departmentCode: 'AM', departmentName: 'Admin and Marketing', description: 'Description', msChannel: 'Admin and Marketing Channel', title: 'Admin and Marketing', msWebhookUrl: 'https://example.webhook.office.com/am', msChannelUrl: 'https://teams.microsoft.com/am-channel' },
-  { departmentId: 6, departmentCode: 'COD', departmentName: 'CEO Office Department', description: 'CEO Office Department', msChannel: 'IT Contract Notification Channel', title: 'IT Contract Notification Channel', msWebhookUrl: 'https://example.webhook.office.com/ceo', msChannelUrl: 'https://teams.microsoft.com/ceo-channel' },
+  
 ];
 
 const mockContractTypes: MockContractType[] = [

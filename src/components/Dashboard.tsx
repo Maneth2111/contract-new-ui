@@ -86,7 +86,7 @@ export default function Dashboard() {
   const statusTotal = statusData.reduce((sum, d) => sum + d.value, 0);
 
   const COLORS = ['#22c55e', '#eab308', '#f97316', '#ef4444', '#6b7280'];
-  const DEPARTMENT_COLORS = ['#0fbab5', '#32527b', '#de6ea0', '#00A693'] as const;
+  const DEPARTMENT_COLORS = ['#0fbab5', '#32527b', '#de6ea0'] as const;
 
   const maxExpirationCount = Math.max(...expiringByMonth.map(d => d.count), 0);
   const expirationYAxisMax = Math.max(maxExpirationCount, 3);
@@ -369,7 +369,7 @@ export default function Dashboard() {
       </div>
 
       {/* Upcoming Expirations by Month */}
-      <div className="bg-white p-6 rounded-lg shadow-sm hover:scale-[1.02] transition-transform duration-200">
+      {/* <div className="bg-white p-6 rounded-lg shadow-sm hover:scale-[1.02] transition-transform duration-200">
         <h3 className="mb-4 font-medium">Upcoming Expirations by Month</h3>
         <ResponsiveContainer width="100%" height={300}>
           <BarChart data={expiringByMonth}>
@@ -380,7 +380,7 @@ export default function Dashboard() {
             <Bar dataKey="count" fill="#f97316" />
           </BarChart>
         </ResponsiveContainer>
-      </div>
+      </div> */}
     </div>
   );
 }                      
