@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Contract, ContractStatus } from '../types/contract';
 import { calculateDaysRemaining } from '../utils/contractUtils';
-import { ArrowLeft, Clock, RefreshCw, Edit2 } from 'lucide-react';
+import { ArrowLeft, Clock, RefreshCw, Edit2, FileText, Users, CalendarDays } from 'lucide-react';
 import { titleCase } from 'text-case';
 import { ContractFormValues } from '../lib/contractSchema';
 import toast from 'react-hot-toast';
@@ -75,7 +75,6 @@ const mockDepartments: MockDepartment[] = [
   { departmentId: 1, departmentCode: 'IT', departmentName: 'IT Department', description: 'Handles IT systems and infrastructure', msChannel: 'Contract Management Alert', title: 'Contract Management Alert', msWebhookUrl: 'https://example.webhook.office.com/it', msChannelUrl: 'https://teams.microsoft.com/it-channel' },
   { departmentId: 3, departmentCode: 'LC', departmentName: 'Legal and Compliance', description: 'Description', msChannel: 'Legal and Compliance Channel', title: 'Legal and Compliance Department', msWebhookUrl: 'https://example.webhook.office.com/lc', msChannelUrl: 'https://teams.microsoft.com/lc-channel' },
   { departmentId: 5, departmentCode: 'AM', departmentName: 'Admin and Marketing', description: 'Description', msChannel: 'Admin and Marketing Channel', title: 'Admin and Marketing', msWebhookUrl: 'https://example.webhook.office.com/am', msChannelUrl: 'https://teams.microsoft.com/am-channel' },
-  
 ];
 
 const mockContractTypes: MockContractType[] = [
@@ -122,7 +121,6 @@ const dept = (id: number): MockDepartment => mockDepartments.find((d) => d.depar
 const ctype = (id: number): MockContractType => mockContractTypes.find((t) => t.contractTypeId === id)!;
 const ptnr = (id: number): MockPartner => mockPartners.find((p) => p.partnerId === id)!;
 
-// All 9 contracts from mock data, keyed by contractId
 const MOCK_CONTRACT_DETAILS: Record<number, MockContractDetail> = {
   56: { contractId: 56, contractCode: 'CCF-2026-049', contractTitle: 'Test Contract', personInCharge: 'Test User', contractTerm: '', effectiveDate: '2026-05-01', expireDate: '2026-05-16', renewalFrequencyMonths: 1, contractValue: 5000, alertDays: null, remark: '', remainingDays: -6, status: 'OVERDUE', createdBy: 9, department: dept(6), contractType: ctype(27), partners: [ptnr(4)], alerts: null },
   50: { contractId: 50, contractCode: 'CCF-2026-046', contractTitle: 'Legal Contract', personInCharge: 'John', contractTerm: '', effectiveDate: '2026-01-19', expireDate: '2026-08-19', renewalFrequencyMonths: 7, contractValue: 100, alertDays: null, remark: '', remainingDays: 89, status: 'EXPIRING_SOON', createdBy: 1, department: dept(3), contractType: ctype(13), partners: [ptnr(6)], alerts: null },
@@ -143,32 +141,22 @@ const MOCK_HISTORY: Record<number, MockHistoryItem[]> = {
     { historyId: 2, actionType: 'MODIFIED', actionDate: '2026-03-10T14:22:00Z', actionBy: { fullName: 'Ouy Ponlouer' }, oldValue: { contractValue: '50' }, newValue: { contractValue: '100' } },
     { historyId: 3, actionType: 'CREATED', actionDate: '2026-01-19T08:00:00Z', actionBy: { fullName: 'John' }, oldValue: null, newValue: null },
   ],
-  49: [
-    { historyId: 4, actionType: 'CREATED', actionDate: '2026-01-19T08:30:00Z', actionBy: { fullName: 'John' }, oldValue: null, newValue: null },
-  ],
-  48: [
-    { historyId: 5, actionType: 'CREATED', actionDate: '2026-05-19T10:00:00Z', actionBy: { fullName: 'John' }, oldValue: null, newValue: null },
-  ],
-  46: [
-    { historyId: 6, actionType: 'CREATED', actionDate: '2026-05-13T09:15:00Z', actionBy: { fullName: 'Test User' }, oldValue: null, newValue: null },
-  ],
-  43: [
-    { historyId: 7, actionType: 'CREATED', actionDate: '2026-05-18T08:00:00Z', actionBy: { fullName: 'John Smith' }, oldValue: null, newValue: null },
-  ],
+  49: [{ historyId: 4, actionType: 'CREATED', actionDate: '2026-01-19T08:30:00Z', actionBy: { fullName: 'John' }, oldValue: null, newValue: null }],
+  48: [{ historyId: 5, actionType: 'CREATED', actionDate: '2026-05-19T10:00:00Z', actionBy: { fullName: 'John' }, oldValue: null, newValue: null }],
+  46: [{ historyId: 6, actionType: 'CREATED', actionDate: '2026-05-13T09:15:00Z', actionBy: { fullName: 'Test User' }, oldValue: null, newValue: null }],
+  43: [{ historyId: 7, actionType: 'CREATED', actionDate: '2026-05-18T08:00:00Z', actionBy: { fullName: 'John Smith' }, oldValue: null, newValue: null }],
   42: [
     { historyId: 8, actionType: 'MODIFIED', actionDate: '2026-05-10T11:00:00Z', actionBy: { fullName: 'Test User' }, oldValue: { remark: '' }, newValue: { remark: 'test' } },
     { historyId: 9, actionType: 'CREATED', actionDate: '2026-05-07T08:00:00Z', actionBy: { fullName: 'Test User' }, oldValue: null, newValue: null },
   ],
-  41: [
-    { historyId: 10, actionType: 'CREATED', actionDate: '2026-01-05T08:00:00Z', actionBy: { fullName: 'Nov Lakena' }, oldValue: null, newValue: null },
-  ],
+  41: [{ historyId: 10, actionType: 'CREATED', actionDate: '2026-01-05T08:00:00Z', actionBy: { fullName: 'Nov Lakena' }, oldValue: null, newValue: null }],
   40: [
     { historyId: 11, actionType: 'MODIFIED', actionDate: '2026-05-20T14:00:00Z', actionBy: { fullName: 'Menghok' }, oldValue: { contractTerm: '' }, newValue: { contractTerm: '5 Years' } },
     { historyId: 12, actionType: 'CREATED', actionDate: '2026-05-15T09:00:00Z', actionBy: { fullName: 'Menghok' }, oldValue: null, newValue: null },
   ],
 };
 
-// ─── Mock hook replacements (same return shape as the real hooks) ─────────────
+// ─── Mock hooks ───────────────────────────────────────────────────────────────
 
 function useContractDetail(contractId: number) {
   const detail = MOCK_CONTRACT_DETAILS[contractId] ?? null;
@@ -183,7 +171,74 @@ function useContractFiles(_contractId: number) {
   return { files: [] as UploadedFile[], refetch: () => { } };
 }
 
-// ─── Component ────────────────────────────────────────────────────────────────
+// ─── Sub-components ───────────────────────────────────────────────────────────
+
+/** Green primary header bar — matches the screenshot's teal section headers */
+function SectionHeader({
+  icon,
+  title,
+}: {
+  icon: React.ReactNode;
+  title: string;
+}) {
+  return (
+    <div className="flex items-center gap-2 bg-primary px-4 py-2.5">
+      <span className="text-white [&>svg]:w-4 [&>svg]:h-4 shrink-0">{icon}</span>
+      <span className="text-xs font-semibold tracking-widest text-white uppercase select-none">
+        {title}
+      </span>
+    </div>
+  );
+}
+
+/**
+ * A two-column table row: fixed-width label cell (with right border) + value cell.
+ * Matches the screenshot's label/value table layout exactly.
+ */
+function FieldRow({
+  label,
+  children,
+  empty,
+}: {
+  label: string;
+  children: React.ReactNode;
+  empty?: boolean;
+}) {
+  return (
+    <tr className="border-b border-gray-100 last:border-b-0">
+      <td className="w-[220px] min-w-[220px] px-4 py-3 border-r border-gray-100 align-middle">
+        <span className="text-[11px] font-semibold tracking-widest text-gray-400 uppercase whitespace-nowrap">
+          {label}
+        </span>
+      </td>
+      <td className="px-4 py-3 align-middle">
+        <span className={empty ? 'text-gray-400 italic text-sm' : 'text-sm text-gray-800'}>
+          {children}
+        </span>
+      </td>
+    </tr>
+  );
+}
+
+/** Card wrapper — border + rounded corners, clips the green header flush to top */
+function SectionCard({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="border border-gray-200 rounded-lg overflow-hidden mb-4">
+      {children}
+    </div>
+  );
+}
+
+/** Full-width <table> used inside a SectionCard for FieldRow children */
+function FieldTable({ children }: { children: React.ReactNode }) {
+  return (
+    <table className="w-full border-collapse">
+      <tbody>{children}</tbody>
+    </table>
+  );
+}
+
+// ─── Component types ──────────────────────────────────────────────────────────
 
 export type ContractDetailsFormMode = 'view' | 'edit' | 'renew';
 
@@ -202,6 +257,8 @@ interface ContractDetailsProps {
 }
 
 type ViewTab = 'details' | 'history';
+
+// ─── Main component ───────────────────────────────────────────────────────────
 
 export function ContractDetails({
   contract,
@@ -228,57 +285,45 @@ export function ContractDetails({
   const [formKey, setFormKey] = useState(0);
   const { files: apiFiles, refetch: refetchFiles } = useContractFiles(contract.contractId);
 
-  useEffect(() => {
-    setFormMode(initialFormMode);
-  }, [contract.contractId, initialFormMode]);
+  useEffect(() => { setFormMode(initialFormMode); }, [contract.contractId, initialFormMode]);
 
-  const apiFileIds = apiFiles.map((f) => f.id).join(',')
-
+  const apiFileIds = apiFiles.map((f) => f.id).join(',');
   useEffect(() => {
-    if (apiFiles.length === 0) {
-      setUploadedFiles([]);
-      return;
-    }
+    if (apiFiles.length === 0) { setUploadedFiles([]); return; }
     setUploadedFiles(apiFiles);
-  }, [apiFileIds])
+  }, [apiFileIds]);
 
-  const editDefaults = useMemo(
-    () =>
-      detail
-        ? {
-          title: detail.contractTitle,
-          personInCharge: detail.personInCharge,
-          effectiveDate: detail.effectiveDate,
-          expiryDate: detail.expireDate,
-          contractValue: String(detail.contractValue),
-          contractTerms: detail.contractTerm ?? '',
-          remarks: detail.remark ?? '',
-          department: detail.department?.departmentName ?? '',
-          contractType: detail.contractType?.contractTypeName ?? '',
-          status: detail.status,
-          partners: detail.partners ?? [],
-        }
-        : undefined,
+  const editDefaults = useMemo(() =>
+    detail ? {
+      title: detail.contractTitle,
+      personInCharge: detail.personInCharge,
+      effectiveDate: detail.effectiveDate,
+      expiryDate: detail.expireDate,
+      contractValue: String(detail.contractValue),
+      contractTerms: detail.contractTerm ?? '',
+      remarks: detail.remark ?? '',
+      department: detail.department?.departmentName ?? '',
+      contractType: detail.contractType?.contractTypeName ?? '',
+      status: detail.status,
+      partners: detail.partners ?? [],
+    } : undefined,
     [detail]
   );
 
-  const renewDefaults = useMemo(
-    () =>
-      detail
-        ? {
-          title: detail.contractTitle,
-          personInCharge: detail.personInCharge,
-          effectiveDate: '',
-          expiryDate: '',
-          contractValue: String(detail.contractValue),
-          contractTerms: detail.contractTerm ?? '',
-          remarks: detail.remark ?? '',
-          department: detail.department?.departmentName ?? '',
-          contractType: detail.contractType?.contractTypeName ?? '',
-          status: detail.status,
-          partners: detail.partners ?? [],
-        }
-        : undefined,
+  const renewDefaults = useMemo(() =>
+    detail ? {
+      title: detail.contractTitle,
+      personInCharge: detail.personInCharge,
+      effectiveDate: '',
+      expiryDate: '',
+      contractValue: String(detail.contractValue),
+      contractTerms: detail.contractTerm ?? '',
+      remarks: detail.remark ?? '',
+      department: detail.department?.departmentName ?? '',
+      contractType: detail.contractType?.contractTypeName ?? '',
+      status: detail.status,
+      partners: detail.partners ?? [],
+    } : undefined,
     [detail]
   );
 
@@ -293,16 +338,12 @@ export function ContractDetails({
 
   const getChangedFields = (
     oldVal: Record<string, unknown> | null,
-    newVal: Record<string, unknown> | null
+    newVal: Record<string, unknown> | null,
   ) => {
     if (!oldVal || !newVal) return [];
     return Object.keys(newVal)
       .filter((key) => JSON.stringify(oldVal[key]) !== JSON.stringify(newVal[key]))
-      .map((key) => ({
-        field: key,
-        from: JSON.stringify(oldVal[key]),
-        to: JSON.stringify(newVal[key]),
-      }));
+      .map((key) => ({ field: key, from: JSON.stringify(oldVal[key]), to: JSON.stringify(newVal[key]) }));
   };
 
   const c: Contract = detail ? {
@@ -314,19 +355,19 @@ export function ContractDetails({
     department: detail.department?.departmentName ?? '',
     personInCharge: detail.personInCharge,
     partnerName: detail.partners?.[0]?.partnerName ?? '',
-    partnerId: detail.partners?.[0]?.partnerId ?? null,           // ← add
-    partnerContact: detail.partners?.[0]?.contactPerson ?? '',    // ← add
-    partnerContactNumber: detail.partners?.[0]?.contactNumber ?? '', // ← add
+    partnerId: detail.partners?.[0]?.partnerId ?? null,
+    partnerContact: detail.partners?.[0]?.contactPerson ?? '',
+    partnerContactNumber: detail.partners?.[0]?.contactNumber ?? '',
     effectiveDate: detail.effectiveDate,
     expiryDate: detail.expireDate,
-    contractTerms: detail.contractTerm ?? '',                     // ← add
+    contractTerms: detail.contractTerm ?? '',
     contractValue: detail.contractValue,
     remainingDays: detail.remainingDays ?? calculateDaysRemaining(detail.expireDate),
     confidential: false,
     autoRenew: false,
     status: detail.status,
     alertDays: detail.alertDays ?? 0,
-    alerts: detail.alerts ?? null,                                // ← add
+    alerts: detail.alerts ?? null,
     partners: detail.partners ?? [],
     remarks: detail.remark ?? '',
   } : contract;
@@ -345,10 +386,7 @@ export function ContractDetails({
       refetchDetail();
       refetchFiles();
       onUpdate();
-      if (initialFormMode === 'edit') {
-        onClose();
-        return;
-      }
+      if (initialFormMode === 'edit') { onClose(); return; }
       setFormMode('view');
       setFormKey((k) => k + 1);
     } catch (error: unknown) {
@@ -372,10 +410,7 @@ export function ContractDetails({
   };
 
   const exitFormMode = () => {
-    if (initialFormMode === 'edit' && formMode === 'edit') {
-      onClose();
-      return;
-    }
+    if (initialFormMode === 'edit' && formMode === 'edit') { onClose(); return; }
     setFormMode('view');
     setFormKey((k) => k + 1);
   };
@@ -394,10 +429,7 @@ export function ContractDetails({
   const isFormActive = formMode === 'edit' || formMode === 'renew';
 
   const handleBack = () => {
-    if (isFormActive) {
-      exitFormMode();
-      return;
-    }
+    if (isFormActive) { exitFormMode(); return; }
     onClose();
   };
 
@@ -405,34 +437,234 @@ export function ContractDetails({
     if (!isFullscreen) return;
     const prev = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
-    return () => {
-      document.body.style.overflow = prev;
-    };
+    return () => { document.body.style.overflow = prev; };
   }, [isFullscreen]);
 
   const formDefaults = formMode === 'renew' ? renewDefaults : editDefaults;
   const detailsFormId = `contract-details-form-${c.contractId}-${formMode}`;
+
+  // ─── View-mode detail layout ─────────────────────────────────────────────
+
+  const renderViewDetails = () => {
+    if (!detail) return null;
+
+    const partners = detail.partners ?? [];
+    const remainingDays = detail.remainingDays;
+    const isOverdue = remainingDays < 0;
+    const isExpiringSoon = remainingDays >= 0 && remainingDays <= 90;
+
+    return (
+      <div className="space-y-0">
+        {/* ── CONTRACT INFORMATION ── */}
+        {/* ── CONTRACT INFORMATION ── */}
+        <SectionCard>
+          <SectionHeader icon={<FileText />} title="Contract Information" />
+          <FieldTable>
+            <FieldRow label="Contract Title">{detail.contractTitle}</FieldRow>
+            <FieldRow label="Contract Type">{detail.contractType?.contractTypeName}</FieldRow>
+            <FieldRow label="Department">{detail.department?.departmentName}</FieldRow>
+            <FieldRow label="Person in Charge">{detail.personInCharge}</FieldRow>
+            <FieldRow label="Microsoft Channel">
+              {viewMeta?.msChannelUrl ? (
+                <a
+                  href={viewMeta.msChannelUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-1.5 text-primary hover:underline text-sm"
+                >
+                  <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                    <circle cx="9" cy="7" r="4" />
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                  </svg>
+                  {viewMeta.msChannelTitle ?? 'Teams Channel'}
+                </a>
+              ) : (
+                <span className="text-gray-400 italic text-sm">Not configured</span>
+              )}
+            </FieldRow>
+            <FieldRow label="Alert Days" empty={!detail.alertDays}>
+              {detail.alertDays ? `${detail.alertDays} days` : 'Not configured'}
+            </FieldRow>
+            <FieldRow label="Contract Terms" empty={!detail.contractTerm}>
+              {detail.contractTerm || 'No terms specified'}
+            </FieldRow>
+          </FieldTable>
+        </SectionCard>
+
+        {/* ── PARTNER / VENDOR INFORMATION ── */}
+        <SectionCard>
+          <SectionHeader icon={<Users />} title="Partner / Vendor Information" />
+
+          {/* Avatar chip row — sits above the table, below the header */}
+          {partners.length > 0 && (
+            <div className="flex flex-wrap gap-4 px-4 py-3 border-b border-gray-100">
+              {partners.map((p, i) => {
+                const initials = p.partnerName
+                  .split(' ')
+                  .map((w) => w[0])
+                  .slice(0, 2)
+                  .join('')
+                  .toUpperCase();
+                return (
+                  <div key={p.partnerId} className="flex items-center gap-2.5">
+                    <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold text-xs shrink-0">
+                      {initials}
+                    </div>
+                    <div className="leading-tight">
+                      <p className="text-sm font-medium text-gray-800">{p.partnerName}</p>
+                      <p className="text-xs text-gray-400">Partner {i + 1}</p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          <FieldTable>
+            {partners.length === 0 ? (
+              <FieldRow label="Partners" empty>No partners assigned</FieldRow>
+            ) : partners.length === 1 ? (
+              <>
+                <FieldRow label="Partner Name">{partners[0].partnerName}</FieldRow>
+                <FieldRow label="Contact Person">{partners[0].contactPerson}</FieldRow>
+                <FieldRow label="Contact Number">
+                  <span className="inline-flex items-center gap-1.5">
+                    <svg className="w-3.5 h-3.5 text-gray-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13.5 19.79 19.79 0 0 1 1.58 4.92 2 2 0 0 1 3.54 2.73h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 10.4a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" />
+                    </svg>
+                    {partners[0].contactNumber}
+                  </span>
+                </FieldRow>
+              </>
+            ) : (
+              partners.map((p, i) => (
+                <FieldRow key={p.partnerId} label={`Partner ${i + 1}`}>
+                  {p.partnerName}
+                  {p.contactPerson && (
+                    <span className="text-gray-400 ml-2 text-xs">· {p.contactPerson}</span>
+                  )}
+                </FieldRow>
+              ))
+            )}
+          </FieldTable>
+        </SectionCard>
+
+        {/* ── CONTRACT DATES & VALUE ── */}
+        <SectionCard>
+          <SectionHeader icon={<CalendarDays />} title="Contract Dates & Value" />
+
+          {/*
+            2×2 grid matching the screenshot exactly:
+            each cell has its own label + value stacked vertically.
+            Inner borders: right border on left cells, bottom border on top row.
+          */}
+          <table className="w-full border-collapse">
+            <tbody>
+              {/* Row 1: Effective Date | Expiry Date */}
+              <tr className="border-b border-gray-100">
+                {/* Effective Date */}
+                <td className="w-1/2 px-4 py-3 border-r border-gray-100 align-top">
+                  <p className="text-[11px] font-semibold tracking-widest text-gray-400 uppercase mb-1.5">
+                    Effective Date
+                  </p>
+                  <p className="text-sm text-gray-800 flex items-center gap-1.5">
+                    <CalendarDays className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+                    {new Date(detail.effectiveDate).toLocaleDateString('en-US', {
+                      month: 'short',
+                      day: 'numeric',
+                      year: 'numeric',
+                    })}
+                  </p>
+                </td>
+
+                {/* Expiry Date */}
+                <td className="w-1/2 px-4 py-3 align-top">
+                  <p className="text-[11px] font-semibold tracking-widest text-gray-400 uppercase mb-1.5">
+                    Expiry Date
+                  </p>
+                  <div className="flex items-start gap-1.5 flex-wrap">
+                    <p className="text-sm text-gray-800 flex items-center gap-1.5">
+                      <CalendarDays className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+                      {new Date(detail.expireDate).toLocaleDateString('en-US', {
+                        month: 'short',
+                        day: 'numeric',
+                        year: 'numeric',
+                      })}
+                    </p>
+                    {isOverdue && (
+                      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-700 shrink-0">
+                        {Math.abs(remainingDays)} days overdue
+                      </span>
+                    )}
+                    {!isOverdue && isExpiringSoon && (
+                      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-700 shrink-0">
+                        {remainingDays} days left
+                      </span>
+                    )}
+                  </div>
+                </td>
+              </tr>
+
+              {/* Row 2: Renewal Frequency | Total Contract Value */}
+              <tr>
+                {/* Renewal Frequency */}
+                <td className="w-1/2 px-4 py-3 border-r border-gray-100 align-top">
+                  <p className="text-[11px] font-semibold tracking-widest text-gray-400 uppercase mb-1.5">
+                    Renewal Frequency
+                  </p>
+                  <p className="text-sm text-gray-400 italic">
+                    {detail.renewalFrequencyMonths
+                      ? `${detail.renewalFrequencyMonths} month${detail.renewalFrequencyMonths > 1 ? 's' : ''}`
+                      : 'Not calculated'}
+                  </p>
+                </td>
+
+                {/* Total Contract Value */}
+                <td className="w-1/2 px-4 py-3 align-top">
+                  <p className="text-[11px] font-semibold tracking-widest text-gray-400 uppercase mb-1.5">
+                    Total Contract Value
+                  </p>
+                  <div className="flex items-baseline gap-0.5">
+                    <span className="text-sm text-gray-500 font-medium">$</span>
+                    <span className="text-xl font-semibold text-gray-900">
+                      {detail.contractValue.toLocaleString()}
+                    </span>
+                    <span className="text-xs text-gray-400 ml-1">USD</span>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </SectionCard>
+
+        {/* Remarks — only if present */}
+        {detail.remark && (
+          <SectionCard>
+            <SectionHeader
+              icon={
+                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                </svg>
+              }
+              title="Remarks"
+            />
+            <div className="px-4 py-3 text-sm text-gray-700 whitespace-pre-wrap">{detail.remark}</div>
+          </SectionCard>
+        )}
+      </div>
+    );
+  };
+
+  // ─── Form renderer (edit / renew / view-via-ContractForm) ────────────────
 
   const renderForm = () => {
     if (detailLoading || !formDefaults) {
       return <p className="p-6 text-gray-500">Loading contract…</p>;
     }
     if (formMode === 'view') {
-      return (
-        <ContractForm
-          key={`view-${formKey}`}
-          readOnly
-          insideModal={!isPage && !isFullscreen}
-          defaultValues={editDefaults}
-          viewMeta={viewMeta}
-          onSubmit={async () => { }}
-          uploadedFiles={uploadedFiles}
-          onFilesChange={() => { }}
-          onDownloadFile={() => { }}
-          downloadingFileIds={downloadingFileIds}
-          currentUser={currentUser}
-        />
-      );
+      return renderViewDetails();
     }
     return (
       <ContractForm
@@ -453,6 +685,8 @@ export function ContractDetails({
     );
   };
 
+  // ─── Layout shells ────────────────────────────────────────────────────────
+
   const panelHeightClass = isPage
     ? 'max-h-[calc(100vh-10rem)] min-h-[24rem]'
     : 'max-h-[calc(100vh-4rem)]';
@@ -465,33 +699,79 @@ export function ContractDetails({
 
   const panel = (
     <div className={panelShellClass}>
+      {/* ── Top bar ── */}
       <div className="shrink-0 bg-white border-b border-gray-200">
-        <div className={`px-4 sm:px-6 pt-4 pb-4 ${isFullscreen ? ' w-full' : ''}`}>
-          <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-4 items-center">
-            <div className="flex items-start gap-6 min-w-0">
-              {(isFullscreen || variant === 'modal') && (
-                <button
-                  type="button"
-                  onClick={handleBack}
-                  className="shrink-0 flex items-center justify-center w-10 h-10 rounded-lg text-gray-700 hover:bg-gray-100 cursor-pointer"
-                  aria-label="Back"
-                >
-                  <ArrowLeft className="w-8 h-5" />
-                </button>
-              )}
-              <div className="min-w-0 flex-1">
-                <h2 className="font-medium text-xl">
-                  {isFormActive
-                    ? formMode === 'renew'
-                      ? 'Renew Contract'
-                      : 'Edit Contract'
-                    : 'Contract Details'}
+        <div className={`px-4 sm:px-6 pt-4 ${isFullscreen ? 'w-full' : ''}`}>
+
+          {/* Breadcrumb / back link */}
+          {(isFullscreen || variant === 'modal') && (
+            <button
+              type="button"
+              onClick={handleBack}
+              className="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-800 cursor-pointer mb-4"
+            >
+              <ArrowLeft className="w-5 h-5" />
+              {isFormActive
+                ? formMode === 'renew' ? 'Cancel renewal' : 'Cancel edit'
+                : 'Back'}
+            </button>
+          )}
+
+          {/* Title row + action buttons on the right */}
+          <div className="flex items-start justify-between gap-4 mb-1">
+            <div className="min-w-0">
+              {isFormActive ? (
+                <h2 className="text-xl font-semibold text-gray-900">
+                  {formMode === 'renew' ? 'Renew Contract' : 'Edit Contract'}
                 </h2>
-                <p className="text-gray-600 truncate">{c.title} · {c.id}</p>
-              </div>
+              ) : (
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h2 className="text-xl font-bold text-gray-900 leading-tight">
+                    {c.title}
+                  </h2>
+                  {/* Status badge */}
+                  {(() => {
+                    const s = apiStatus;
+                    if (s === 'OVERDUE')
+                      return (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-700 border border-red-200">
+                          Overdue
+                        </span>
+                      );
+                    if (s === 'EXPIRING_SOON')
+                      return (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-700 border border-amber-200">
+                          Expiring Soon
+                        </span>
+                      );
+                    if (s === 'ACTIVE')
+                      return (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-700 border border-green-200">
+                          <span className="w-1.5 h-1.5 rounded-full bg-green-500 inline-block" />
+                          Active
+                        </span>
+                      );
+                    if (s === 'EXPIRED')
+                      return (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-600 border border-gray-200">
+                          Expired
+                        </span>
+                      );
+                    return null;
+                  })()}
+                </div>
+              )}
+              {/* Subtitle: person · department */}
+              {!isFormActive && (
+                <p className="text-sm text-gray-500 mt-0.5">
+                  {c.contractCode}
+                  {c.department ? <> · {c.department}</>: null}
+                </p>
+              )}
             </div>
 
-            <div className="flex flex-nowrap items-center justify-end gap-2 mr-10 min-w-0">
+            {/* Right: action buttons */}
+            <div className="flex flex-nowrap items-center gap-2 shrink-0">
               {isFormActive ? (
                 <>
                   <button
@@ -508,18 +788,14 @@ export function ContractDetails({
                   >
                     {formMode === 'renew' ? 'Renew Contract' : 'Save Changes'}
                   </button>
-
                 </>
               ) : (
                 <>
                   {canEdit && c.status !== 'Closed' && (
                     <button
                       type="button"
-                      onClick={() => {
-                        setFormMode('edit');
-                        setActiveTab('details');
-                      }}
-                      className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 cursor-pointer text-sm"
+                      onClick={() => { setFormMode('edit'); setActiveTab('details'); }}
+                      className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 cursor-pointer text-sm font-medium"
                     >
                       <Edit2 className="w-4 h-4" />
                       Edit Contract
@@ -528,11 +804,8 @@ export function ContractDetails({
                   {canShowRenew && (
                     <button
                       type="button"
-                      onClick={() => {
-                        setFormMode('renew');
-                        setActiveTab('details');
-                      }}
-                      className="flex items-center gap-2 px-4 py-2 bg-brand-pink text-white rounded-lg hover:bg-brand-pink/80 cursor-pointer text-sm"
+                      onClick={() => { setFormMode('renew'); setActiveTab('details'); }}
+                      className="flex items-center gap-2 px-4 py-2 bg-brand-pink text-white rounded-lg hover:bg-brand-pink/80 cursor-pointer text-sm font-medium"
                     >
                       <RefreshCw className="w-4 h-4" />
                       Renew Contract
@@ -542,9 +815,55 @@ export function ContractDetails({
               )}
             </div>
           </div>
+
+          {/* Alert banner — overdue / expiring soon warning */}
+          {!isFormActive && detail && (() => {
+            const days = detail.remainingDays;
+            if (days < 0) {
+              return (
+                <div className="flex items-start gap-2 mt-3 mb-3 px-3 py-2.5 rounded-lg bg-red-50 border border-red-200 text-sm text-red-700">
+                  <svg className="w-4 h-4 shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                    <line x1="12" y1="9" x2="12" y2="13" />
+                    <line x1="12" y1="17" x2="12.01" y2="17" />
+                  </svg>
+                  <span>
+                    This contract expired on{' '}
+                    <strong>
+                      {new Date(detail.expireDate).toLocaleDateString('en-US', {
+                        month: 'long', day: 'numeric', year: 'numeric',
+                      })}
+                    </strong>
+                    {' '}— {Math.abs(days)} days overdue. Please renew or archive it immediately.
+                  </span>
+                </div>
+              );
+            }
+            if (days <= 90) {
+              return (
+                <div className="flex items-start gap-2 mt-3 mb-3 px-3 py-2.5 rounded-lg bg-amber-50 border border-amber-200 text-sm text-amber-700">
+                  <svg className="w-4 h-4 shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                    <line x1="12" y1="9" x2="12" y2="13" />
+                    <line x1="12" y1="17" x2="12.01" y2="17" />
+                  </svg>
+                  <span>
+                    This contract expires on{' '}
+                    <strong>
+                      {new Date(detail.expireDate).toLocaleDateString('en-US', {
+                        month: 'long', day: 'numeric', year: 'numeric',
+                      })}
+                    </strong>
+                    {' '}— {days} days remaining.
+                  </span>
+                </div>
+              );
+            }
+            return null;
+          })()}
         </div>
 
-
+        {/* Tabs — hidden in form mode */}
         {!isFormActive && (
           <div className={`px-4 sm:px-6 ${isFullscreen ? 'max-w-350 mx-auto w-full' : ''}`}>
             <div className="flex gap-1">
@@ -566,6 +885,7 @@ export function ContractDetails({
         )}
       </div>
 
+      {/* ── Body ── */}
       <div
         className={
           useInnerScroll
@@ -576,50 +896,36 @@ export function ContractDetails({
         {isFormActive || activeTab === 'details' ? (
           renderForm()
         ) : (
+          /* ── History tab ── */
           <div className="space-y-4">
             {historyItems.length === 0 ? (
               <div className="text-center py-8 text-gray-500">No history available</div>
             ) : (
-              historyItems.map((item) => {
-                const changes = getChangedFields(item.oldValue, item.newValue);
-                return (
-                  <div key={item.historyId} className="border-l-4 border-primary pl-4 py-2">
-                    <div className="flex items-start gap-3">
-                      <Clock className="w-5 h-5 text-gray-400 mt-0.5 shrink-0" />
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <span
-                            className={`px-2 py-0.5 text-xs rounded font-medium ${item.actionType === 'CREATED'
-                              ? 'bg-green-100 text-green-800'
-                              : item.actionType === 'MODIFIED'
-                                ? 'bg-primary/10 text-brand-navy'
-                                : 'bg-red-100 text-red-800'
-                              }`}
-                          >
-                            {titleCase(item.actionType)}
-                          </span>
-                          <span className="text-gray-500 text-sm">
-                            {new Date(item.actionDate).toLocaleString()}
-                          </span>
-                        </div>
-                        {/* {changes.length > 0 && (
-                          <div className="mt-2 space-y-1">
-                            {changes.map((change) => (
-                              <p key={change.field} className="text-sm text-gray-600">
-                                <span className="font-medium text-gray-700">{change.field}:</span>{' '}
-                                <span className="text-red-500 line-through">{change.from}</span>
-                                {' → '}
-                                <span className="text-green-600">{change.to}</span>
-                              </p>
-                            ))}
-                          </div>
-                        )} */}
-                        <p className="text-gray-500 text-sm mt-1">By: {item.actionBy.fullName}</p>
+              historyItems.map((item) => (
+                <div key={item.historyId} className="border-l-4 border-primary pl-4 py-2">
+                  <div className="flex items-start gap-3">
+                    <Clock className="w-5 h-5 text-gray-400 mt-0.5 shrink-0" />
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span
+                          className={`px-2 py-0.5 text-xs rounded font-medium ${item.actionType === 'CREATED'
+                            ? 'bg-green-100 text-green-800'
+                            : item.actionType === 'MODIFIED'
+                              ? 'bg-primary/10 text-brand-navy'
+                              : 'bg-red-100 text-red-800'
+                            }`}
+                        >
+                          {titleCase(item.actionType)}
+                        </span>
+                        <span className="text-gray-500 text-sm">
+                          {new Date(item.actionDate).toLocaleString()}
+                        </span>
                       </div>
+                      <p className="text-gray-500 text-sm mt-1">By: {item.actionBy.fullName}</p>
                     </div>
                   </div>
-                );
-              })
+                </div>
+              ))
             )}
           </div>
         )}
@@ -635,9 +941,7 @@ export function ContractDetails({
     );
   }
 
-  if (isPage) {
-    return panel;
-  }
+  if (isPage) return panel;
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-start justify-center z-50 p-4 sm:p-8 overflow-hidden">

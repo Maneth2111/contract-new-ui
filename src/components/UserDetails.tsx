@@ -1,5 +1,19 @@
 import { useEffect, useRef, useState, useMemo } from 'react';
-import { ArrowLeft, Edit2, History, Mail, PencilLine, UserPlus } from 'lucide-react';
+import {
+  ArrowLeft,
+  Edit2,
+  History,
+  Mail,
+  PencilLine,
+  UserPlus,
+  User as UserIcon,
+  Building2,
+  ShieldCheck,
+  BadgeCheck,
+  Phone,
+  Hash,
+} from 'lucide-react';
+import { titleCase } from 'text-case';
 import type { Audit } from '../services/userService';
 import { User, UserFormValues } from '../types/user';
 import { useForm } from 'react-hook-form';
@@ -57,6 +71,85 @@ function formatDateTime(dateTime: string) {
     minute: '2-digit',
   });
 }
+
+// ── Section card primitives (mirrors ContractDetails exactly) ────────────────
+
+function SectionHeader({ icon, title }: { icon: React.ReactNode; title: string }) {
+  return (
+    <div className="flex items-center gap-2 bg-primary px-4 py-2.5">
+      <span className="text-white [&>svg]:w-4 [&>svg]:h-4 shrink-0">{icon}</span>
+      <span className="text-xs font-semibold tracking-widest text-white uppercase select-none">
+        {title}
+      </span>
+    </div>
+  );
+}
+
+function FieldRow({
+  label,
+  children,
+  empty,
+}: {
+  label: string;
+  children: React.ReactNode;
+  empty?: boolean;
+}) {
+  return (
+    <tr className="border-b border-gray-100 last:border-b-0">
+      <td className="w-[220px] min-w-[220px] px-4 py-3 border-r border-gray-100 align-middle">
+        <span className="text-[11px] font-semibold tracking-widest text-gray-400 uppercase whitespace-nowrap">
+          {label}
+        </span>
+      </td>
+      <td className="px-4 py-3 align-middle">
+        <span className={empty ? 'text-gray-400 italic text-sm' : 'text-sm text-gray-800'}>
+          {children}
+        </span>
+      </td>
+    </tr>
+  );
+}
+
+function SectionCard({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="border border-gray-200 rounded-lg overflow-hidden mb-4">
+      {children}
+    </div>
+  );
+}
+
+function FieldTable({ children }: { children: React.ReactNode }) {
+  return (
+    <table className="w-full border-collapse">
+      <tbody>{children}</tbody>
+    </table>
+  );
+}
+
+// ── Status badge ──────────────────────────────────────────────────────────────
+
+function StatusBadge({ status }: { status: string }) {
+  const s = status?.toUpperCase();
+  if (s === 'ACTIVE')
+    return (
+      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-700 border border-green-200">
+        Active
+      </span>
+    );
+  if (s === 'INACTIVE')
+    return (
+      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-600 border border-gray-200">
+        Inactive
+      </span>
+    );
+  return (
+    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-700 border border-red-200">
+      Disabled
+    </span>
+  );
+}
+
+// ── Audit panel (original code, untouched) ───────────────────────────────────
 
 type AuditEventType = 'created' | 'updated';
 interface AuditEvent {
@@ -145,63 +238,43 @@ function UserAuditPanel({ audit }: { audit: Audit | undefined }) {
 
         {/* First Created */}
         <div className="relative rounded-xl border border-gray-200 shadow bg-linear-to-br from-green-50 via-white to-white p-4 sm:p-5">
-
-          {/* Date TOP RIGHT */}
           <p className="absolute top-4 right-4 text-xs text-green-700/80 font-medium">
             {formatDateTime(audit.createdDateTime)}
           </p>
-
           <div className="flex items-start gap-3 sm:gap-4">
-
-            {/* Icon */}
             <div className="flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-lg bg-green-100 shrink-0">
               <UserPlus className="w-5 h-5 text-green-600" />
             </div>
-
-            {/* Content */}
             <div className="min-w-0 pr-16">
               <p className="text-[11px] sm:text-xs font-medium uppercase tracking-wide text-green-700/80">
                 First created
               </p>
-
               <p className="mt-1 text-xs sm:text-sm text-gray-600 truncate">
                 by {audit.createdBy || 'System'}
               </p>
             </div>
-
           </div>
         </div>
 
         {/* Last Activity */}
         <div className="relative rounded-xl border border-gray-200 shadow bg-linear-to-br from-primary/5 via-white to-white p-4 sm:p-5">
-
-          {/* Date TOP RIGHT */}
           <p className="absolute top-4 right-4 text-xs text-primary/80 font-medium">
             {lastActivityAt ? formatDateTime(lastActivityAt) : 'N/A'}
           </p>
-
           <div className="flex items-start gap-3 sm:gap-4">
-
-            {/* Icon */}
             <div className="flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-lg bg-primary/10 shrink-0">
               <PencilLine className="w-5 h-5 text-primary" />
             </div>
-
-            {/* Content */}
             <div className="min-w-0 pr-16">
               <p className="text-[11px] sm:text-xs font-medium uppercase tracking-wide text-primary/80">
                 Last activity
               </p>
-
               <p className="mt-1 text-xs sm:text-sm text-gray-600 truncate">
                 by {audit.lastUpdatedBy || audit.createdBy || '—'}
               </p>
             </div>
-
           </div>
         </div>
-
-
       </div>
 
       <div>
@@ -239,7 +312,7 @@ function UserAuditPanel({ audit }: { audit: Audit | undefined }) {
   );
 }
 
-// ── Main component ─────────────────────────────────────────────────────────
+// ── Main component ────────────────────────────────────────────────────────────
 
 export function UserDetails({
   userId,
@@ -259,6 +332,7 @@ export function UserDetails({
   const contentRef = useRef<HTMLDivElement>(null);
   const depAccessRef = useRef<HTMLDivElement>(null);
 
+  // ── original data fetching — untouched ───────────────────────────────────
   const detailResponse = useMemo(() => getUserDetailById(userId), [userId]);
   const detail = detailResponse.success ? detailResponse.payload : null;
 
@@ -266,9 +340,9 @@ export function UserDetails({
   const isOwnProfile = userId === Number(currentUser?.id);
   const isFormActive = formMode === 'edit';
 
-  const form = useForm<UserFormValues,any, UserFormValues>({
-  defaultValues: emptyFormValues,
-  resolver: zodResolver(editUserSchema),
+  const form = useForm<UserFormValues, any, UserFormValues>({
+    defaultValues: emptyFormValues,
+    resolver: zodResolver(editUserSchema),
   });
   const formData = form.watch();
 
@@ -295,7 +369,6 @@ export function UserDetails({
       { shouldDirty: true, shouldValidate: true }
     );
   };
-
   const onContractToggle = (id: number) => {
     const current = formData.contractPermissionIds;
     form.setValue(
@@ -304,7 +377,6 @@ export function UserDetails({
       { shouldDirty: true, shouldValidate: true }
     );
   };
-
   const onAllContract = () => {
     form.setValue(
       'contractPermissionIds',
@@ -312,7 +384,6 @@ export function UserDetails({
       { shouldDirty: true, shouldValidate: true }
     );
   };
-
   const onUserToggle = (id: number) => {
     const current = formData.userPermissionIds;
     form.setValue(
@@ -321,7 +392,6 @@ export function UserDetails({
       { shouldDirty: true, shouldValidate: true }
     );
   };
-
   const onAllUser = () => {
     form.setValue(
       'userPermissionIds',
@@ -329,6 +399,32 @@ export function UserDetails({
       { shouldDirty: true, shouldValidate: true }
     );
   };
+
+  // ── view-mode derived values — using real UserDetail shape from mockData ─
+  // detail.roles is RoleRef[] → { id: number, name: RoleName }
+  // detail.permissions is { CONTRACT: Permission[], USER: Permission[] }
+  // detail.department is { departmentId, departmentName }
+  // detail.moduleAccess is { id, name }[] — these are the dept access rows
+
+  const roleNames = useMemo(
+    () => detail?.roles.map(r => r.name) ?? [],
+    [detail]
+  );
+
+  const deptAccessNames = useMemo(
+    () => detail?.moduleAccess.map(m => m.name) ?? [],
+    [detail]
+  );
+
+  const contractPermNames = useMemo(
+    () => detail?.permissions.CONTRACT.map(p => p.name) ?? [],
+    [detail]
+  );
+
+  const userPermNames = useMemo(
+    () => detail?.permissions.USER.map(p => p.name) ?? [],
+    [detail]
+  );
 
   useEffect(() => {
     if (!detail) return;
@@ -433,11 +529,123 @@ export function UserDetails({
     insideModal: false as const,
   };
 
-  const renderForm = () => {
+  // ── View-mode section card layout ────────────────────────────────────────
+  const renderViewDetails = () => {
     if (!detail) return <p className="py-8 text-gray-500">Loading user…</p>;
-    if (formMode === 'view') {
-      return <UserForm key={`view-${formKey}`} {...sharedFormProps} readOnly />;
-    }
+
+    return (
+      <div>
+
+        {/* PERSONAL INFORMATION */}
+        <SectionCard>
+          <SectionHeader icon={<UserIcon />} title="User Information" />
+          <FieldTable>
+            <FieldRow label="Employee ID" empty={!detail.employeeId}>
+              {detail.employeeId ? (
+                <span className="inline-flex items-center gap-1.5">
+                  {detail.employeeId}
+                </span>
+              ) : 'Not assigned'}
+            </FieldRow>
+            <FieldRow label="Full Name">{detail.fullName}</FieldRow>
+            <FieldRow label="Role" empty={roleNames.length === 0}>
+              {roleNames.length === 0 ? 'No roles assigned' : (
+                <div className="flex flex-wrap gap-1.5">
+                  {roleNames.map(r => (
+                    <span
+                      key={r}
+                      className="inline-flex items-center gap-1.5"
+                    >
+                      {titleCase(r.replace('ROLE_', '').replace(/_/g, ' '))}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </FieldRow>
+            <FieldRow label="Email">
+              <a
+                href={`mailto:${detail.email}`}
+                className="inline-flex items-center gap-1.5 text-sm text-primary hover:text-brand-navy truncate max-w-full"
+              >
+                <Mail className="w-3.5 h-3.5 shrink-0" />
+                {detail.email}
+              </a>
+            </FieldRow>
+            <FieldRow label="Department" empty={!detail.department?.departmentName}>
+              {detail.department?.departmentName || 'Not assigned'}
+            </FieldRow>
+            <FieldRow label="Job Title" empty={!detail.jobTitle}>
+              {detail.jobTitle || 'Not specified'}
+            </FieldRow>
+            <FieldRow label="Phone Number" empty={!detail.phoneNumber}>
+              {detail.phoneNumber ? (
+                <span className="inline-flex items-center gap-1.5">
+                  <Phone className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+                  {detail.phoneNumber}
+                </span>
+              ) : 'Not provided'}
+            </FieldRow>
+          </FieldTable>
+        </SectionCard>
+
+        {/* PERMISSIONS — detail.permissions is { CONTRACT: [], USER: [] } */}
+        {(contractPermNames.length > 0 || userPermNames.length > 0 || deptAccessNames.length > 0) && (
+          <SectionCard>
+            <SectionHeader icon={<ShieldCheck />} title="Permissions" />
+            <FieldTable>
+              {deptAccessNames.length > 0 && (
+                <FieldRow label="Department Access">
+                  <div className="flex flex-wrap gap-1.5">
+                    {deptAccessNames.map(n => (
+                      <span
+                        key={n}
+                        className="inline-flex items-center px-2.5 py-1 bg-primary/8 text-primary border border-primary/20 rounded-md text-xs font-medium whitespace-nowrap shrink-0"
+                      >
+                        {n}
+                      </span>
+                    ))}
+                  </div>
+                </FieldRow>
+              )}
+              {contractPermNames.length > 0 && (
+                <FieldRow label="Contract Permissions">
+                  <div className="flex flex-wrap gap-1.5">
+                    {contractPermNames.map(p => (
+                      <span
+                        key={p}
+                        className="inline-flex items-center px-2.5 py-1 bg-primary/8 text-primary border border-primary/20 rounded-md text-xs font-medium whitespace-nowrap shrink-0"
+                      >
+                        {p.replace('CONTRACT_', '')}
+                      </span>
+                    ))}
+                  </div>
+                </FieldRow>
+              )}
+              {userPermNames.length > 0 && (
+                <FieldRow label="User Permissions">
+                  <div className="flex flex-wrap gap-1.5">
+                    {userPermNames.map(p => (
+                      <span
+                        key={p}
+                        className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium whitespace-nowrap shrink-0 bg-brand-navy/8 text-brand-navy border border-brand-navy/5"
+                      >
+                        {p.replace('USER_', '')}
+                      </span>
+                    ))}
+                  </div>
+                </FieldRow>
+              )}
+            </FieldTable>
+          </SectionCard>
+        )}
+
+      </div>
+    );
+  };
+
+  // ── Edit form (original renderForm, minus the view branch) ───────────────
+  const renderEditForm = () => {
+    if (!detail) return <p className="py-8 text-gray-500">Loading user…</p>;
     return (
       <form id={detailsFormId} onSubmit={form.handleSubmit(onSubmit)} className="w-full">
         <UserForm key={`edit-${formKey}`} {...sharedFormProps} />
@@ -461,13 +669,21 @@ export function UserDetails({
                   <ArrowLeft className="w-8 h-5" />
                 </button>
                 <div className="min-w-0 flex-1">
-                  <h2 className="font-medium text-xl">
-                    {isFormActive ? 'Edit User' : 'User Details'}
-                  </h2>
-                  <p className="text-gray-600 truncate">
-                    {displayName}
-                    {displayEmployeeId ? ` · ${displayEmployeeId}` : ''}
-                  </p>
+                  {isFormActive ? (
+                    <h2 className="font-medium text-xl">Edit User</h2>
+                  ) : (
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <h2 className="font-bold text-xl leading-tight">{displayName}</h2>
+                      {detail?.status && <StatusBadge status={detail.status} />}
+                    </div>
+                  )}
+                  {!isFormActive && (
+                    <p className="text-gray-500 text-sm mt-0.5 truncate">
+                      {displayEmployeeId ? `${displayEmployeeId}` : ''}
+                      {displayEmployeeId && detail?.jobTitle ? ' · ' : ''}
+                      {detail?.jobTitle ?? ''}
+                    </p>
+                  )}
                 </div>
               </div>
               <div className="flex flex-wrap items-center justify-end gap-2 mr-10 min-w-0">
@@ -532,9 +748,11 @@ export function UserDetails({
           ref={contentRef}
           className="flex-1 min-h-0 overflow-y-auto px-4 sm:px-6 py-4 max-w-350 mx-auto w-full"
         >
-          {isFormActive || activeTab === 'user details'
-            ? renderForm()
-            : <UserAuditPanel audit={detail?.audit} />}
+          {isFormActive
+            ? renderEditForm()
+            : activeTab === 'user details'
+              ? renderViewDetails()
+              : <UserAuditPanel audit={detail?.audit} />}
         </div>
       </div>
     </div>

@@ -417,7 +417,7 @@ export const mockUsers: User[] = [
     roles: [{ id: 2, name: "ROLE_TOP_MANAGEMENT" }],
     permissions: mockAllPermissions,
     audit: {
-      createdBy: null, createdByEmail: null,
+      createdBy: "SAN Simaneth", createdByEmail: "simaneth.san@chokchey.com.kh",
       createdDateTime: "2026-05-07 08:18:03.876816",
       lastUpdatedBy: "Ouy Ponlouer", lastUpdatedByEmail: "ponlouer.ouy@chokchey.com.kh",
       lastUpdatedDateTime: "2026-05-12 16:20:14.359+07",
@@ -528,7 +528,7 @@ export const mockUsers: User[] = [
   {
     userId: 1, fullName: "Ouy Ponlouer", employeeId: "1068",
     email: "ponlouer.ouy@chokchey.com.kh", phoneNumber: "012000001",
-    jobTitle: "System Administrator", status: "ACTIVE",
+    jobTitle: "Administrator", status: "ACTIVE",
     moduleAccess: [
       { id: 3, name: "Legal and Compliance" },
       { id: 5, name: "Admin and Marketing" },
