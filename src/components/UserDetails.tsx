@@ -95,20 +95,38 @@ function FieldRow({
   empty?: boolean;
 }) {
   return (
-    <tr className="border-b border-gray-100 last:border-b-0">
-      <td className="w-[220px] min-w-[220px] px-4 py-3 border-r border-gray-100 align-middle">
-        <span className="text-[11px] font-semibold tracking-widest text-gray-400 uppercase whitespace-nowrap">
+    <tr className="border-b border-gray-100 last:border-b-0 block sm:table-row">
+      
+      {/* LABEL */}
+      <td className="
+        block sm:table-cell
+        w-full sm:w-55 sm:min-w-55
+        px-4 pt-3 pb-1 sm:py-3
+        border border-r sm:border-r border-gray-100 bg-gray-50
+      ">
+        <span className="text-xs font-medium text-brand-navy uppercase">
           {label}
         </span>
       </td>
-      <td className="px-4 py-3 align-middle">
-        <span className={empty ? 'text-gray-400 italic text-sm' : 'text-sm text-gray-800'}>
+
+      {/* VALUE */}
+      <td className="
+        block sm:table-cell
+        w-full
+        px-4 pb-3 pt-1 sm:py-3 bg-white
+      ">
+        <span className={empty
+          ? 'text-gray-400 italic text-sm'
+          : 'text-sm text-gray-800'
+        }>
           {children}
         </span>
       </td>
+
     </tr>
   );
 }
+
 
 function SectionCard({ children }: { children: React.ReactNode }) {
   return (
@@ -270,7 +288,7 @@ function UserAuditPanel({ audit }: { audit: Audit | undefined }) {
                 Last activity
               </p>
               <p className="mt-1 text-xs sm:text-sm text-gray-600 truncate">
-                by {audit.lastUpdatedBy || audit.createdBy || '—'}
+                by {audit.lastUpdatedBy || audit.createdBy || '---'}
               </p>
             </div>
           </div>
@@ -332,7 +350,7 @@ export function UserDetails({
   const contentRef = useRef<HTMLDivElement>(null);
   const depAccessRef = useRef<HTMLDivElement>(null);
 
-  // ── original data fetching — untouched ───────────────────────────────────
+  // ── original data fetching --- untouched ───────────────────────────────────
   const detailResponse = useMemo(() => getUserDetailById(userId), [userId]);
   const detail = detailResponse.success ? detailResponse.payload : null;
 
@@ -400,11 +418,6 @@ export function UserDetails({
     );
   };
 
-  // ── view-mode derived values — using real UserDetail shape from mockData ─
-  // detail.roles is RoleRef[] → { id: number, name: RoleName }
-  // detail.permissions is { CONTRACT: Permission[], USER: Permission[] }
-  // detail.department is { departmentId, departmentName }
-  // detail.moduleAccess is { id, name }[] — these are the dept access rows
 
   const roleNames = useMemo(
     () => detail?.roles.map(r => r.name) ?? [],
@@ -587,8 +600,7 @@ export function UserDetails({
             </FieldRow>
           </FieldTable>
         </SectionCard>
-
-        {/* PERMISSIONS — detail.permissions is { CONTRACT: [], USER: [] } */}
+        {/* PERMISSIONS */}
         {(contractPermNames.length > 0 || userPermNames.length > 0 || deptAccessNames.length > 0) && (
           <SectionCard>
             <SectionHeader icon={<ShieldCheck />} title="Permissions" />
@@ -638,6 +650,67 @@ export function UserDetails({
             </FieldTable>
           </SectionCard>
         )}
+        {/* AUDIT INFORMATION */}
+        {detail.audit && (
+          <SectionCard>
+            <SectionHeader icon={<History />} title="Audit Information" />
+            <FieldTable>
+              {/* LAST UPDATED */}
+              <FieldRow label="Last Updated By">
+                <div className="flex  justify-between">
+                  <div className="flex flex-col">
+                    <span className="text-sm text-gray-800">
+                      {detail.audit.lastUpdatedBy || detail.audit.createdBy || '---'}
+                    </span>
+
+                    {detail.audit.lastUpdatedByEmail && (
+                      <a
+                        href={`mailto:${detail.audit.lastUpdatedByEmail}`}
+                        className="inline-flex items-center gap-1.5 text-xs text-primary hover:text-brand-navy mt-0.5"
+                      >
+                        <Mail className="w-3.5 h-3.5" />
+                        {detail.audit.lastUpdatedByEmail}
+                      </a>
+                    )}
+
+                  </div>
+
+                  <span className="text-xs text-gray-500 mt-0.5">
+                    {detail.audit.lastUpdatedDateTime
+                      ? formatDateTime(detail.audit.lastUpdatedDateTime)
+                      : '---'}
+                  </span>
+                </div>
+              </FieldRow>
+
+              {/* CREATED */}
+              <FieldRow label="Created By">
+                <div className="flex  justify-between">
+                  <div className="flex flex-col">
+                    <span className="text-sm text-gray-800">
+                      {detail.audit.createdBy || 'System'}
+                    </span>
+
+                    {detail.audit.createdByEmail && (
+                      <a
+                        href={`mailto:${detail.audit.createdByEmail}`}
+                        className="inline-flex items-center gap-1.5 text-primary hover:text-brand-navy mt-0.5"
+                      >
+                        <Mail className="w-3.5 h-3.5" />
+                        {detail.audit.createdByEmail}
+                      </a>
+                    )}
+
+                  </div>
+
+                  <span className="text-xs text-gray-500 mt-0.5">
+                    {formatDateTime(detail.audit.createdDateTime)}
+                  </span>
+                </div>
+              </FieldRow>
+            </FieldTable>
+          </SectionCard>
+        )}
 
       </div>
     );
@@ -657,7 +730,7 @@ export function UserDetails({
     <div className="fixed inset-0 z-50 bg-white flex flex-col h-dvh">
       <div className="flex flex-col h-full min-h-0 bg-white">
         <div className="shrink-0 bg-white border-b border-gray-200">
-          <div className="px-4 sm:px-6 pt-4 pb-4 w-full">
+          <div className="px-4 sm:px-6 pt-4 pb-4 max-w-350 mx-auto w-full">
             <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-4 items-center">
               <div className="flex items-start gap-6 min-w-0">
                 <button
@@ -670,23 +743,30 @@ export function UserDetails({
                 </button>
                 <div className="min-w-0 flex-1">
                   {isFormActive ? (
-                    <h2 className="font-medium text-xl">Edit User</h2>
+                    <>
+                      <h2 className="font-medium text-xl">Edit User <span className="text-brand-navy">{detail?.fullName}</span></h2>
+                      <p className="text-sm text-gray-500 mt-0.5">
+                        {detail?.employeeId ? `${displayEmployeeId}` : 'No employee ID'}
+                        {detail?.department?.departmentName ? <> · {detail.department.departmentName}</> : null}
+                      </p>
+                    </>
+
                   ) : (
                     <div className="flex items-center gap-2 flex-wrap">
                       <h2 className="font-bold text-xl leading-tight">{displayName}</h2>
                       {detail?.status && <StatusBadge status={detail.status} />}
                     </div>
+
                   )}
                   {!isFormActive && (
-                    <p className="text-gray-500 text-sm mt-0.5 truncate">
-                      {displayEmployeeId ? `${displayEmployeeId}` : ''}
-                      {displayEmployeeId && detail?.jobTitle ? ' · ' : ''}
-                      {detail?.jobTitle ?? ''}
+                    <p className="text-sm text-gray-500 mt-0.5">
+                      {detail?.employeeId ? `${displayEmployeeId}` : 'No employee ID'}
+                      {detail?.department?.departmentName ? <> · {detail.department.departmentName}</> : null}
                     </p>
                   )}
                 </div>
               </div>
-              <div className="flex flex-wrap items-center justify-end gap-2 mr-10 min-w-0">
+              <div className="flex flex-wrap items-center justify-start gap-2 min-w-0">
                 {isFormActive ? (
                   <>
                     <button
@@ -724,7 +804,7 @@ export function UserDetails({
               </div>
             </div>
           </div>
-          {!isFormActive && (
+          {/* {!isFormActive && (
             <div className="px-4 sm:px-6 max-w-350 mx-auto w-full">
               <div className="flex gap-1">
                 {(['user details', 'audit information'] as const).map(tab => (
@@ -742,7 +822,7 @@ export function UserDetails({
                 ))}
               </div>
             </div>
-          )}
+          )} */}
         </div>
         <div
           ref={contentRef}

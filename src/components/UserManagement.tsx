@@ -348,7 +348,7 @@ export function UserManagement({ currentUser, userPermission, onSelectUser, onRe
 
                     <td className="relative">
                       <span className="absolute left-0 text-left top-0 h-full w-1 bg-brand-pink opacity-0 group-hover:opacity-100 transition-opacity"></span>
-                      <span className='text-right ml-5'>
+                      <span className='text-right ml-5 text-primary font-medium'>
                         {user.employeeId}
                       </span>
                     </td>

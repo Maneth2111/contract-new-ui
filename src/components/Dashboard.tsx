@@ -91,16 +91,60 @@ export default function Dashboard() {
   const maxExpirationCount = Math.max(...expiringByMonth.map(d => d.count), 0);
   const expirationYAxisMax = Math.max(maxExpirationCount, 3);
   const expirationYTicks = Array.from({ length: expirationYAxisMax + 1 }, (_, i) => i);
+  const expiringSoon30 = RAW_CONTRACTS.filter(c => c.status === 'EXPIRING_SOON' && c.remainingDays <= 30).length;
+  const expiringSoon60 = RAW_CONTRACTS.filter(c => c.status === 'EXPIRING_SOON' && c.remainingDays > 30 && c.remainingDays <= 60).length;
+  const expiringSoon90 = RAW_CONTRACTS.filter(c => c.status === 'EXPIRING_SOON' && c.remainingDays > 60 && c.remainingDays <= 90).length;
 
   return (
     <div className="space-y-6">
       {/* Summary Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-4 gap-x-8">
-        {/* Expiring Soon */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-y-4 gap-x-8">
+        {/* 30-days Expiring Soon */}
         <div className="bg-white p-4 rounded-xl shadow flex hover:scale-[1.02] transition-transform duration-200 ">
-          {/* LEFT LINE */}
-          {/* <div className="w-1 rounded-l-xl bg-orange-500 mr-4" /> */}
+          <div className="flex-1 flex items-center justify-between">
+            <div>
+              <p className="text-gray-700 font-medium">
+                Expiring Soon (30 days)
+              </p>
 
+              <p className="mt-2 text-xl font-medium text-gray-900">
+                {expiringSoon30}
+              </p>
+
+              <p className="text-sm text-red-500 mt-1">
+                Requires attention soon
+              </p>
+            </div>
+
+            <div className="p-3 rounded-lg bg-red-50">
+              <Clock className="w-6 h-6 text-red-500" />
+            </div>
+          </div>
+        </div>
+        {/* 60-days Expiring Soon */}
+        <div className="bg-white p-4 rounded-xl shadow flex hover:scale-[1.02] transition-transform duration-200 ">
+          <div className="flex-1 flex items-center justify-between">
+            <div>
+              <p className="text-gray-700 font-medium">
+                Expiring Soon (60 days)
+              </p>
+
+              <p className="mt-2 text-xl font-medium text-gray-900">
+                {expiringSoon60}
+              </p>
+
+              <p className="text-sm text-orange-500 mt-1">
+                Requires attention soon
+              </p>
+            </div>
+
+            <div className="p-3 rounded-lg bg-orange-50">
+              <Clock className="w-6 h-6 text-orange-500" />
+            </div>
+          </div>
+        </div>
+        {/* 90-days Expiring Soon */}
+        <div className="bg-white p-4 rounded-xl shadow flex hover:scale-[1.02] transition-transform duration-200 ">
           <div className="flex-1 flex items-center justify-between">
             <div>
               <p className="text-gray-700 font-medium">
@@ -108,16 +152,16 @@ export default function Dashboard() {
               </p>
 
               <p className="mt-2 text-xl font-medium text-gray-900">
-                {expiringSoon}
+                {expiringSoon90}
               </p>
 
-              <p className="text-sm text-gray-400 mt-1">
+              <p className="text-sm text-yellow-500 mt-1">
                 Requires attention soon
               </p>
             </div>
 
-            <div className="p-3 rounded-lg bg-orange-50">
-              <Clock className="w-6 h-6 text-orange-500" />
+            <div className="p-3 rounded-lg bg-yellow-50">
+              <Clock className="w-6 h-6 text-yellow-500" />
             </div>
           </div>
         </div>
@@ -312,7 +356,7 @@ export default function Dashboard() {
                   data={statusData}
                   cx="50%"
                   cy="50%"
-                  innerRadius={55}  
+                  innerRadius={55}
                   outerRadius={75}
                   paddingAngle={3}
                   dataKey="value"

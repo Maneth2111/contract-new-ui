@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Contract, ContractStatus } from '../types/contract';
 import { calculateDaysRemaining } from '../utils/contractUtils';
-import { ArrowLeft, Clock, RefreshCw, Edit2, FileText, Users, CalendarDays } from 'lucide-react';
+import { ArrowLeft, Clock, RefreshCw, Edit2, FileText, Users, CalendarDays, AlertTriangle } from 'lucide-react';
 import { titleCase } from 'text-case';
 import { ContractFormValues } from '../lib/contractSchema';
 import toast from 'react-hot-toast';
@@ -191,10 +191,6 @@ function SectionHeader({
   );
 }
 
-/**
- * A two-column table row: fixed-width label cell (with right border) + value cell.
- * Matches the screenshot's label/value table layout exactly.
- */
 function FieldRow({
   label,
   children,
@@ -205,20 +201,39 @@ function FieldRow({
   empty?: boolean;
 }) {
   return (
-    <tr className="border-b border-gray-100 last:border-b-0">
-      <td className="w-[220px] min-w-[220px] px-4 py-3 border-r border-gray-100 align-middle">
-        <span className="text-[11px] font-semibold tracking-widest text-gray-400 uppercase whitespace-nowrap">
+    <tr className="border-b border-gray-100 last:border-b-0 block sm:table-row">
+
+      {/* LABEL */}
+      <td className="
+        block sm:table-cell border-r
+        w-full sm:w-55 sm:min-w-55
+        px-4 pt-3 pb-1 sm:py-3
+        border sm:border-r border-gray-100
+        bg-gray-50
+      ">
+        <span className="text-xs font-medium text-brand-navy uppercase">
           {label}
         </span>
       </td>
-      <td className="px-4 py-3 align-middle">
-        <span className={empty ? 'text-gray-400 italic text-sm' : 'text-sm text-gray-800'}>
+
+      {/* VALUE */}
+      <td className="
+        block sm:table-cell
+        w-full
+        px-4 pb-3 pt-1 sm:py-3 bg-white
+      ">
+        <span className={empty
+          ? 'text-gray-400 italic text-sm'
+          : 'text-sm text-gray-800'
+        }>
           {children}
         </span>
       </td>
+
     </tr>
   );
 }
+
 
 /** Card wrapper — border + rounded corners, clips the green header flush to top */
 function SectionCard({ children }: { children: React.ReactNode }) {
@@ -456,7 +471,6 @@ export function ContractDetails({
     return (
       <div className="space-y-0">
         {/* ── CONTRACT INFORMATION ── */}
-        {/* ── CONTRACT INFORMATION ── */}
         <SectionCard>
           <SectionHeader icon={<FileText />} title="Contract Information" />
           <FieldTable>
@@ -472,23 +486,20 @@ export function ContractDetails({
                   rel="noreferrer"
                   className="inline-flex items-center gap-1.5 text-primary hover:underline text-sm"
                 >
-                  <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-                    <circle cx="9" cy="7" r="4" />
-                    <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-                    <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-                  </svg>
                   {viewMeta.msChannelTitle ?? 'Teams Channel'}
                 </a>
               ) : (
-                <span className="text-gray-400 italic text-sm">Not configured</span>
+                <span className="text-gray-400 italic text-sm">No alerts days</span>
               )}
             </FieldRow>
             <FieldRow label="Alert Days" empty={!detail.alertDays}>
-              {detail.alertDays ? `${detail.alertDays} days` : 'Not configured'}
+              {detail.alertDays ? `${detail.alertDays} days` : 'No alerts days'}
             </FieldRow>
             <FieldRow label="Contract Terms" empty={!detail.contractTerm}>
-              {detail.contractTerm || 'No terms specified'}
+              {detail.contractTerm || 'No contract terms specified'}
+            </FieldRow>
+            <FieldRow label="Remarks" empty={!detail.remark}>
+              {detail.remark || 'No remarks specified'}
             </FieldRow>
           </FieldTable>
         </SectionCard>
@@ -514,7 +525,7 @@ export function ContractDetails({
                     </div>
                     <div className="leading-tight">
                       <p className="text-sm font-medium text-gray-800">{p.partnerName}</p>
-                      <p className="text-xs text-gray-400">Partner {i + 1}</p>
+                      <p className="text-xs text-gray-400">Partner {partners.length > 1 && (` ${i + 1}`)}</p>
                     </div>
                   </div>
                 );
@@ -555,89 +566,107 @@ export function ContractDetails({
         <SectionCard>
           <SectionHeader icon={<CalendarDays />} title="Contract Dates & Value" />
 
-          {/*
-            2×2 grid matching the screenshot exactly:
-            each cell has its own label + value stacked vertically.
-            Inner borders: right border on left cells, bottom border on top row.
-          */}
           <table className="w-full border-collapse">
             <tbody>
-              {/* Row 1: Effective Date | Expiry Date */}
+
+              {/* ROW 1 */}
               <tr className="border-b border-gray-100">
+
                 {/* Effective Date */}
-                <td className="w-1/2 px-4 py-3 border-r border-gray-100 align-top">
-                  <p className="text-[11px] font-semibold tracking-widest text-gray-400 uppercase mb-1.5">
+                <td className="w-1/4 bg-gray-50 px-4 py-3 border-r border-gray-100">
+                  <span className="text-xs font-medium text-brand-navy uppercase">
                     Effective Date
-                  </p>
-                  <p className="text-sm text-gray-800 flex items-center gap-1.5">
-                    <CalendarDays className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+                  </span>
+                </td>
+
+                <td className="w-1/4 px-4 py-3 border-r border-gray-100">
+                  <div className="text-sm text-gray-800 flex items-center gap-1.5 whitespace-nowrap">
+                    <CalendarDays className="w-3.5 h-3.5 text-gray-400" />
                     {new Date(detail.effectiveDate).toLocaleDateString('en-US', {
                       month: 'short',
                       day: 'numeric',
                       year: 'numeric',
                     })}
-                  </p>
+                  </div>
                 </td>
 
-                {/* Expiry Date */}
-                <td className="w-1/2 px-4 py-3 align-top">
-                  <p className="text-[11px] font-semibold tracking-widest text-gray-400 uppercase mb-1.5">
+                {/* Expiry */}
+                <td className="bg-gray-50 px-4 py-3 border-r border-gray-100">
+                  <span className="text-xs font-medium text-brand-navy uppercase">
                     Expiry Date
-                  </p>
-                  <div className="flex items-start gap-1.5 flex-wrap">
-                    <p className="text-sm text-gray-800 flex items-center gap-1.5">
-                      <CalendarDays className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+                  </span>
+                </td>
+
+                <td className="px-4 py-3 border-r border-gray-100">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-sm text-gray-800 flex items-center gap-1.5 whitespace-nowrap">
+                      <CalendarDays className="w-3.5 h-3.5 text-gray-400" />
                       {new Date(detail.expireDate).toLocaleDateString('en-US', {
                         month: 'short',
                         day: 'numeric',
                         year: 'numeric',
                       })}
-                    </p>
+                    </span>
+
                     {isOverdue && (
-                      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-700 shrink-0">
+                      <span className="text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded whitespace-nowrap">
                         {Math.abs(remainingDays)} days overdue
                       </span>
                     )}
+
                     {!isOverdue && isExpiringSoon && (
-                      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-700 shrink-0">
+                      <span className="text-xs bg-amber-100 text-amber-600 px-2 py-0.5 rounded whitespace-nowrap">
                         {remainingDays} days left
                       </span>
                     )}
                   </div>
                 </td>
+
               </tr>
 
-              {/* Row 2: Renewal Frequency | Total Contract Value */}
+              {/* ROW 2 */}
               <tr>
-                {/* Renewal Frequency */}
-                <td className="w-1/2 px-4 py-3 border-r border-gray-100 align-top">
-                  <p className="text-[11px] font-semibold tracking-widest text-gray-400 uppercase mb-1.5">
+
+                {/* Renewal */}
+                <td className="w-1/4 bg-gray-50 px-4 py-3 border-r border-gray-100">
+                  <span className="text-xs font-medium text-brand-navy uppercase">
                     Renewal Frequency
-                  </p>
-                  <p className="text-sm text-gray-400 italic">
+                  </span>
+                </td>
+
+                <td className="w-1/4 px-4 py-3">
+                  <span className="text-sm text-gray-400 italic whitespace-nowrap">
                     {detail.renewalFrequencyMonths
                       ? `${detail.renewalFrequencyMonths} month${detail.renewalFrequencyMonths > 1 ? 's' : ''}`
                       : 'Not calculated'}
-                  </p>
+                  </span>
                 </td>
 
-                {/* Total Contract Value */}
-                <td className="w-1/2 px-4 py-3 align-top">
-                  <p className="text-[11px] font-semibold tracking-widest text-gray-400 uppercase mb-1.5">
+                {/* Value */}
+                <td className="bg-gray-50 px-4 py-3 border-r border-gray-100">
+                  <span className="text-xs font-medium text-brand-navy uppercase">
                     Total Contract Value
-                  </p>
-                  <div className="flex items-baseline gap-0.5">
-                    <span className="text-sm text-gray-500 font-medium">$</span>
-                    <span className="text-xl font-semibold text-gray-900">
+                  </span>
+                </td>
+
+                <td className="px-4 py-3">
+                  <div className="inline-flex items-center gap-1 bg-green-50 px-3 py-1 rounded-full whitespace-nowrap">
+                    <span className="text-green-600 text-sm font-medium">$</span>
+                    <span className="text-green-700 text-sm font-semibold">
                       {detail.contractValue.toLocaleString()}
                     </span>
-                    <span className="text-xs text-gray-400 ml-1">USD</span>
+                    <span className="text-green-600 text-xs">USD</span>
                   </div>
                 </td>
+
               </tr>
+
             </tbody>
           </table>
         </SectionCard>
+
+
+
 
         {/* Remarks — only if present */}
         {detail.remark && (
@@ -697,11 +726,17 @@ export function ContractDetails({
     ? 'flex flex-col h-full min-h-0 bg-white'
     : `bg-white rounded-lg flex flex-col ${useInnerScroll ? `min-h-0 ${panelHeightClass}` : ''} ${isPage ? 'border border-gray-200' : `w-full max-w-4xl mx-4 ${useInnerScroll ? panelHeightClass : ''}`}`;
 
+  // ── Shared centering class — applied to EVERY horizontal band in the top bar
+  //    and the body, so they all share the same left/right alignment.
+  const centerClass = isFullscreen ? 'max-w-350 mx-auto w-full' : '';
+
   const panel = (
     <div className={panelShellClass}>
       {/* ── Top bar ── */}
       <div className="shrink-0 bg-white border-b border-gray-200">
-        <div className={`px-4 sm:px-6 pt-4 ${isFullscreen ? 'w-full' : ''}`}>
+
+        {/* Single wrapper — same max-width + padding for ALL header content */}
+        <div className={`px-4 sm:px-6 pt-4 ${centerClass}`}>
 
           {/* Breadcrumb / back link */}
           {(isFullscreen || variant === 'modal') && (
@@ -718,7 +753,7 @@ export function ContractDetails({
           )}
 
           {/* Title row + action buttons on the right */}
-          <div className="flex items-start justify-between gap-4 mb-1">
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-1">
             <div className="min-w-0">
               {isFormActive ? (
                 <h2 className="text-xl font-semibold text-gray-900">
@@ -726,7 +761,7 @@ export function ContractDetails({
                 </h2>
               ) : (
                 <div className="flex items-center gap-2 flex-wrap">
-                  <h2 className="text-xl font-bold text-gray-900 leading-tight">
+                  <h2 className="text-xl font-bold text-gray-900 leading-tight whitespace-nowrap">
                     {c.title}
                   </h2>
                   {/* Status badge */}
@@ -740,7 +775,7 @@ export function ContractDetails({
                       );
                     if (s === 'EXPIRING_SOON')
                       return (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-700 border border-amber-200">
+                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-orange-100 text-orange-700 border border-orange-200">
                           Expiring Soon
                         </span>
                       );
@@ -761,17 +796,17 @@ export function ContractDetails({
                   })()}
                 </div>
               )}
-              {/* Subtitle: person · department */}
+              {/* Subtitle: contractCode · department */}
               {!isFormActive && (
-                <p className="text-sm text-gray-500 mt-0.5">
+                <p className="text-sm text-gray-500 mt-0.5 whitespace-nowrap">
                   {c.contractCode}
-                  {c.department ? <> · {c.department}</>: null}
+                  {c.department ? <> · {c.department}</> : null}
                 </p>
               )}
             </div>
 
             {/* Right: action buttons */}
-            <div className="flex flex-nowrap items-center gap-2 shrink-0">
+            <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 shrink-0 w-full sm:w-auto">
               {isFormActive ? (
                 <>
                   <button
@@ -841,12 +876,8 @@ export function ContractDetails({
             }
             if (days <= 90) {
               return (
-                <div className="flex items-start gap-2 mt-3 mb-3 px-3 py-2.5 rounded-lg bg-amber-50 border border-amber-200 text-sm text-amber-700">
-                  <svg className="w-4 h-4 shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
-                    <line x1="12" y1="9" x2="12" y2="13" />
-                    <line x1="12" y1="17" x2="12.01" y2="17" />
-                  </svg>
+                <div className="flex items-start gap-2 mt-3 mb-3 px-3 py-2.5 rounded-lg bg-amber-50 border border-amber-200 text-sm text-orange-600">
+                  <AlertTriangle className="w-6 h-6 text-yellow-600" />
                   <span>
                     This contract expires on{' '}
                     <strong>
@@ -861,11 +892,9 @@ export function ContractDetails({
             }
             return null;
           })()}
-        </div>
 
-        {/* Tabs — hidden in form mode */}
-        {!isFormActive && (
-          <div className={`px-4 sm:px-6 ${isFullscreen ? 'max-w-350 mx-auto w-full' : ''}`}>
+          {/* Tabs — hidden in form mode, now INSIDE the shared centering wrapper */}
+          {!isFormActive && (
             <div className="flex gap-1">
               {(['details', 'history'] as const).map((tab) => (
                 <button
@@ -881,16 +910,17 @@ export function ContractDetails({
                 </button>
               ))}
             </div>
-          </div>
-        )}
+          )}
+
+        </div>{/* ← end shared centering wrapper */}
       </div>
 
       {/* ── Body ── */}
       <div
         className={
           useInnerScroll
-            ? `flex-1 min-h-0 overflow-y-auto px-4 sm:px-6 py-4 ${isFullscreen ? 'max-w-350 mx-auto w-full' : ''}`
-            : `px-4 sm:px-6 py-4 ${isFullscreen ? 'max-w-350 mx-auto w-full' : ''}`
+            ? `flex-1 min-h-0 overflow-y-auto px-4 sm:px-6 py-4 ${centerClass}`
+            : `px-4 sm:px-6 py-4 ${centerClass}`
         }
       >
         {isFormActive || activeTab === 'details' ? (

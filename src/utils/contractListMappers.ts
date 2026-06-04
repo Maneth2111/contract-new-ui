@@ -69,3 +69,20 @@ export function listStatusBadgeClass (status: Contract['status']): string {
       return 'bg-gray-100 text-gray-800'
   }
 }
+
+export function listStatusTextClass (status: Contract['status']): string {
+  switch (status) {
+    case 'Active':
+      return 'text-green-600'
+    case 'Expired':
+      return 'text-gray-600'
+    case 'Expiring Soon':
+      return 'text-yellow-600'
+    case 'Overdue':
+      return 'text-red-600'
+    case 'Closed':
+      return 'text-gray-600'
+    default:
+      return 'text-gray-600'
+  }
+}
