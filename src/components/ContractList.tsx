@@ -221,7 +221,7 @@ export function ContractList({
 
             <div className="min-w-0">
               <p className="text-xs sm:text-sm text-gray-600 truncate">
-                30-Day Warning
+                Expiring in 30 Days
               </p>
 
               <p className="mt-1 text-lg sm:text-xl font-semibold">
@@ -242,7 +242,7 @@ export function ContractList({
 
             <div className="min-w-0">
               <p className="text-xs sm:text-sm text-gray-600 truncate">
-                60-Day Warning
+                Expiring in 60 Days
               </p>
 
               <p className="mt-1 text-lg sm:text-xl font-semibold">
@@ -263,7 +263,7 @@ export function ContractList({
 
             <div className="min-w-0">
               <p className="text-xs sm:text-sm text-gray-600 truncate">
-                90-Day Warning
+                Expiring in 90 Days
               </p>
 
               <p className="mt-1 text-lg sm:text-xl font-semibold">

@@ -665,8 +665,66 @@ export function ContractDetails({
           </table>
         </SectionCard>
 
+        {/* ── UPLOADED DOCUMENTS ── */}
+        {/* <SectionCard>
+          <SectionHeader
+            icon={<FileText />}
+            title="Uploaded Documents"
+          />
 
+          {apiFiles.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-8 gap-2">
+              <FileText className="w-8 h-8 text-gray-200" />
+              <p className="text-sm text-gray-400 italic">No documents uploaded</p>
+            </div>
+          ) : (
+            <ul className="divide-y divide-gray-100">
+              {apiFiles.map((file) => {
+                const isDownloading = downloadingFileIds.has(file.id);
+                const ext = file.name?.split('.').pop()?.toLowerCase() ?? '';
+                const isPdf = ext === 'pdf';
 
+                return (
+                  <li key={file.id} className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors"> */}
+                    {/* icon */}
+                    {/* <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${isPdf ? 'bg-red-50' : 'bg-blue-50'}`}>
+                      <FileText className={`w-4 h-4 ${isPdf ? 'text-red-500' : 'text-blue-500'}`} />
+                    </div> */}
+
+                    {/* name + meta */}
+                    {/* <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-gray-800 truncate">{file.name}</p>
+                      <p className="text-xs text-gray-400 mt-0.5">
+                        {file.size ? `${(file.size / 1024).toFixed(1)} KB` : ''}
+                        {file.size && file.uploadedAt ? ' · ' : ''}
+                        {file.uploadedAt
+                          ? `Uploaded ${new Date(file.uploadedAt).toLocaleDateString('en-US', {
+                            month: 'short', day: 'numeric', year: 'numeric',
+                          })}`
+                          : ''}
+                        {file.uploadedBy ? ` by ${file.uploadedBy}` : ''}
+                      </p>
+                    </div> */}
+
+                    {/* download button */}
+                    {/* <button
+                      type="button"
+                      disabled={isDownloading}
+                      onClick={() => {
+                        if (file.url) window.open(file.url, '_blank');
+                      }}
+                      className="text-sm text-primary hover:text-primary/80 font-medium shrink-0 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    >
+                      {isDownloading ? 'Downloading…' : 'Download'}
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </SectionCard> */}
+
+          
 
         {/* Remarks — only if present */}
         {detail.remark && (
