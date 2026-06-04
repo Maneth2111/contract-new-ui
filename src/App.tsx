@@ -201,7 +201,7 @@ export default function App() {
 
   // ── Render ────────────────────────────────────────────────────────────────
   return (
-    <div className="min-h-screen bg-primary/5">
+    <div className="min-h-screen bg-primary/15">
       <Toaster position="top-center" toastOptions={{ duration: 4000 }} />
 
       {/* Header with tab navigation */}

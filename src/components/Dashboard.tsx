@@ -100,7 +100,7 @@ export default function Dashboard() {
       {/* Summary Metrics */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-y-4 gap-x-8">
         {/* 30-days Expiring Soon */}
-        <div className="bg-white p-4 rounded-xl shadow flex hover:scale-[1.02] transition-transform duration-200 ">
+        <div className="bg-white p-4 rounded-xl shadow-md shadow-gray-300 flex hover:scale-[1.02] transition-transform duration-200 ">
           <div className="flex-1 flex items-center justify-between">
             <div>
               <p className="text-gray-700 font-medium">
@@ -116,13 +116,13 @@ export default function Dashboard() {
               </p>
             </div>
 
-            <div className="p-3 rounded-lg bg-red-50">
+            <div className="p-3 rounded-lg bg-red-100">
               <Clock className="w-6 h-6 text-red-500" />
             </div>
           </div>
         </div>
         {/* 60-days Expiring Soon */}
-        <div className="bg-white p-4 rounded-xl shadow flex hover:scale-[1.02] transition-transform duration-200 ">
+        <div className="bg-white p-4 rounded-xl shadow-md shadow-gray-300flex hover:scale-[1.02] transition-transform duration-200 ">
           <div className="flex-1 flex items-center justify-between">
             <div>
               <p className="text-gray-700 font-medium">
@@ -138,13 +138,13 @@ export default function Dashboard() {
               </p>
             </div>
 
-            <div className="p-3 rounded-lg bg-orange-50">
+            <div className="p-3 rounded-lg bg-orange-100">
               <Clock className="w-6 h-6 text-orange-500" />
             </div>
           </div>
         </div>
         {/* 90-days Expiring Soon */}
-        <div className="bg-white p-4 rounded-xl shadow flex hover:scale-[1.02] transition-transform duration-200 ">
+        <div className="bg-white p-4 rounded-xl shadow-md shadow-gray-300 flex hover:scale-[1.02] transition-transform duration-200 ">
           <div className="flex-1 flex items-center justify-between">
             <div>
               <p className="text-gray-700 font-medium">
@@ -160,7 +160,7 @@ export default function Dashboard() {
               </p>
             </div>
 
-            <div className="p-3 rounded-lg bg-yellow-50">
+            <div className="p-3 rounded-lg bg-yellow-100">
               <Clock className="w-6 h-6 text-yellow-500" />
             </div>
           </div>
@@ -185,7 +185,7 @@ export default function Dashboard() {
               </p>
             </div>
 
-            <div className="p-3 rounded-lg bg-red-50">
+            <div className="p-3 rounded-lg bg-red-100">
               <AlertTriangle className="w-6 h-6 text-red-500" />
             </div>
           </div>
@@ -210,14 +210,14 @@ export default function Dashboard() {
               </p>
             </div>
 
-            <div className="p-3 rounded-lg bg-green-50">
+            <div className="p-3 rounded-lg bg-green-100">
               <CheckCircle className="w-6 h-6 text-green-500" />
             </div>
           </div>
         </div>
 
         {/* Total Contracts */}
-        <div className="bg-white p-4 rounded-xl shadow flex hover:scale-[1.02] transition-transform duration-200">
+        <div className="bg-white p-4 rounded-xl shadow-md shadow-gray-300 flex hover:scale-[1.02] transition-transform duration-200">
           {/* <div className="w-1 rounded-l-xl bg-blue-500 mr-4" /> */}
 
           <div className="flex-1 flex items-center justify-between">
@@ -235,14 +235,14 @@ export default function Dashboard() {
               </p>
             </div>
 
-            <div className="p-3 rounded-lg bg-blue-50">
+            <div className="p-3 rounded-lg bg-blue-100">
               <FileText className="w-6 h-6 text-blue-500" />
             </div>
           </div>
         </div>
 
         {/* Total Value */}
-        <div className="bg-white p-4 rounded-xl shadow flex hover:scale-[1.02] transition-transform duration-200">
+        <div className="bg-white p-4 rounded-xl shadow-md shadow-gray-300 flex hover:scale-[1.02] transition-transform duration-200">
           {/* <div className="w-1 rounded-l-xl bg-green-500 mr-4" /> */}
 
           <div className="flex-1 flex items-center justify-between">
@@ -260,14 +260,14 @@ export default function Dashboard() {
               </p>
             </div>
 
-            <div className="p-3 rounded-lg bg-green-50">
+            <div className="p-3 rounded-lg bg-green-100">
               <DollarSign className="w-6 h-6 text-green-500" />
             </div>
           </div>
         </div>
 
         {/* Partners */}
-        <div className="bg-white p-4 rounded-xl shadow flex hover:scale-[1.02] transition-transform duration-200">
+        <div className="bg-white p-4 rounded-xl shadow-md shadow-gray-300 flex hover:scale-[1.02] transition-transform duration-200">
           {/* <div className="w-1 rounded-l-xl bg-purple-500 mr-4" /> */}
 
           <div className="flex-1 flex items-center justify-between">
@@ -285,7 +285,7 @@ export default function Dashboard() {
               </p>
             </div>
 
-            <div className="p-3 rounded-lg bg-purple-50">
+            <div className="p-3 rounded-lg bg-purple-100">
               <FileText className="w-6 h-6 text-purple-500" />
             </div>
           </div>
@@ -295,7 +295,7 @@ export default function Dashboard() {
       {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Contracts by Department */}
-        <div className="bg-white p-6 rounded-lg shadow-sm hover:scale-[1.02] transition-transform duration-200">
+        <div className="bg-white p-6 rounded-lg shadow-md shadow-gray-300 hover:scale-[1.02] transition-transform duration-200">
           <div className="flex items-center justify-between gap-4 mb-6">
             <h3 className="font-medium text-gray-900">Contracts by Department</h3>
             <span className="text-sm text-gray-500 shrink-0">By contract count</span>
@@ -343,7 +343,7 @@ export default function Dashboard() {
         </div>
 
         {/* Status Distribution */}
-        <div className="bg-white p-6 rounded-xl shadow-sm hover:scale-[1.02] transition-transform duration-200">
+        <div className="bg-white p-6 rounded-xl shadow-md shadow-gray-300 hover:scale-[1.02] transition-transform duration-200">
           <h3 className="mb-4 text-gray-700 font-semibold">
             Status Distribution
           </h3>

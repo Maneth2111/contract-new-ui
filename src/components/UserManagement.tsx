@@ -194,7 +194,7 @@ export function UserManagement({ currentUser, userPermission, onSelectUser, onRe
     <div className="space-y-6">
       {/* Summary cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="bg-white p-6 rounded-lg shadow hover:scale-[1.02] transition-transform duration-200">
+        <div className="bg-white p-6 rounded-lg shadow-md hover:scale-[1.02] border border-gray-200transition-transform duration-200">
           <div className="flex items-center gap-3">
             <span><Users className="w-7 h-7" /></span>
             <div>
@@ -203,7 +203,7 @@ export function UserManagement({ currentUser, userPermission, onSelectUser, onRe
             </div>
           </div>
         </div>
-        <div className="bg-white p-6 rounded-lg shadow hover:scale-[1.02] transition-transform duration-200">
+        <div className="bg-white p-6 rounded-lg shadow-md hover:scale-[1.02] border border-gray-200transition-transform duration-200">
           <div className="flex items-center gap-3">
             <span><Users className="w-7 h-7" /></span>
             <div>
@@ -212,7 +212,7 @@ export function UserManagement({ currentUser, userPermission, onSelectUser, onRe
             </div>
           </div>
         </div>
-        <div className="bg-white p-6 rounded-lg shadow hover:scale-[1.02] transition-transform duration-200">
+        <div className="bg-white p-6 rounded-lg shadow-md hover:scale-[1.02] border border-gray-200transition-transform duration-200">
           <div className="flex items-center gap-3">
             <span><Users className="w-7 h-7 text-red-600" /></span>
             <div>
@@ -221,7 +221,7 @@ export function UserManagement({ currentUser, userPermission, onSelectUser, onRe
             </div>
           </div>
         </div>
-        <div className="bg-white p-6 rounded-lg shadow hover:scale-[1.02] transition-transform duration-200">
+        <div className="bg-white p-6 rounded-lg shadow-md hover:scale-[1.02] border border-gray-200transition-transform duration-200">
           <div className="flex items-center gap-3">
             <span><Users className="w-7 h-7" /></span>
             <div>
@@ -233,7 +233,7 @@ export function UserManagement({ currentUser, userPermission, onSelectUser, onRe
       </div>
 
       {/* Filters */}
-      <div className="bg-white p-4 rounded-lg shadow">
+      <div className="bg-white p-4 rounded-lg shadow-md">
         <div className="flex items-center justify-between mb-4 gap-3">
           <h2 className="text-lg sm:text-2xl font-medium truncate">User Management</h2>
           {userPermission.create && (
@@ -307,7 +307,7 @@ export function UserManagement({ currentUser, userPermission, onSelectUser, onRe
       </div>
 
       {/* User Table */}
-      <div className="bg-white rounded-lg shadow">
+      <div className="bg-white rounded-lg shadow-md">
         <div
           className={[
             'overflow-x-auto',
