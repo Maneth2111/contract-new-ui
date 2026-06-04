@@ -566,13 +566,57 @@ export function ContractDetails({
         <SectionCard>
           <SectionHeader icon={<CalendarDays />} title="Contract Dates & Value" />
 
-          <table className="w-full border-collapse">
+          {/* --- MOBILE / TABLET (STACKED) */}
+          <div className="block sm:hidden">
+
+            <FieldTable>
+              <FieldRow label="Effective Date">
+                <div className="flex items-center gap-1.5">
+                  <CalendarDays className="w-3.5 h-3.5 text-gray-400" />
+                  {new Date(detail.effectiveDate).toLocaleDateString()}
+                </div>
+              </FieldRow>
+
+              <FieldRow label="Expiry Date">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="flex items-center gap-1.5">
+                    <CalendarDays className="w-3.5 h-3.5 text-gray-400" />
+                    {new Date(detail.expireDate).toLocaleDateString()}
+                  </span>
+
+                  {isOverdue && (
+                    <span className="text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded">
+                      {Math.abs(remainingDays)} days overdue
+                    </span>
+                  )}
+                </div>
+              </FieldRow>
+
+              <FieldRow label="Renewal Frequency">
+                {detail.renewalFrequencyMonths
+                  ? `${detail.renewalFrequencyMonths} months`
+                  : 'Not calculated'}
+              </FieldRow>
+
+              <FieldRow label="Total Contract Value">
+                <div className="inline-flex items-center gap-1 bg-green-50 px-3 py-1 rounded-full">
+                  <span className="text-green-600">$</span>
+                  <span className="text-green-700">
+                    {detail.contractValue.toLocaleString()}
+                  </span>
+                  <span className="text-green-600 text-xs">USD</span>
+                </div>
+              </FieldRow>
+            </FieldTable>
+
+          </div>
+
+          {/* --- DESKTOP (KEEP YOUR DESIGN) */}
+          <table className="hidden sm:table w-full border-collapse">
             <tbody>
 
               {/* ROW 1 */}
               <tr className="border-b border-gray-100">
-
-                {/* Effective Date */}
                 <td className="w-1/4 bg-gray-50 px-4 py-3 border-r border-gray-100">
                   <span className="text-xs font-medium text-brand-navy uppercase">
                     Effective Date
@@ -580,17 +624,12 @@ export function ContractDetails({
                 </td>
 
                 <td className="w-1/4 px-4 py-3 border-r border-gray-100">
-                  <div className="text-sm text-gray-800 flex items-center gap-1.5 whitespace-nowrap">
+                  <div className="text-sm flex items-center gap-1.5 whitespace-nowrap">
                     <CalendarDays className="w-3.5 h-3.5 text-gray-400" />
-                    {new Date(detail.effectiveDate).toLocaleDateString('en-US', {
-                      month: 'short',
-                      day: 'numeric',
-                      year: 'numeric',
-                    })}
+                    {new Date(detail.effectiveDate).toLocaleDateString()}
                   </div>
                 </td>
 
-                {/* Expiry */}
                 <td className="bg-gray-50 px-4 py-3 border-r border-gray-100">
                   <span className="text-xs font-medium text-brand-navy uppercase">
                     Expiry Date
@@ -599,50 +638,34 @@ export function ContractDetails({
 
                 <td className="px-4 py-3 border-r border-gray-100">
                   <div className="flex items-center justify-between gap-2">
-                    <span className="text-sm text-gray-800 flex items-center gap-1.5 whitespace-nowrap">
+                    <span className="flex items-center gap-1.5 whitespace-nowrap">
                       <CalendarDays className="w-3.5 h-3.5 text-gray-400" />
-                      {new Date(detail.expireDate).toLocaleDateString('en-US', {
-                        month: 'short',
-                        day: 'numeric',
-                        year: 'numeric',
-                      })}
+                      {new Date(detail.expireDate).toLocaleDateString()}
                     </span>
 
                     {isOverdue && (
-                      <span className="text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded whitespace-nowrap">
+                      <span className="text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded">
                         {Math.abs(remainingDays)} days overdue
-                      </span>
-                    )}
-
-                    {!isOverdue && isExpiringSoon && (
-                      <span className="text-xs bg-amber-100 text-amber-600 px-2 py-0.5 rounded whitespace-nowrap">
-                        {remainingDays} days left
                       </span>
                     )}
                   </div>
                 </td>
-
               </tr>
 
               {/* ROW 2 */}
               <tr>
-
-                {/* Renewal */}
-                <td className="w-1/4 bg-gray-50 px-4 py-3 border-r border-gray-100">
+                <td className="bg-gray-50 px-4 py-3 border-r border-gray-100">
                   <span className="text-xs font-medium text-brand-navy uppercase">
                     Renewal Frequency
                   </span>
                 </td>
 
-                <td className="w-1/4 px-4 py-3">
-                  <span className="text-sm text-gray-400 italic whitespace-nowrap">
-                    {detail.renewalFrequencyMonths
-                      ? `${detail.renewalFrequencyMonths} month${detail.renewalFrequencyMonths > 1 ? 's' : ''}`
-                      : 'Not calculated'}
-                  </span>
+                <td className="px-4 py-3 border-r border-gray-100">
+                  {detail.renewalFrequencyMonths
+                    ? `${detail.renewalFrequencyMonths} months`
+                    : <span className="italic text-gray-400">Not calculated</span>}
                 </td>
 
-                {/* Value */}
                 <td className="bg-gray-50 px-4 py-3 border-r border-gray-100">
                   <span className="text-xs font-medium text-brand-navy uppercase">
                     Total Contract Value
@@ -650,21 +673,19 @@ export function ContractDetails({
                 </td>
 
                 <td className="px-4 py-3">
-                  <div className="inline-flex items-center gap-1 bg-green-50 px-3 py-1 rounded-full whitespace-nowrap">
-                    <span className="text-green-600 text-sm font-medium">$</span>
-                    <span className="text-green-700 text-sm font-semibold">
+                  <div className="inline-flex items-center gap-1 bg-green-50 px-3 py-1 rounded-full">
+                    <span className="text-green-600">$</span>
+                    <span className="text-green-700">
                       {detail.contractValue.toLocaleString()}
                     </span>
                     <span className="text-green-600 text-xs">USD</span>
                   </div>
                 </td>
-
               </tr>
 
             </tbody>
           </table>
         </SectionCard>
-
         {/* ── UPLOADED DOCUMENTS ── */}
         {/* <SectionCard>
           <SectionHeader
@@ -686,13 +707,13 @@ export function ContractDetails({
 
                 return (
                   <li key={file.id} className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors"> */}
-                    {/* icon */}
-                    {/* <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${isPdf ? 'bg-red-50' : 'bg-blue-50'}`}>
+        {/* icon */}
+        {/* <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${isPdf ? 'bg-red-50' : 'bg-blue-50'}`}>
                       <FileText className={`w-4 h-4 ${isPdf ? 'text-red-500' : 'text-blue-500'}`} />
                     </div> */}
 
-                    {/* name + meta */}
-                    {/* <div className="flex-1 min-w-0">
+        {/* name + meta */}
+        {/* <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-gray-800 truncate">{file.name}</p>
                       <p className="text-xs text-gray-400 mt-0.5">
                         {file.size ? `${(file.size / 1024).toFixed(1)} KB` : ''}
@@ -706,8 +727,8 @@ export function ContractDetails({
                       </p>
                     </div> */}
 
-                    {/* download button */}
-                    {/* <button
+        {/* download button */}
+        {/* <button
                       type="button"
                       disabled={isDownloading}
                       onClick={() => {
@@ -724,7 +745,7 @@ export function ContractDetails({
           )}
         </SectionCard> */}
 
-          
+
 
         {/* Remarks — only if present */}
         {detail.remark && (
