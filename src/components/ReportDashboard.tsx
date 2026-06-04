@@ -22,6 +22,7 @@ import {
   type ContractStatus,
 } from '../data/mockData'; // adjust path to wherever you placed the mock data file
 import { CustomSelect } from './ui/CustomSelect';
+import { listStatusTextClass } from '../utils/contractListMappers';
 
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -530,7 +531,7 @@ export function ReportDashboard({ currentUser, onSelectContract }: ReportDashboa
                   const daysRemaining = calculateDaysRemaining(contract.expiryDate);
                   return (
                     <tr key={contract.id} onClick={() => onSelectContract?.(contract)} className="group relative transition-all hover:bg-primary/10 cursor-pointer">
-                      <td className="relative whitespace-nowrap lg:max-w-0" title={contract.contractCode}>
+                      <td className="relative whitespace-nowrap lg:max-w-0 text-primary font-medium" title={contract.contractCode}>
                         <span className="absolute left-0 top-0 h-full w-1 bg-brand-pink opacity-0 group-hover:opacity-100 transition-opacity"></span>
                         {contract.contractCode}
                       </td>
@@ -561,7 +562,7 @@ export function ReportDashboard({ currentUser, onSelectContract }: ReportDashboa
                       <td className="whitespace-nowrap">{formatDate(contract.effectiveDate)}</td>
                       <td className="whitespace-nowrap">{formatDate(contract.expiryDate)}</td>
                       <td className="whitespace-nowrap">
-                        <span className={daysRemaining < 0 ? 'text-red-600' : ''}>
+                        <span className={`${listStatusTextClass(contract.status)}`}>
                           {daysRemaining} days
                         </span>
                       </td>

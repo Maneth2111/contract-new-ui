@@ -28,14 +28,11 @@ interface NotificationCenterProps {
 const NOW = new Date("2026-05-26T10:30:00");
 
 const MOCK_CONTRACTS: ContractNotification[] = [
-  { id: 56, code: "CCF-2026-049", title: "Test Contract",     pic: "Test User",  dept: "CEO Office",         partner: "YTest Corp",      expiry: "2026-05-16", status: "OVERDUE",       alertedAt: "2026-05-26T10:28:00" },
   { id: 50, code: "CCF-2026-046", title: "Legal Contract",    pic: "John",       dept: "Legal & Compliance", partner: "Global Software",  expiry: "2026-08-19", status: "EXPIRING_SOON", alertedAt: "2026-05-26T08:00:00" },
   { id: 49, code: "CCF-2026-045", title: "Contract Testing",  pic: "John",       dept: "Legal & Compliance", partner: "Training Experts", expiry: "2026-07-21", status: "EXPIRING_SOON", alertedAt: "2026-05-25T09:15:00" },
   { id: 48, code: "CCF-2026-044", title: "Lease Agreement",   pic: "John",       dept: "Admin & Marketing",  partner: "Global Software",  expiry: "2026-08-19", status: "EXPIRING_SOON", alertedAt: "2026-05-24T14:00:00" },
   { id: 46, code: "CCF-2026-042", title: "Testing Agreement", pic: "Test User",  dept: "Legal & Compliance", partner: "YTest Corp",       expiry: "2026-06-18", status: "EXPIRING_SOON", alertedAt: "2026-05-26T09:30:00" },
   { id: 43, code: "CCF-2026-039", title: "Testing",           pic: "John Smith", dept: "IT Department",      partner: "ABC Company",      expiry: "2026-07-18", status: "EXPIRING_SOON", alertedAt: "2026-05-23T07:45:00" },
-  { id: 42, code: "CCF-2026-038", title: "Test Contract B",   pic: "Test User",  dept: "CEO Office",         partner: "YTest Corp",       expiry: "2026-07-16", status: "EXPIRING_SOON", alertedAt: "2026-05-20T11:00:00" },
-  { id: 40, code: "CCF-2026-036", title: "VG Agreement",      pic: "Menghok",    dept: "CEO Office",         partner: "EE Solutions",     expiry: "2026-06-30", status: "EXPIRING_SOON", alertedAt: "2026-05-26T10:00:00" },
 ];
 
 const PAGE_SIZE = 10;
@@ -160,7 +157,7 @@ function ContractCard({ contract, isRead, onRead, onSelectContract }: ContractCa
   return (
     <div
       onClick={handleClick}
-      className="shadow rounded-xl overflow-hidden hover:bg-gray-50 transition-colors cursor-pointer bg-white"
+      className={`${isRead ? "bg-white" : " bg-gray-50"} shadow rounded-xl overflow-hidden transition-colors cursor-pointer`}
     >
       <div className="flex">
         {/* Colored left accent bar */}
@@ -170,10 +167,6 @@ function ContractCard({ contract, isRead, onRead, onSelectContract }: ContractCa
           {/* Top row */}
           <div className="flex items-start gap-2 mb-3">
             <div className="flex flex-wrap items-center gap-5 flex-1 min-w-0">
-              {/* Unread dot */}
-              {!isRead && (
-                <span className="w-2 h-2 rounded-full bg-primary shrink-0 mt-0.5" aria-label="Unread" />
-              )}
               <span className="bg-gray-100 text-gray-600 text-xs font-medium rounded-md px-2.5 py-1">
                 {contract.code}
               </span>

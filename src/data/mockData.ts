@@ -268,16 +268,6 @@ export const mockDepartments: Department[] = [
     msWebhookUrl: "https://example.webhook.office.com/am",
     msChannelUrl: "https://teams.microsoft.com/am-channel",
   },
-  {
-    departmentId: 6,
-    departmentCode: "COD",
-    departmentName: "CEO Office Department",
-    description: "CEO Office Department",
-    msChannel: "IT Contract Notification Channel",
-    title: "IT Contract Notification Channel",
-    msWebhookUrl: "https://example.webhook.office.com/ceo",
-    msChannelUrl: "https://teams.microsoft.com/ceo-channel",
-  },
 ];
 
 // ── Contract Types ───────────────────────────
@@ -332,14 +322,6 @@ const partner = (id: number) => mockPartners.find((p) => p.partnerId === id)!;
 
 export const mockContracts: Contract[] = [
   {
-    contractId: 56, contractCode: "CCF-2026-049", contractTitle: "Test Contract",
-    personInCharge: "Test User", contractTerm: "", effectiveDate: "2026-05-01",
-    expireDate: "2026-05-16", renewalFrequencyMonths: 1, contractValue: 5000,
-    alertDays: null, remark: "", remainingDays: -6, status: "OVERDUE",
-    createdBy: 9, department: dept(6), contractType: ctype(27),
-    partners: [partner(4)], alerts: null,
-  },
-  {
     contractId: 50, contractCode: "CCF-2026-046", contractTitle: "Legal Contract",
     personInCharge: "John", contractTerm: "", effectiveDate: "2026-01-19",
     expireDate: "2026-08-19", renewalFrequencyMonths: 7, contractValue: 100,
@@ -380,28 +362,12 @@ export const mockContracts: Contract[] = [
     partners: [partner(1)], alerts: null,
   },
   {
-    contractId: 42, contractCode: "CCF-2026-038", contractTitle: "Test Contract B",
-    personInCharge: "Test User", contractTerm: "ffjhjt", effectiveDate: "2026-05-07",
-    expireDate: "2026-07-16", renewalFrequencyMonths: 2, contractValue: 9000,
-    alertDays: null, remark: "test", remainingDays: 55, status: "EXPIRING_SOON",
-    createdBy: 9, department: dept(6), contractType: ctype(26),
-    partners: [partner(4)], alerts: null,
-  },
-  {
     contractId: 41, contractCode: "CCF-2026-037", contractTitle: "CHK Branch Lease Renewal",
     personInCharge: "Nov Lakena", contractTerm: "5 years", effectiveDate: "2026-01-05",
     expireDate: "2026-12-30", renewalFrequencyMonths: 12, contractValue: 33360,
     alertDays: null, remark: "", remainingDays: 222, status: "ACTIVE",
     createdBy: 17, department: dept(5), contractType: ctype(18),
     partners: [partner(24)], alerts: null,
-  },
-  {
-    contractId: 40, contractCode: "CCF-2026-036", contractTitle: "VG Agreement",
-    personInCharge: "Menghok", contractTerm: "5 Years", effectiveDate: "2026-05-15",
-    expireDate: "2026-06-30", renewalFrequencyMonths: 2, contractValue: 10000,
-    alertDays: null, remark: "fffff", remainingDays: 39, status: "EXPIRING_SOON",
-    createdBy: 13, department: dept(6), contractType: ctype(26),
-    partners: [partner(22), partner(21)], alerts: null,
   },
 ];
 
@@ -451,7 +417,7 @@ export const mockUsers: User[] = [
     roles: [{ id: 2, name: "ROLE_TOP_MANAGEMENT" }],
     permissions: mockAllPermissions,
     audit: {
-      createdBy: null, createdByEmail: null,
+      createdBy: "SAN Simaneth", createdByEmail: "simaneth.san@chokchey.com.kh",
       createdDateTime: "2026-05-07 08:18:03.876816",
       lastUpdatedBy: "Ouy Ponlouer", lastUpdatedByEmail: "ponlouer.ouy@chokchey.com.kh",
       lastUpdatedDateTime: "2026-05-12 16:20:14.359+07",
@@ -532,7 +498,6 @@ export const mockUsers: User[] = [
     email: "menghok.bun@chokchey.com.kh", phoneNumber: null, jobTitle: null,
     status: "ACTIVE",
     moduleAccess: [
-      { id: 6, name: "CEO Office Department" },
       { id: 3, name: "Legal and Compliance" },
       { id: 5, name: "Admin and Marketing" },
       { id: 1, name: "IT Department" },
@@ -563,9 +528,8 @@ export const mockUsers: User[] = [
   {
     userId: 1, fullName: "Ouy Ponlouer", employeeId: "1068",
     email: "ponlouer.ouy@chokchey.com.kh", phoneNumber: "012000001",
-    jobTitle: "System Administrator", status: "ACTIVE",
+    jobTitle: "Administrator", status: "ACTIVE",
     moduleAccess: [
-      { id: 6, name: "CEO Office Department" },
       { id: 3, name: "Legal and Compliance" },
       { id: 5, name: "Admin and Marketing" },
       { id: 1, name: "IT Department" },
@@ -585,7 +549,6 @@ export const mockUsers: User[] = [
     email: "kakada.neang@chokchey.com.kh", phoneNumber: null, jobTitle: null,
     status: "ACTIVE",
     moduleAccess: [
-      { id: 6, name: "CEO Office Department" },
       { id: 3, name: "Legal and Compliance" },
       { id: 5, name: "Admin and Marketing" },
       { id: 1, name: "IT Department" },
@@ -821,7 +784,6 @@ export interface ContractByDepartmentResponse {
 
 export const mockContractsByDepartment: ContractByDepartment[] = [
   { department: "Admin and Marketing",   contractCount: 5 },
-  { department: "CEO Office Department", contractCount: 3 },
   { department: "IT Department",         contractCount: 4 },
   { department: "Legal and Compliance",  contractCount: 7 },
 ];
@@ -866,7 +828,6 @@ export const mockUserDetail: UserDetail = {
   jobTitle: "System Administrator",
   status: "ACTIVE",
   moduleAccess: [
-    { id: 6, name: "CEO Office Department" },
     { id: 3, name: "Legal and Compliance"  },
     { id: 5, name: "Admin and Marketing"   },
     { id: 1, name: "IT Department"         },

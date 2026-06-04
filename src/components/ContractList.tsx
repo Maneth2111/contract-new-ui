@@ -7,7 +7,7 @@ import { titleCase } from 'text-case';
 import { usePagination } from '../hook/usePagination';
 import { PaginationBar } from './PaginationBar';
 import { ConfirmDialog } from './ConfirmationDialog';
-import { listStatusBadgeClass, mapApiContractToListRow } from '../utils/contractListMappers';
+import { listStatusBadgeClass, listStatusTextClass, mapApiContractToListRow } from '../utils/contractListMappers';
 import toast from 'react-hot-toast';
 import { getAllowedDepartments } from '../utils/departmentAccess';
 import { contractTableSortAccessors } from '../utils/contractTableSort';
@@ -221,7 +221,7 @@ export function ContractList({
 
             <div className="min-w-0">
               <p className="text-xs sm:text-sm text-gray-600 truncate">
-                30-Day Warning
+                Expiring in 30 Days
               </p>
 
               <p className="mt-1 text-lg sm:text-xl font-semibold">
@@ -242,7 +242,7 @@ export function ContractList({
 
             <div className="min-w-0">
               <p className="text-xs sm:text-sm text-gray-600 truncate">
-                60-Day Warning
+                Expiring in 60 Days
               </p>
 
               <p className="mt-1 text-lg sm:text-xl font-semibold">
@@ -263,7 +263,7 @@ export function ContractList({
 
             <div className="min-w-0">
               <p className="text-xs sm:text-sm text-gray-600 truncate">
-                90-Day Warning
+                Expiring in 90 Days
               </p>
 
               <p className="mt-1 text-lg sm:text-xl font-semibold">
@@ -386,7 +386,7 @@ export function ContractList({
                       onClick={() => contractPermission.viewDocuments && handleViewContractDetails(contract)}
                       className={`group relative transition-all hover:bg-primary/10 cursor-pointer ${isDeleting ? 'opacity-40 pointer-events-none' : ''}`}
                     >
-                      <td className="relative whitespace-nowrap lg:max-w-0" title={contract.id}><span className="absolute left-0 top-0 h-full w-1 bg-brand-pink opacity-0 group-hover:opacity-100 transition-opacity"></span>{contract.id}</td>
+                      <td className="relative whitespace-nowrap lg:max-w-0 text-primary font-medium" title={contract.id}><span className="absolute left-0 top-0 h-full w-1 bg-brand-pink opacity-0 group-hover:opacity-100 transition-opacity"></span>{contract.id}</td>
                       <td className="whitespace-nowrap lg:truncate lg:max-w-0" title={contract.title}>
                         <div className="flex items-center gap-1 min-w-0">
                           <span className="whitespace-nowrap lg:truncate">{contract.title}</span>
@@ -397,7 +397,7 @@ export function ContractList({
                       <td className="whitespace-nowrap lg:truncate lg:max-w-0" title={contract.partnerName}>{contract.partnerName}</td>
                       <td className="whitespace-nowrap">{formatDate(contract.expiryDate)}</td>
                       <td className="whitespace-nowrap">
-                        <span className={daysRemaining < 0 ? 'text-red-600' : ''}>
+                        <span className={`${listStatusTextClass(contract.status)}`}>
                           {daysRemaining} days
                         </span>
                       </td>
