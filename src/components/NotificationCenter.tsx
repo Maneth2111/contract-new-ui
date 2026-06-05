@@ -102,7 +102,7 @@ function FilterPills({
         <button
           key={f.key}
           onClick={() => onChange(f.key)}
-          className={`rounded-sm px-4 shadow py-1 text-sm transition-colors ${
+          className={`rounded-sm px-4 shadow-md shadow-gray-300 py-1 text-sm transition-colors ${
             current === f.key
               ? "bg-primary text-white border-primary"
               : "bg-white text-gray-500  hover:bg-gray-50"
@@ -157,7 +157,7 @@ function ContractCard({ contract, isRead, onRead, onSelectContract }: ContractCa
   return (
     <div
       onClick={handleClick}
-      className={`${isRead ? "bg-white" : " bg-gray-50"} shadow rounded-xl overflow-hidden transition-colors cursor-pointer`}
+      className={`${isRead ? "bg-white" : " bg-gray-50"} shadow-md shadow-gray-300 rounded-xl overflow-hidden transition-colors cursor-pointer`}
     >
       <div className="flex">
         {/* Colored left accent bar */}

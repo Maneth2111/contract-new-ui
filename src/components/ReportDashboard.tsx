@@ -330,7 +330,7 @@ export function ReportDashboard({ currentUser, onSelectContract }: ReportDashboa
   return (
     <div className="space-y-6">
       {/* Report Filters */}
-      <div className="bg-white rounded-lg shadow p-6">
+      <div className="bg-white rounded-lg shadow-md shadow-gray-300 p-6">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6">
           <h2 className="font-bold text-xl text-gray-900 shrink-0">Contract Summary Report</h2>
           <div className="flex flex-wrap items-center gap-3 sm:justify-end">
@@ -341,7 +341,7 @@ export function ReportDashboard({ currentUser, onSelectContract }: ReportDashboa
               className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/80 disabled:bg-gray-300 disabled:cursor-not-allowed cursor-pointer text-sm font-medium"
             >
               {exportingCSV ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
-              {exportingCSV ? 'Exporting...' : 'Export CSV'}
+              {exportingCSV ? 'Exporting...' : 'Export Excel'}
             </button>
             <button
               type="button"
@@ -414,12 +414,12 @@ export function ReportDashboard({ currentUser, onSelectContract }: ReportDashboa
       </div>
 
       {/* Report Preview */}
-      <div className="bg-white rounded-lg shadow p-6">
+      <div className="bg-white rounded-lg shadow-md shadow-gray-300 p-6">
         <div className="mb-6 pb-6 border-b border-gray-200">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-4">
 
             {/* Total Contracts */}
-            <div className="bg-white p-4 sm:p-5 rounded-lg shadow hover:shadow hover:scale-[1.02] transition-transform duration-200">
+            <div className="bg-white p-4 sm:p-5 rounded-lg shadow-md hover:shadow-md shadow-gray-300  hover:scale-[1.02] border border-gray-200 transition-transform duration-200">
               <div className="flex items-center justify-between">
                 <div className="min-w-0">
                   <p className="text-xs sm:text-sm text-gray-600">
@@ -431,14 +431,14 @@ export function ReportDashboard({ currentUser, onSelectContract }: ReportDashboa
                   </p>
                 </div>
 
-                <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-blue-50">
+                <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-blue-100">
                   <FileText className="w-5 h-5 sm:w-6 sm:h-6 text-blue-500" />
                 </div>
               </div>
             </div>
 
             {/* Total Value */}
-            <div className="bg-white p-4 sm:p-5 rounded-lg shadow hover:shadow hover:scale-[1.02] transition-transform duration-200">
+            <div className="bg-white p-4 sm:p-5 rounded-lg shadow-md hover:shadow-md shadow-gray-300 hover:scale-[1.02] border border-gray-200 transition-transform duration-200">
               <div className="flex items-center justify-between">
                 <div className="min-w-0">
                   <p className="text-xs sm:text-sm text-gray-600">
@@ -450,14 +450,14 @@ export function ReportDashboard({ currentUser, onSelectContract }: ReportDashboa
                   </p>
                 </div>
 
-                <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-green-50">
+                <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-green-100">
                   <DollarSign className="w-5 h-5 sm:w-6 sm:h-6 text-green-500" />
                 </div>
               </div>
             </div>
 
             {/* Active */}
-            <div className="bg-white p-4 sm:p-5 rounded-lg shadow hover:shadow hover:scale-[1.02] transition-transform duration-200">
+            <div className="bg-white p-4 sm:p-5 rounded-lg shadow-md hover:shadow-md shadow-gray-300 hover:scale-[1.02] border border-gray-200 transition-transform duration-200">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-xs sm:text-sm text-gray-600">
@@ -469,14 +469,14 @@ export function ReportDashboard({ currentUser, onSelectContract }: ReportDashboa
                   </p>
                 </div>
 
-                <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-green-50">
+                <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-green-100">
                   <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-green-500" />
                 </div>
               </div>
             </div>
 
             {/* Expiring Soon */}
-            <div className="bg-white p-4 sm:p-5 rounded-lg shadow hover:shadow hover:scale-[1.02] transition-transform duration-200">
+            <div className="bg-white p-4 sm:p-5 rounded-lg shadow-md hover:shadow-md shadow-gray-300 hover:scale-[1.02] border border-gray-200 transition-transform duration-200">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-xs sm:text-sm text-gray-600">
@@ -488,7 +488,7 @@ export function ReportDashboard({ currentUser, onSelectContract }: ReportDashboa
                   </p>
                 </div>
 
-                <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-orange-50">
+                <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-orange-100">
                   <AlertCircle className="w-5 h-5 sm:w-6 sm:h-6 text-orange-500" />
                 </div>
               </div>
@@ -584,10 +584,9 @@ export function ReportDashboard({ currentUser, onSelectContract }: ReportDashboa
             </tbody>
           </table>
         </div>
-      </div>
-
+        
       {/* Results count + pagination */}
-      <div className="flex flex-col sm:flex-row justify-between w-full items-start sm:items-center gap-3 sm:gap-0">
+      <div className="flex flex-col sm:flex-row justify-between items-center gap-3 px-4 py-3 border-t border-gray-100">
         <div className="text-gray-600 text-sm sm:text-base whitespace-nowrap">
           Showing {sortedContracts.length} of {total} contracts
         </div>
@@ -610,6 +609,8 @@ export function ReportDashboard({ currentUser, onSelectContract }: ReportDashboa
           />
         </div>
       </div>
+      </div>
+
     </div>
   );
 }

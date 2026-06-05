@@ -192,92 +192,68 @@ export function ContractList({
       {/* Notification summary cards */}
       <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 gap-4">
         {/* Overdue */}
-        <div className="bg-white p-4 sm:p-5 rounded-xl shadow-sm relative overflow-hidden hover:scale-[1.02] transition-transform duration-200">
-          <div className="flex items-center gap-3">
-            <span className="flex items-center justify-center w-11 h-11 rounded-lg bg-red-50 shrink-0">
-              <AlertTriangle className="w-5 h-5 sm:w-6 sm:h-6 text-red-600" />
+        <div className="bg-white p-3 rounded-xl border border-gray-100 shadow-sm relative overflow-hidden hover:scale-[1.02] transition-transform duration-200">
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-xs font-semibold tracking-widest text-gray-400 uppercase">Overdue</p>
+            <span className="flex items-center justify-center w-8 h-8 rounded-full bg-red-50 shrink-0">
+              <AlertTriangle className="w-4 h-4 text-red-500" />
             </span>
-
-            <div className="min-w-0">
-              <p className="text-xs sm:text-sm text-gray-600 truncate">
-                Overdue Contract{pluralS(overdueCount)}
-              </p>
-
-              <p className="mt-1 text-lg sm:text-xl font-semibold">
-                {overdueCount}
-              </p>
-            </div>
           </div>
-
-          {/* <div className="absolute bottom-0 left-0 w-full h-1 bg-red-500" /> */}
+          <p className="text-2xl font-bold text-gray-900 mb-0.5">{overdueCount}</p>
+          <p className="text-xs text-red-500 font-medium">
+            {overdueCount === 0 ? 'All clear' : 'Requires immediate action'}
+          </p>
+          <div className="absolute bottom-0 left-0 w-full h-1 bg-red-500 rounded-b-xl" />
         </div>
 
         {/* 30 Days */}
-        <div className="bg-white p-4 sm:p-5 rounded-xl shadow-sm relative overflow-hidden hover:scale-[1.02] transition-transform duration-200">
-          <div className="flex items-center gap-3">
-            <span className="flex items-center justify-center w-11 h-11 rounded-lg bg-red-50 shrink-0">
-              <Clock className="w-5 h-5 sm:w-6 sm:h-6 text-red-500" />
+        <div className="bg-white p-3 rounded-xl border border-gray-100 shadow-sm relative overflow-hidden hover:scale-[1.02] transition-transform duration-200">
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-xs font-semibold tracking-widest text-gray-400 uppercase">≤ 30 Days</p>
+            <span className="flex items-center justify-center w-8 h-8 rounded-full bg-red-50 shrink-0">
+              <Clock className="w-4 h-4 text-red-500" />
             </span>
-
-            <div className="min-w-0">
-              <p className="text-xs sm:text-sm text-gray-600 truncate">
-                Expiring in 30 Days
-              </p>
-
-              <p className="mt-1 text-lg sm:text-xl font-semibold">
-                {notificationSummary.expire30}
-              </p>
-            </div>
           </div>
-
-          {/* <div className="absolute bottom-0 left-0 w-full h-1 bg-red-400" /> */}
+          <p className="text-2xl font-bold text-gray-900 mb-0.5">{notificationSummary.expire30}</p>
+          <p className="text-xs text-red-400 font-medium">
+            {notificationSummary.expire30 === 0 ? 'None expiring' : 'Critical — act now'}
+          </p>
+          <div className="absolute bottom-0 left-0 w-full h-1 bg-red-400 rounded-b-xl" />
         </div>
 
         {/* 60 Days */}
-        <div className="bg-white p-4 sm:p-5 rounded-xl shadow-sm relative overflow-hidden hover:scale-[1.02] transition-transform duration-200">
-          <div className="flex items-center gap-3">
-            <span className="flex items-center justify-center w-11 h-11 rounded-lg bg-orange-50 shrink-0">
-              <Clock className="w-5 h-5 sm:w-6 sm:h-6 text-orange-600" />
+        <div className="bg-white p-3 rounded-xl border border-gray-100 shadow-sm relative overflow-hidden hover:scale-[1.02] transition-transform duration-200">
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-xs font-semibold tracking-widest text-gray-400 uppercase">≤ 60 Days</p>
+            <span className="flex items-center justify-center w-8 h-8 rounded-full bg-orange-50 shrink-0">
+              <Clock className="w-4 h-4 text-orange-500" />
             </span>
-
-            <div className="min-w-0">
-              <p className="text-xs sm:text-sm text-gray-600 truncate">
-                Expiring in 60 Days
-              </p>
-
-              <p className="mt-1 text-lg sm:text-xl font-semibold">
-                {notificationSummary.expire60}
-              </p>
-            </div>
           </div>
-
-          {/* <div className="absolute bottom-0 left-0 w-full h-1 bg-orange-500" /> */}
+          <p className="text-2xl font-bold text-gray-900 mb-0.5">{notificationSummary.expire60}</p>
+          <p className="text-xs text-orange-400 font-medium">
+            {notificationSummary.expire60 === 0 ? 'None expiring' : 'Urgent attention needed'}
+          </p>
+          <div className="absolute bottom-0 left-0 w-full h-1 bg-orange-400 rounded-b-xl" />
         </div>
 
         {/* 90 Days */}
-        <div className="bg-white p-4 sm:p-5 rounded-xl shadow-sm relative overflow-hidden hover:scale-[1.02] transition-transform duration-200">
-          <div className="flex items-center gap-3">
-            <span className="flex items-center justify-center w-11 h-11 rounded-lg bg-yellow-50 shrink-0">
-              <Clock className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-600" />
+        <div className="bg-white p-3 rounded-xl border border-gray-100 shadow-sm relative overflow-hidden hover:scale-[1.02] transition-transform duration-200">
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-xs font-semibold tracking-widest text-gray-400 uppercase">≤ 90 Days</p>
+            <span className="flex items-center justify-center w-8 h-8 rounded-full bg-yellow-100 shrink-0">
+              <Clock className="w-4 h-4 text-yellow-500" />
             </span>
-
-            <div className="min-w-0">
-              <p className="text-xs sm:text-sm text-gray-600 truncate">
-                Expiring in 90 Days
-              </p>
-
-              <p className="mt-1 text-lg sm:text-xl font-semibold">
-                {notificationSummary.expire90}
-              </p>
-            </div>
           </div>
-
-          {/* <div className="absolute bottom-0 left-0 w-full h-1 bg-yellow-500" /> */}
+          <p className="text-2xl font-bold text-gray-900 mb-0.5">{notificationSummary.expire90}</p>
+          <p className="text-xs text-yellow-500 font-medium">
+            {notificationSummary.expire90 === 0 ? 'None expiring' : 'Plan renewal soon'}
+          </p>
+          <div className="absolute bottom-0 left-0 w-full h-1 bg-yellow-400 rounded-b-xl" />
         </div>
       </div>
 
       {/* Filters */}
-      <div className="bg-white p-4 rounded-lg shadow">
+      <div className="bg-white p-4 rounded-lg shadow-md shadow-gray-300">
         <div className="flex items-center justify-between mb-4 gap-3">
           <h2 className="text-lg sm:text-2xl font-medium ">Contract Management</h2>
           {contractPermission.create && (
@@ -346,7 +322,7 @@ export function ContractList({
       </div>
 
       {/* Contract Table */}
-      <div className="bg-white rounded-lg shadow ">
+      <div className="bg-white rounded-lg shadow-md shadow-gray-300 ">
         <div
           className={[
             'overflow-x-auto',
@@ -384,22 +360,60 @@ export function ContractList({
                     <tr
                       key={contract.id}
                       onClick={() => contractPermission.viewDocuments && handleViewContractDetails(contract)}
-                      className={`group relative transition-all hover:bg-primary/10 cursor-pointer ${isDeleting ? 'opacity-40 pointer-events-none' : ''}`}
+                      className={`relative transition-all cursor-pointer ${isDeleting ? 'opacity-40 pointer-events-none' : ''}`}
                     >
-                      <td className="relative whitespace-nowrap lg:max-w-0 text-primary font-medium" title={contract.id}><span className="absolute left-0 top-0 h-full w-1 bg-brand-pink opacity-0 group-hover:opacity-100 transition-opacity"></span>{contract.id}</td>
+                      <td className="relative whitespace-nowrap lg:max-w-0 font-medium" title={contract.id}>
+                        <span className="text-primary">{contract.id}</span>
+                      </td>
                       <td className="whitespace-nowrap lg:truncate lg:max-w-0" title={contract.title}>
                         <div className="flex items-center gap-1 min-w-0">
                           <span className="whitespace-nowrap lg:truncate">{contract.title}</span>
                         </div>
                       </td>
-                      <td className="whitespace-nowrap lg:truncate lg:max-w-0" title={contract.department}>{contract.department}</td>
+                      <td className="whitespace-nowrap lg:truncate lg:max-w-0" title={contract.department}>
+                        {(() => {
+                          const name = contract.department ?? '';
+                          const colorMap: Record<string, string> = {
+                            'IT Department': 'bg-pink-100 text-pink-700',
+                            'Legal and Compliance': 'bg-primary/20 text-primary',
+                            'Admin and Marketing': 'bg-purple-100 text-purple-700',
+                          };
+                          const color = colorMap[name] ?? 'bg-gray-100 text-gray-600';
+                          return (
+                            <span className={`inline-block px-2.5 py-1 rounded-md text-xs font-medium ${color}`}>
+                              {name}
+                            </span>
+                          );
+                        })()}
+                      </td>
                       <td className="whitespace-nowrap lg:truncate lg:max-w-0" title={contract.personInCharge}>{contract.personInCharge}</td>
                       <td className="whitespace-nowrap lg:truncate lg:max-w-0" title={contract.partnerName}>{contract.partnerName}</td>
                       <td className="whitespace-nowrap">{formatDate(contract.expiryDate)}</td>
                       <td className="whitespace-nowrap">
-                        <span className={`${listStatusTextClass(contract.status)}`}>
-                          {daysRemaining} days
-                        </span>
+                        {(() => {
+                          const days = calculateDaysRemaining(contract.expiryDate);
+                          const maxDays = Math.max(...pagedContracts.map(c => calculateDaysRemaining(c.expiryDate)));
+
+                          let textColor = 'text-green-600';
+                          let barColor = 'bg-green-600';
+                          if (days < 0) { textColor = 'text-red-600'; barColor = 'bg-red-500'; }
+                          else if (days <= 30) { textColor = 'text-red-500'; barColor = 'bg-red-400'; }
+                          else if (days <= 60) { textColor = 'text-orange-500'; barColor = 'bg-orange-400'; }
+                          else if (days <= 90) { textColor = 'text-yellow-600'; barColor = 'bg-yellow-400'; }
+
+                          const barWidth = days < 0 ? 100 : maxDays > 0 ? Math.round((days / maxDays) * 100) : 0;
+
+                          return (
+                            <div className="flex flex-col gap-1 min-w-18">
+                              <span className={`text-sm font-semibold ${textColor}`}>
+                                {days < 0 ? `${Math.abs(days)} overdue` : `${days} days`}
+                              </span>
+                              <div className="h-1 w-full bg-gray-100 rounded-full overflow-hidden">
+                                <div className={`h-full rounded-full ${barColor}`} style={{ width: `${barWidth}%` }} />
+                              </div>
+                            </div>
+                          );
+                        })()}
                       </td>
                       <td className="whitespace-nowrap">
                         <span
@@ -454,31 +468,30 @@ export function ContractList({
             </tbody>
           </table>
         </div>
-      </div>
+        {/* Results count + pagination */}
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-3 px-4 py-3 border-t border-gray-100">
+          <div className="text-gray-600 text-sm sm:text-base whitespace-nowrap">
+            Showing {pagedContracts.length} of {total} contracts
+          </div>
 
-      {/* Results count + pagination */}
-      <div className="flex flex-col sm:flex-row justify-between w-full items-start sm:items-center gap-3 sm:gap-0">
-        <div className="text-gray-600 text-sm sm:text-base whitespace-nowrap">
-          Showing {pagedContracts.length} of {total} contracts
-        </div>
-
-        <div className="flex items-center gap-3">
-          {total > 10 && (
-            <select
-              value={pagination.size}
-              onChange={(e) => { setSize(Number(e.target.value)); goToPage(1); }}
-              className="px-2 py-1.5 sm:py-2 border border-gray-300 rounded-lg text-sm bg-white cursor-pointer"
-            >
-              {[10, 20, 50].map((s) => (
-                <option key={s} value={s}>Show {s}</option>
-              ))}
-            </select>
-          )}
-          <PaginationBar
-            currentPage={pagination.page}
-            totalPages={totalPages}
-            onPageChange={goToPage}
-          />
+          <div className="flex items-center gap-3">
+            {total > 10 && (
+              <select
+                value={pagination.size}
+                onChange={(e) => { setSize(Number(e.target.value)); goToPage(1); }}
+                className="px-2 py-1.5 sm:py-2 border border-gray-300 rounded-lg text-sm bg-white cursor-pointer"
+              >
+                {[10, 20, 50].map((s) => (
+                  <option key={s} value={s}>Show {s}</option>
+                ))}
+              </select>
+            )}
+            <PaginationBar
+              currentPage={pagination.page}
+              totalPages={totalPages}
+              onPageChange={goToPage}
+            />
+          </div>
         </div>
       </div>
 

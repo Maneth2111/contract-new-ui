@@ -1,7 +1,7 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Contract, ContractStatus } from '../types/contract';
 import { calculateDaysRemaining } from '../utils/contractUtils';
-import { ArrowLeft, Clock, RefreshCw, Edit2, FileText, Users, CalendarDays, AlertTriangle } from 'lucide-react';
+import { Clock, RefreshCw, Edit2, FileText, Users, CalendarDays, AlertTriangle } from 'lucide-react';
 import { titleCase } from 'text-case';
 import { ContractFormValues } from '../lib/contractSchema';
 import toast from 'react-hot-toast';
@@ -9,6 +9,7 @@ import { type ContractDetailTab } from '../utils/contractDetailRoute';
 import { formatContractApiError } from '../utils/contractFormHelpers';
 import { ContractForm, type UploadedFile } from './ContractForm';
 import { UserProfile } from '../types/user';
+import type { ContractDetailActions } from '../App';
 
 
 // ─── Mock types ───────────────────────────────────────────────────────────────
@@ -173,84 +174,35 @@ function useContractFiles(_contractId: number) {
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
-/** Green primary header bar — matches the screenshot's teal section headers */
-function SectionHeader({
-  icon,
-  title,
-}: {
-  icon: React.ReactNode;
-  title: string;
-}) {
+/** Green primary header bar */
+function SectionHeader({ icon, title }: { icon: React.ReactNode; title: string }) {
   return (
     <div className="flex items-center gap-2 bg-primary px-4 py-2.5">
       <span className="text-white [&>svg]:w-4 [&>svg]:h-4 shrink-0">{icon}</span>
-      <span className="text-xs font-semibold tracking-widest text-white uppercase select-none">
-        {title}
-      </span>
+      <span className="text-xs font-semibold tracking-widest text-white uppercase select-none">{title}</span>
     </div>
   );
 }
 
-function FieldRow({
-  label,
-  children,
-  empty,
-}: {
-  label: string;
-  children: React.ReactNode;
-  empty?: boolean;
-}) {
+function FieldRow({ label, children, empty }: { label: string; children: React.ReactNode; empty?: boolean }) {
   return (
     <tr className="border-b border-gray-100 last:border-b-0 block sm:table-row">
-
-      {/* LABEL */}
-      <td className="
-        block sm:table-cell border-r
-        w-full sm:w-55 sm:min-w-55
-        px-4 pt-3 pb-1 sm:py-3
-        border sm:border-r border-gray-100
-        bg-gray-50
-      ">
-        <span className="text-xs font-medium text-brand-navy uppercase">
-          {label}
-        </span>
+      <td className="block sm:table-cell border-r w-full sm:w-55 sm:min-w-55 px-4 pt-3 pb-1 sm:py-3 border sm:border-r border-gray-100 bg-gray-50">
+        <span className="text-xs font-medium text-brand-navy uppercase">{label}</span>
       </td>
-
-      {/* VALUE */}
-      <td className="
-        block sm:table-cell
-        w-full
-        px-4 pb-3 pt-1 sm:py-3 bg-white
-      ">
-        <span className={empty
-          ? 'text-gray-400 italic text-sm'
-          : 'text-sm text-gray-800'
-        }>
-          {children}
-        </span>
+      <td className="block sm:table-cell w-full px-4 pb-3 pt-1 sm:py-3 bg-white">
+        <span className={empty ? 'text-gray-400 italic text-sm' : 'text-sm text-gray-800'}>{children}</span>
       </td>
-
     </tr>
   );
 }
 
-
-/** Card wrapper — border + rounded corners, clips the green header flush to top */
 function SectionCard({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="border border-gray-200 rounded-lg overflow-hidden mb-4">
-      {children}
-    </div>
-  );
+  return <div className="border border-gray-200 rounded-lg overflow-hidden mb-4">{children}</div>;
 }
 
-/** Full-width <table> used inside a SectionCard for FieldRow children */
 function FieldTable({ children }: { children: React.ReactNode }) {
-  return (
-    <table className="w-full border-collapse">
-      <tbody>{children}</tbody>
-    </table>
-  );
+  return <table className="w-full border-collapse"><tbody>{children}</tbody></table>;
 }
 
 // ─── Component types ──────────────────────────────────────────────────────────
@@ -269,6 +221,12 @@ interface ContractDetailsProps {
   variant?: 'page' | 'modal' | 'fullscreen';
   initialFormMode?: ContractDetailsFormMode;
   currentUser?: UserProfile | null;
+  /** Reports form mode (and optionally the contract title) back to App */
+  onFormModeChange?: (mode: ContractDetailsFormMode, title?: string) => void;
+  /** Called once capabilities are known so App can show/hide top-bar buttons */
+  onActionsReady?: (canEdit: boolean, canShowRenew: boolean) => void;
+  /** Ref that App writes action callbacks into to control this component from the top bar */
+  actionsRef?: React.MutableRefObject<ContractDetailActions>;
 }
 
 type ViewTab = 'details' | 'history';
@@ -287,6 +245,9 @@ export function ContractDetails({
   variant = 'fullscreen',
   initialFormMode = 'view',
   currentUser,
+  onFormModeChange,
+  onActionsReady,
+  actionsRef,
 }: ContractDetailsProps) {
   const [activeTab, setActiveTab] = useState<ViewTab>(() =>
     initialTab === 'history' ? 'history' : 'details'
@@ -295,7 +256,6 @@ export function ContractDetails({
   const { contract: detail, loading: detailLoading, refetch: refetchDetail } = useContractDetail(contract.contractId);
   const [historyPage] = useState(1);
   const { items: historyItems } = useContractHistory(contract.contractId, historyPage);
-  const [downloadingFileIds, setDownloadingFileIds] = useState<Set<number>>(() => new Set());
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
   const [formKey, setFormKey] = useState(0);
   const { files: apiFiles, refetch: refetchFiles } = useContractFiles(contract.contractId);
@@ -351,16 +311,6 @@ export function ContractDetails({
     };
   }, [detail]);
 
-  const getChangedFields = (
-    oldVal: Record<string, unknown> | null,
-    newVal: Record<string, unknown> | null,
-  ) => {
-    if (!oldVal || !newVal) return [];
-    return Object.keys(newVal)
-      .filter((key) => JSON.stringify(oldVal[key]) !== JSON.stringify(newVal[key]))
-      .map((key) => ({ field: key, from: JSON.stringify(oldVal[key]), to: JSON.stringify(newVal[key]) }));
-  };
-
   const c: Contract = detail ? {
     id: detail.contractCode,
     contractId: detail.contractId,
@@ -395,6 +345,28 @@ export function ContractDetails({
     (['Expired', 'Expiring Soon', 'Overdue'].includes(c.status) ||
       ['EXPIRED', 'EXPIRING_SOON', 'OVERDUE'].includes(apiStatus));
 
+  // ── Expose actions + report capability flags ──────────────────────────────
+  useEffect(() => {
+    const resolvedCanEdit = Boolean(canEdit && c.status !== 'Closed');
+    const resolvedCanShowRenew = Boolean(canShowRenew);
+    if (actionsRef) {
+      actionsRef.current = {
+        enterEditMode: () => { setFormMode('edit'); setActiveTab('details'); },
+        enterRenewMode: () => { setFormMode('renew'); setActiveTab('details'); },
+        exitFormMode: () => exitFormMode(),
+        canEdit: resolvedCanEdit,
+        canShowRenew: resolvedCanShowRenew,
+      };
+    }
+    onActionsReady?.(resolvedCanEdit, resolvedCanShowRenew);
+    // Re-run when detail loads or permissions change
+  }, [detail, canEdit, canShowRenew, c.status]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Report mode changes upward whenever formMode changes
+  useEffect(() => {
+    onFormModeChange?.(formMode, detail?.contractTitle);
+  }, [formMode, detail?.contractTitle]);
+
   const handleEditSubmit = async (data: ContractFormValues) => {
     try {
       toast.success(`Contract "${data.title}" has been updated successfully!`);
@@ -424,11 +396,11 @@ export function ContractDetails({
     }
   };
 
-  const exitFormMode = () => {
+  const exitFormMode = useCallback(() => {
     if (initialFormMode === 'edit' && formMode === 'edit') { onClose(); return; }
     setFormMode('view');
     setFormKey((k) => k + 1);
-  };
+  }, [initialFormMode, formMode, onClose]);
 
   useEffect(() => {
     setActiveTab(initialTab === 'history' ? 'history' : 'details');
@@ -442,11 +414,6 @@ export function ContractDetails({
   const isFullscreen = variant === 'fullscreen';
   const isPage = variant === 'page';
   const isFormActive = formMode === 'edit' || formMode === 'renew';
-
-  const handleBack = () => {
-    if (isFormActive) { exitFormMode(); return; }
-    onClose();
-  };
 
   useEffect(() => {
     if (!isFullscreen) return;
@@ -466,7 +433,6 @@ export function ContractDetails({
     const partners = detail.partners ?? [];
     const remainingDays = detail.remainingDays;
     const isOverdue = remainingDays < 0;
-    const isExpiringSoon = remainingDays >= 0 && remainingDays <= 90;
 
     return (
       <div className="space-y-0">
@@ -480,12 +446,7 @@ export function ContractDetails({
             <FieldRow label="Person in Charge">{detail.personInCharge}</FieldRow>
             <FieldRow label="Microsoft Channel">
               {viewMeta?.msChannelUrl ? (
-                <a
-                  href={viewMeta.msChannelUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex items-center gap-1.5 text-primary hover:underline text-sm"
-                >
+                <a href={viewMeta.msChannelUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-primary hover:underline text-sm">
                   {viewMeta.msChannelTitle ?? 'Teams Channel'}
                 </a>
               ) : (
@@ -507,32 +468,22 @@ export function ContractDetails({
         {/* ── PARTNER / VENDOR INFORMATION ── */}
         <SectionCard>
           <SectionHeader icon={<Users />} title="Partner / Vendor Information" />
-
-          {/* Avatar chip row — sits above the table, below the header */}
           {partners.length > 0 && (
             <div className="flex flex-wrap gap-4 px-4 py-3 border-b border-gray-100">
               {partners.map((p, i) => {
-                const initials = p.partnerName
-                  .split(' ')
-                  .map((w) => w[0])
-                  .slice(0, 2)
-                  .join('')
-                  .toUpperCase();
+                const initials = p.partnerName.split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase();
                 return (
                   <div key={p.partnerId} className="flex items-center gap-2.5">
-                    <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold text-xs shrink-0">
-                      {initials}
-                    </div>
+                    <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold text-xs shrink-0">{initials}</div>
                     <div className="leading-tight">
                       <p className="text-sm font-medium text-gray-800">{p.partnerName}</p>
-                      <p className="text-xs text-gray-400">Partner {partners.length > 1 && (` ${i + 1}`)}</p>
+                      <p className="text-xs text-gray-400">Partner {partners.length > 1 && ` ${i + 1}`}</p>
                     </div>
                   </div>
                 );
               })}
             </div>
           )}
-
           <FieldTable>
             {partners.length === 0 ? (
               <FieldRow label="Partners" empty>No partners assigned</FieldRow>
@@ -553,9 +504,7 @@ export function ContractDetails({
               partners.map((p, i) => (
                 <FieldRow key={p.partnerId} label={`Partner ${i + 1}`}>
                   {p.partnerName}
-                  {p.contactPerson && (
-                    <span className="text-gray-400 ml-2 text-xs">· {p.contactPerson}</span>
-                  )}
+                  {p.contactPerson && <span className="text-gray-400 ml-2 text-xs">· {p.contactPerson}</span>}
                 </FieldRow>
               ))
             )}
@@ -566,9 +515,8 @@ export function ContractDetails({
         <SectionCard>
           <SectionHeader icon={<CalendarDays />} title="Contract Dates & Value" />
 
-          {/* --- MOBILE / TABLET (STACKED) */}
+          {/* Mobile */}
           <div className="block sm:hidden">
-
             <FieldTable>
               <FieldRow label="Effective Date">
                 <div className="flex items-center gap-1.5">
@@ -576,14 +524,12 @@ export function ContractDetails({
                   {new Date(detail.effectiveDate).toLocaleDateString()}
                 </div>
               </FieldRow>
-
               <FieldRow label="Expiry Date">
                 <div className="flex items-center justify-between gap-2">
                   <span className="flex items-center gap-1.5">
                     <CalendarDays className="w-3.5 h-3.5 text-gray-400" />
                     {new Date(detail.expireDate).toLocaleDateString()}
                   </span>
-
                   {isOverdue && (
                     <span className="text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded">
                       {Math.abs(remainingDays)} days overdue
@@ -591,58 +537,41 @@ export function ContractDetails({
                   )}
                 </div>
               </FieldRow>
-
               <FieldRow label="Renewal Frequency">
-                {detail.renewalFrequencyMonths
-                  ? `${detail.renewalFrequencyMonths} months`
-                  : 'Not calculated'}
+                {detail.renewalFrequencyMonths ? `${detail.renewalFrequencyMonths} months` : 'Not calculated'}
               </FieldRow>
-
               <FieldRow label="Total Contract Value">
                 <div className="inline-flex items-center gap-1 bg-green-50 px-3 py-1 rounded-full">
                   <span className="text-green-600">$</span>
-                  <span className="text-green-700">
-                    {detail.contractValue.toLocaleString()}
-                  </span>
+                  <span className="text-green-700">{detail.contractValue.toLocaleString()}</span>
                   <span className="text-green-600 text-xs">USD</span>
                 </div>
               </FieldRow>
             </FieldTable>
-
           </div>
 
-          {/* --- DESKTOP (KEEP YOUR DESIGN) */}
+          {/* Desktop */}
           <table className="hidden sm:table w-full border-collapse">
             <tbody>
-
-              {/* ROW 1 */}
               <tr className="border-b border-gray-100">
                 <td className="w-1/4 bg-gray-50 px-4 py-3 border-r border-gray-100">
-                  <span className="text-xs font-medium text-brand-navy uppercase">
-                    Effective Date
-                  </span>
+                  <span className="text-xs font-medium text-brand-navy uppercase">Effective Date</span>
                 </td>
-
                 <td className="w-1/4 px-4 py-3 border-r border-gray-100">
                   <div className="text-sm flex items-center gap-1.5 whitespace-nowrap">
                     <CalendarDays className="w-3.5 h-3.5 text-gray-400" />
                     {new Date(detail.effectiveDate).toLocaleDateString()}
                   </div>
                 </td>
-
                 <td className="bg-gray-50 px-4 py-3 border-r border-gray-100">
-                  <span className="text-xs font-medium text-brand-navy uppercase">
-                    Expiry Date
-                  </span>
+                  <span className="text-xs font-medium text-brand-navy uppercase">Expiry Date</span>
                 </td>
-
                 <td className="px-4 py-3 border-r border-gray-100">
                   <div className="flex items-center justify-between gap-2">
                     <span className="flex items-center gap-1.5 whitespace-nowrap">
                       <CalendarDays className="w-3.5 h-3.5 text-gray-400" />
                       {new Date(detail.expireDate).toLocaleDateString()}
                     </span>
-
                     {isOverdue && (
                       <span className="text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded">
                         {Math.abs(remainingDays)} days overdue
@@ -651,103 +580,30 @@ export function ContractDetails({
                   </div>
                 </td>
               </tr>
-
-              {/* ROW 2 */}
               <tr>
                 <td className="bg-gray-50 px-4 py-3 border-r border-gray-100">
-                  <span className="text-xs font-medium text-brand-navy uppercase">
-                    Renewal Frequency
-                  </span>
+                  <span className="text-xs font-medium text-brand-navy uppercase">Renewal Frequency</span>
                 </td>
-
                 <td className="px-4 py-3 border-r border-gray-100">
                   {detail.renewalFrequencyMonths
                     ? `${detail.renewalFrequencyMonths} months`
                     : <span className="italic text-gray-400">Not calculated</span>}
                 </td>
-
                 <td className="bg-gray-50 px-4 py-3 border-r border-gray-100">
-                  <span className="text-xs font-medium text-brand-navy uppercase">
-                    Total Contract Value
-                  </span>
+                  <span className="text-xs font-medium text-brand-navy uppercase">Total Contract Value</span>
                 </td>
-
                 <td className="px-4 py-3">
                   <div className="inline-flex items-center gap-1 bg-green-50 px-3 py-1 rounded-full">
                     <span className="text-green-600">$</span>
-                    <span className="text-green-700">
-                      {detail.contractValue.toLocaleString()}
-                    </span>
+                    <span className="text-green-700">{detail.contractValue.toLocaleString()}</span>
                     <span className="text-green-600 text-xs">USD</span>
                   </div>
                 </td>
               </tr>
-
             </tbody>
           </table>
         </SectionCard>
-        {/* ── UPLOADED DOCUMENTS ── */}
-        {/* <SectionCard>
-          <SectionHeader
-            icon={<FileText />}
-            title="Uploaded Documents"
-          />
 
-          {apiFiles.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-8 gap-2">
-              <FileText className="w-8 h-8 text-gray-200" />
-              <p className="text-sm text-gray-400 italic">No documents uploaded</p>
-            </div>
-          ) : (
-            <ul className="divide-y divide-gray-100">
-              {apiFiles.map((file) => {
-                const isDownloading = downloadingFileIds.has(file.id);
-                const ext = file.name?.split('.').pop()?.toLowerCase() ?? '';
-                const isPdf = ext === 'pdf';
-
-                return (
-                  <li key={file.id} className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors"> */}
-        {/* icon */}
-        {/* <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${isPdf ? 'bg-red-50' : 'bg-blue-50'}`}>
-                      <FileText className={`w-4 h-4 ${isPdf ? 'text-red-500' : 'text-blue-500'}`} />
-                    </div> */}
-
-        {/* name + meta */}
-        {/* <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-800 truncate">{file.name}</p>
-                      <p className="text-xs text-gray-400 mt-0.5">
-                        {file.size ? `${(file.size / 1024).toFixed(1)} KB` : ''}
-                        {file.size && file.uploadedAt ? ' · ' : ''}
-                        {file.uploadedAt
-                          ? `Uploaded ${new Date(file.uploadedAt).toLocaleDateString('en-US', {
-                            month: 'short', day: 'numeric', year: 'numeric',
-                          })}`
-                          : ''}
-                        {file.uploadedBy ? ` by ${file.uploadedBy}` : ''}
-                      </p>
-                    </div> */}
-
-        {/* download button */}
-        {/* <button
-                      type="button"
-                      disabled={isDownloading}
-                      onClick={() => {
-                        if (file.url) window.open(file.url, '_blank');
-                      }}
-                      className="text-sm text-primary hover:text-primary/80 font-medium shrink-0 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                    >
-                      {isDownloading ? 'Downloading…' : 'Download'}
-                    </button>
-                  </li>
-                );
-              })}
-            </ul>
-          )}
-        </SectionCard> */}
-
-
-
-        {/* Remarks — only if present */}
         {detail.remark && (
           <SectionCard>
             <SectionHeader
@@ -765,7 +621,7 @@ export function ContractDetails({
     );
   };
 
-  // ─── Form renderer (edit / renew / view-via-ContractForm) ────────────────
+  // ─── Form renderer ───────────────────────────────────────────────────────
 
   const renderForm = () => {
     if (detailLoading || !formDefaults) {
@@ -795,217 +651,134 @@ export function ContractDetails({
 
   // ─── Layout shells ────────────────────────────────────────────────────────
 
-  const panelHeightClass = isPage
-    ? 'max-h-[calc(100vh-10rem)] min-h-[24rem]'
-    : 'max-h-[calc(100vh-4rem)]';
-
-  const useInnerScroll = isFullscreen || isFormActive;
+  const useInnerScroll = isFullscreen;
+  const panelHeightClass = isPage ? '' : 'max-h-[calc(100vh-4rem)]';
 
   const panelShellClass = isFullscreen
     ? 'flex flex-col h-full min-h-0 bg-white'
     : `bg-white rounded-lg flex flex-col ${useInnerScroll ? `min-h-0 ${panelHeightClass}` : ''} ${isPage ? 'border border-gray-200' : `w-full max-w-4xl mx-4 ${useInnerScroll ? panelHeightClass : ''}`}`;
 
-  // ── Shared centering class — applied to EVERY horizontal band in the top bar
-  //    and the body, so they all share the same left/right alignment.
   const centerClass = isFullscreen ? 'max-w-350 mx-auto w-full' : '';
 
   const panel = (
     <div className={panelShellClass}>
-      {/* ── Top bar ── */}
-      <div className="shrink-0 bg-white border-b border-gray-200">
-
-        {/* Single wrapper — same max-width + padding for ALL header content */}
-        <div className={`px-4 sm:px-6 pt-4 ${centerClass}`}>
-
-          {/* Breadcrumb / back link */}
-          {(isFullscreen || variant === 'modal') && (
-            <button
-              type="button"
-              onClick={handleBack}
-              className="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-800 cursor-pointer mb-4"
-            >
-              <ArrowLeft className="w-5 h-5" />
-              {isFormActive
-                ? formMode === 'renew' ? 'Cancel renewal' : 'Cancel edit'
-                : 'Back'}
-            </button>
-          )}
-
-          {/* Title row + action buttons on the right */}
-          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-1">
-            <div className="min-w-0">
-              {isFormActive ? (
-                <h2 className="text-xl font-semibold text-gray-900">
-                  {formMode === 'renew' ? 'Renew Contract' : 'Edit Contract'}
-                </h2>
-              ) : (
-                <div className="flex items-center gap-2 flex-wrap">
-                  <h2 className="text-xl font-bold text-gray-900 leading-tight whitespace-nowrap">
-                    {c.title}
+      {/* ── Top bar (only rendered for fullscreen/modal — in page mode App owns the header) ── */}
+      {!isPage && (
+        <div className="shrink-0 bg-white border-b border-gray-200">
+          <div className={`px-4 sm:px-6 pt-4 ${centerClass}`}>
+            {/* Title row */}
+            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-1">
+              <div className="min-w-0">
+                {isFormActive ? (
+                  <h2 className="text-xl font-semibold text-gray-900">
+                    {formMode === 'renew' ? 'Renew Contract' : 'Edit Contract'}
                   </h2>
-                  {/* Status badge */}
-                  {(() => {
-                    const s = apiStatus;
-                    if (s === 'OVERDUE')
-                      return (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-700 border border-red-200">
-                          Overdue
-                        </span>
-                      );
-                    if (s === 'EXPIRING_SOON')
-                      return (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-orange-100 text-orange-700 border border-orange-200">
-                          Expiring Soon
-                        </span>
-                      );
-                    if (s === 'ACTIVE')
-                      return (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-700 border border-green-200">
-                          <span className="w-1.5 h-1.5 rounded-full bg-green-500 inline-block" />
-                          Active
-                        </span>
-                      );
-                    if (s === 'EXPIRED')
-                      return (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-600 border border-gray-200">
-                          Expired
-                        </span>
-                      );
-                    return null;
-                  })()}
-                </div>
-              )}
-              {/* Subtitle: contractCode · department */}
-              {!isFormActive && (
-                <p className="text-sm text-gray-500 mt-0.5 whitespace-nowrap">
-                  {c.contractCode}
-                  {c.department ? <> · {c.department}</> : null}
-                </p>
-              )}
+                ) : (
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h2 className="text-xl font-bold text-gray-900 leading-tight whitespace-nowrap">{c.title}</h2>
+                    {renderStatusBadge(apiStatus)}
+                  </div>
+                )}
+                {!isFormActive && (
+                  <p className="text-sm text-gray-500 mt-0.5 whitespace-nowrap">
+                    {c.contractCode}{c.department ? <> · {c.department}</> : null}
+                  </p>
+                )}
+              </div>
+              {/* Fullscreen/modal action buttons stay here */}
+              <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 shrink-0 w-full sm:w-auto">
+                {isFormActive ? (
+                  <>
+                    <button type="button" onClick={exitFormMode} className="px-4 py-2 text-primary rounded-lg bg-white border border-primary hover:bg-primary/10 cursor-pointer text-sm transition-colors">Cancel</button>
+                    <button type="submit" form={detailsFormId} className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 cursor-pointer text-sm">
+                      {formMode === 'renew' ? 'Renew Contract' : 'Save Changes'}
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    {canEdit && c.status !== 'Closed' && (
+                      <button type="button" onClick={() => { setFormMode('edit'); setActiveTab('details'); }} className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 cursor-pointer text-sm font-medium">
+                        <Edit2 className="w-4 h-4" /> Edit Contract
+                      </button>
+                    )}
+                    {canShowRenew && (
+                      <button type="button" onClick={() => { setFormMode('renew'); setActiveTab('details'); }} className="flex items-center gap-2 px-4 py-2 bg-brand-pink text-white rounded-lg hover:bg-brand-pink/80 cursor-pointer text-sm font-medium">
+                        <RefreshCw className="w-4 h-4" /> Renew Contract
+                      </button>
+                    )}
+                  </>
+                )}
+              </div>
             </div>
 
-            {/* Right: action buttons */}
-            <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 shrink-0 w-full sm:w-auto">
-              {isFormActive ? (
-                <>
-                  <button
-                    type="button"
-                    onClick={exitFormMode}
-                    className="px-4 py-2 text-primary rounded-lg bg-white border border-primary hover:bg-primary/10 cursor-pointer text-sm transition-colors"
-                  >
-                    Cancel
+            {/* Alert banner */}
+            {renderAlertBanner(detail, isFormActive)}
+
+            {/* Tabs */}
+            {!isFormActive && (
+              <div className="flex gap-1">
+                {(['details', 'history'] as const).map((tab) => (
+                  <button key={tab} type="button" onClick={() => setTab(tab)}
+                    className={`px-4 py-2 border-b-2 text-sm font-medium transition-colors cursor-pointer capitalize ${activeTab === tab ? 'border-primary text-primary' : 'border-transparent text-gray-600 hover:text-gray-900'}`}>
+                    {tab}
                   </button>
-                  <button
-                    type="submit"
-                    form={detailsFormId}
-                    className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 cursor-pointer text-sm"
-                  >
-                    {formMode === 'renew' ? 'Renew Contract' : 'Save Changes'}
-                  </button>
-                </>
-              ) : (
-                <>
-                  {canEdit && c.status !== 'Closed' && (
-                    <button
-                      type="button"
-                      onClick={() => { setFormMode('edit'); setActiveTab('details'); }}
-                      className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 cursor-pointer text-sm font-medium"
-                    >
-                      <Edit2 className="w-4 h-4" />
-                      Edit Contract
-                    </button>
-                  )}
-                  {canShowRenew && (
-                    <button
-                      type="button"
-                      onClick={() => { setFormMode('renew'); setActiveTab('details'); }}
-                      className="flex items-center gap-2 px-4 py-2 bg-brand-pink text-white rounded-lg hover:bg-brand-pink/80 cursor-pointer text-sm font-medium"
-                    >
-                      <RefreshCw className="w-4 h-4" />
-                      Renew Contract
-                    </button>
-                  )}
-                </>
-              )}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
+        </div>
+      )}
 
-          {/* Alert banner — overdue / expiring soon warning */}
-          {!isFormActive && detail && (() => {
-            const days = detail.remainingDays;
-            if (days < 0) {
-              return (
-                <div className="flex items-start gap-2 mt-3 mb-3 px-3 py-2.5 rounded-lg bg-red-50 border border-red-200 text-sm text-red-700">
-                  <svg className="w-4 h-4 shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
-                    <line x1="12" y1="9" x2="12" y2="13" />
-                    <line x1="12" y1="17" x2="12.01" y2="17" />
-                  </svg>
-                  <span>
-                    This contract expired on{' '}
-                    <strong>
-                      {new Date(detail.expireDate).toLocaleDateString('en-US', {
-                        month: 'long', day: 'numeric', year: 'numeric',
-                      })}
-                    </strong>
-                    {' '}— {Math.abs(days)} days overdue. Please renew or archive it immediately.
-                  </span>
+      {/* ── Page-variant header (tabs + alert — no action buttons, those are in App's top bar) ── */}
+      {isPage && (
+        <div className="shrink-0  border-b border-gray-200 rounded-t-lg px-5 bg-white">
+          <div className={`px-0 ${centerClass}`}>
+            {/* Contract name + status badge */}
+            {!isFormActive && (
+              <div>
+                <div className="flex items-center gap-2 flex-wrap px-0 pt-3 pb-2">
+                  <h2 className="text-lg font-bold text-gray-900 leading-tight whitespace-nowrap">{c.title}</h2>
+                  {renderStatusBadge(apiStatus)}
+
                 </div>
-              );
-            }
-            if (days <= 90) {
-              return (
-                <div className="flex items-start gap-2 mt-3 mb-3 px-3 py-2.5 rounded-lg bg-amber-50 border border-amber-200 text-sm text-orange-600">
-                  <AlertTriangle className="w-6 h-6 text-yellow-600" />
-                  <span>
-                    This contract expires on{' '}
-                    <strong>
-                      {new Date(detail.expireDate).toLocaleDateString('en-US', {
-                        month: 'long', day: 'numeric', year: 'numeric',
-                      })}
-                    </strong>
-                    {' '}— {days} days remaining.
-                  </span>
-                </div>
-              );
-            }
-            return null;
-          })()}
 
-          {/* Tabs — hidden in form mode, now INSIDE the shared centering wrapper */}
-          {!isFormActive && (
-            <div className="flex gap-1">
-              {(['details', 'history'] as const).map((tab) => (
-                <button
-                  key={tab}
-                  type="button"
-                  onClick={() => setTab(tab)}
-                  className={`px-4 py-2 border-b-2 text-sm font-medium transition-colors cursor-pointer capitalize ${activeTab === tab
-                    ? 'border-primary text-primary'
-                    : 'border-transparent text-gray-600 hover:text-gray-900'
-                    }`}
-                >
-                  {tab}
-                </button>
-              ))}
-            </div>
-          )}
+                {c.contractCode && (
+                  <span className="text-sm text-gray-400">{c.contractCode}</span>
+                )}
+                {c.department && (
+                  <span className="text-sm text-gray-400"> · {c.department}</span>
+                )}
+              </div>
+            )}
+            {isFormActive && (
+              <h2 className="text-lg font-semibold text-gray-900 pt-3 pb-2">
+                {formMode === 'renew' ? 'Renew Contract' : 'Edit Contract'}
+              </h2>
+            )}
 
-        </div>{/* ← end shared centering wrapper */}
-      </div>
+            {/* Alert banner */}
+            {renderAlertBanner(detail, isFormActive)}
+
+            {/* Tabs */}
+            {!isFormActive && (
+              <div className="flex gap-1">
+                {(['details', 'history'] as const).map((tab) => (
+                  <button key={tab} type="button" onClick={() => setTab(tab)}
+                    className={`px-4 py-2 border-b-2 text-sm font-medium transition-colors cursor-pointer capitalize ${activeTab === tab ? 'border-primary text-primary' : 'border-transparent text-gray-600 hover:text-gray-900'}`}>
+                    {tab}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* ── Body ── */}
-      <div
-        className={
-          useInnerScroll
-            ? `flex-1 min-h-0 overflow-y-auto px-4 sm:px-6 py-4 ${centerClass}`
-            : `px-4 sm:px-6 py-4 ${centerClass}`
-        }
-      >
+      <div className={useInnerScroll ? `flex-1 min-h-0 overflow-y-auto px-4 sm:px-6 py-4 ${centerClass}` : `px-4 sm:px-6 py-4 ${centerClass}`}>
         {isFormActive || activeTab === 'details' ? (
           renderForm()
         ) : (
-          /* ── History tab ── */
           <div className="space-y-4">
             {historyItems.length === 0 ? (
               <div className="text-center py-8 text-gray-500">No history available</div>
@@ -1016,19 +789,10 @@ export function ContractDetails({
                     <Clock className="w-5 h-5 text-gray-400 mt-0.5 shrink-0" />
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
-                        <span
-                          className={`px-2 py-0.5 text-xs rounded font-medium ${item.actionType === 'CREATED'
-                            ? 'bg-green-100 text-green-800'
-                            : item.actionType === 'MODIFIED'
-                              ? 'bg-primary/10 text-brand-navy'
-                              : 'bg-red-100 text-red-800'
-                            }`}
-                        >
+                        <span className={`px-2 py-0.5 text-xs rounded font-medium ${item.actionType === 'CREATED' ? 'bg-green-100 text-green-800' : item.actionType === 'MODIFIED' ? 'bg-primary/10 text-brand-navy' : 'bg-red-100 text-red-800'}`}>
                           {titleCase(item.actionType)}
                         </span>
-                        <span className="text-gray-500 text-sm">
-                          {new Date(item.actionDate).toLocaleString()}
-                        </span>
+                        <span className="text-gray-500 text-sm">{new Date(item.actionDate).toLocaleString()}</span>
                       </div>
                       <p className="text-gray-500 text-sm mt-1">By: {item.actionBy.fullName}</p>
                     </div>
@@ -1043,18 +807,59 @@ export function ContractDetails({
   );
 
   if (isFullscreen) {
-    return (
-      <div className="fixed inset-0 z-50 bg-white flex flex-col h-dvh">
-        {panel}
-      </div>
-    );
+    return <div className="fixed inset-0 z-50 bg-white flex flex-col h-dvh">{panel}</div>;
   }
-
   if (isPage) return panel;
-
   return (
     <div className="fixed inset-0 bg-black/50 flex items-start justify-center z-50 p-4 sm:p-8 overflow-hidden">
       {panel}
     </div>
   );
+}
+
+// ─── Extracted helpers to avoid duplication ───────────────────────────────────
+
+function renderStatusBadge(apiStatus: string) {
+  if (apiStatus === 'OVERDUE')
+    return <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-700 border border-red-200">Overdue</span>;
+  if (apiStatus === 'EXPIRING_SOON')
+    return <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-orange-100 text-orange-700 border border-orange-200">Expiring Soon</span>;
+  if (apiStatus === 'ACTIVE')
+    return <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-700 border border-green-200"><span className="w-1.5 h-1.5 rounded-full bg-green-500 inline-block" />Active</span>;
+  if (apiStatus === 'EXPIRED')
+    return <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-600 border border-gray-200">Expired</span>;
+  return null;
+}
+
+function renderAlertBanner(detail: { remainingDays: number; expireDate: string } | null, isFormActive: boolean) {
+  if (isFormActive || !detail) return null;
+  const days = detail.remainingDays;
+  if (days < 0) {
+    return (
+      <div className="flex items-start gap-2 mt-3 mb-3 px-3 py-2.5 rounded-lg bg-red-50 border border-red-200 text-sm text-red-700">
+        <svg className="w-4 h-4 shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+          <line x1="12" y1="9" x2="12" y2="13" /><line x1="12" y1="17" x2="12.01" y2="17" />
+        </svg>
+        <span>
+          This contract expired on{' '}
+          <strong>{new Date(detail.expireDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</strong>
+          {' '}— {Math.abs(days)} days overdue. Please renew or archive it immediately.
+        </span>
+      </div>
+    );
+  }
+  if (days <= 90) {
+    return (
+      <div className="flex items-start gap-2 mt-3 mb-3 px-3 py-2.5 rounded-lg bg-amber-50 border border-amber-200 text-sm text-orange-600">
+        <AlertTriangle className="w-6 h-6 text-yellow-600" />
+        <span>
+          This contract expires on{' '}
+          <strong>{new Date(detail.expireDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</strong>
+          {' '}— {days} days remaining.
+        </span>
+      </div>
+    );
+  }
+  return null;
 }
