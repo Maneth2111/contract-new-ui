@@ -1,46 +1,39 @@
 import React from 'react';
 import { formatCurrency, pluralS } from '../utils/contractUtils';
-import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { FileText, DollarSign, CheckCircle, AlertTriangle, Clock } from 'lucide-react';
+import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts';
+import { FileText, DollarSign, CheckCircle, AlertTriangle, Clock, Users } from 'lucide-react';
 import {
   mockContracts as RAW_CONTRACTS,
   mockPartners,
-  mockContractsByDepartment,
   type Contract as MockContract,
 } from '../data/mockData';
 
-// ── Map to display status (same logic as ContractList) ────────────────────────
-function toDisplayStatus(status: MockContract['status']): string {
-  switch (status) {
-    case 'ACTIVE': return 'Active';
-    case 'OVERDUE': return 'Overdue';
-    case 'EXPIRED': return 'Expired';
-    case 'EXPIRING_SOON': return 'Expiring Soon';
-    default: return status;
-  }
-}
-
-// ── Derive all stats from the same mock contracts ────────────────────────────
+// ── Derive all stats ──────────────────────────────────────────────────────────
 const totalContracts = RAW_CONTRACTS.length;
 const activeContracts = RAW_CONTRACTS.filter(c => c.status === 'ACTIVE').length;
 const overdueContracts = RAW_CONTRACTS.filter(c => c.status === 'OVERDUE').length;
-const expiringSoon = RAW_CONTRACTS.filter(c => c.status === 'EXPIRING_SOON').length;
+const closedContracts = RAW_CONTRACTS.filter(c => c.status === 'CLOSED' || c.status === 'Closed').length;
+const expiringSoonAll = RAW_CONTRACTS.filter(c => c.status === 'EXPIRING_SOON').length;
 const totalValue = RAW_CONTRACTS.reduce((sum, c) => sum + c.contractValue, 0);
 const uniquePartners = mockPartners.length;
 
-// Status distribution counts
+const expiringSoon30 = RAW_CONTRACTS.filter(c => c.remainingDays >= 0 && c.remainingDays <= 30).length;
+const expiringSoon60 = RAW_CONTRACTS.filter(c => c.remainingDays > 30 && c.remainingDays <= 60).length;
+const expiringSoon90 = RAW_CONTRACTS.filter(c => c.remainingDays > 60 && c.remainingDays <= 90).length;
+const max30_60_90 = Math.max(expiringSoon30, expiringSoon60, expiringSoon90, 1);
+
 const statusCounts = RAW_CONTRACTS.reduce(
   (acc, c) => {
     if (c.status === 'ACTIVE') acc.active += 1;
     else if (c.status === 'EXPIRING_SOON') acc.expiringSoon += 1;
     else if (c.status === 'EXPIRED') acc.expired += 1;
     else if (c.status === 'OVERDUE') acc.overdue += 1;
+    else if (c.status === 'CLOSED' || c.status === 'Closed') acc.closed += 1;
     return acc;
   },
   { active: 0, expiringSoon: 0, expired: 0, overdue: 0, closed: 0 }
 );
 
-// Contracts by department — count directly from RAW_CONTRACTS for accuracy
 const deptCountMap: Record<string, number> = {};
 for (const c of RAW_CONTRACTS) {
   const name = c.department.departmentName;
@@ -49,22 +42,18 @@ for (const c of RAW_CONTRACTS) {
 const departmentData = Object.entries(deptCountMap)
   .map(([name, count]) => ({ name, count }))
   .sort((a, b) => b.count - a.count);
+const maxDepartmentCount = Math.max(...departmentData.map(d => d.count), 1);
 
-// Expiration by month (current year) counted from RAW_CONTRACTS
-const currentYear = new Date().getFullYear();
-const expirationMap: Record<string, number> = {};
-for (const c of RAW_CONTRACTS) {
-  const d = new Date(c.expireDate);
-  if (d.getFullYear() === currentYear) {
-    const key = d.toLocaleString('default', { month: 'short', year: 'numeric' });
-    expirationMap[key] = (expirationMap[key] ?? 0) + 1;
-  }
-}
-const expiringByMonth = Array.from({ length: 12 }, (_, i) => {
-  const date = new Date(currentYear, i, 1);
-  const month = date.toLocaleString('default', { month: 'short', year: 'numeric' });
-  return { month, count: expirationMap[month] ?? 0 };
-});
+const DEPT_COLORS = ['#0fbab5', '#32527b', '#de6ea0'];
+
+const statusData = [
+  { name: 'Closed', value: statusCounts.closed, color: '#d4d4d8' },
+  { name: 'Expiring', value: statusCounts.expiringSoon, color: '#ff8904' },
+  { name: 'Active', value: statusCounts.active, color: '#0fbab5' },
+  { name: 'Overdue', value: statusCounts.overdue, color: '#e7000b' },
+].filter(d => d.value > 0);
+
+const statusTotal = statusData.reduce((sum, d) => sum + d.value, 0);
 
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -72,359 +61,247 @@ export default function Dashboard() {
   const formatPercent = (part: number, total: number) =>
     total > 0 ? ((part / total) * 100).toFixed(1) : '0';
 
-  const activePercentage = formatPercent(activeContracts, totalContracts);
-  const maxDepartmentCount = Math.max(...departmentData.map(d => d.count), 1);
-
-  const statusData = [
-    { name: 'Active', value: statusCounts.active },
-    { name: 'Expiring Soon', value: statusCounts.expiringSoon },
-    { name: 'Expired', value: statusCounts.expired },
-    { name: 'Closed', value: statusCounts.closed },
-    { name: 'Overdue', value: statusCounts.overdue },
-  ].filter(d => d.value > 0);
-
-  const statusTotal = statusData.reduce((sum, d) => sum + d.value, 0);
-
-  const COLORS = ['#22c55e', '#eab308', '#f97316', '#ef4444', '#6b7280'];
-  const DEPARTMENT_COLORS = ['#0fbab5', '#32527b', '#de6ea0'] as const;
-
-  const maxExpirationCount = Math.max(...expiringByMonth.map(d => d.count), 0);
-  const expirationYAxisMax = Math.max(maxExpirationCount, 3);
-  const expirationYTicks = Array.from({ length: expirationYAxisMax + 1 }, (_, i) => i);
-  const expiringSoon30 = RAW_CONTRACTS.filter(c => c.status === 'EXPIRING_SOON' && c.remainingDays <= 30).length;
-  const expiringSoon60 = RAW_CONTRACTS.filter(c => c.status === 'EXPIRING_SOON' && c.remainingDays > 30 && c.remainingDays <= 60).length;
-  const expiringSoon90 = RAW_CONTRACTS.filter(c => c.status === 'EXPIRING_SOON' && c.remainingDays > 60 && c.remainingDays <= 90).length;
-
   return (
     <div className="space-y-6">
-      {/* Summary Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-y-4 gap-x-8">
-        {/* 30-days Expiring Soon */}
-        <div className="bg-white p-4 rounded-xl shadow-md shadow-gray-300 flex hover:scale-[1.02] transition-transform duration-200 ">
-          <div className="flex-1 flex items-center justify-between">
-            <div>
-              <p className="text-gray-700 font-medium">
-                Expiring Soon (30 days)
-              </p>
 
-              <p className="mt-2 text-xl font-medium text-gray-900">
-                {expiringSoon30}
-              </p>
+      {/* ── ATTENTION REQUIRED ── */}
+      <section>
+        <p className="text-xs font-semibold tracking-widest text-gray-400 uppercase mb-3">Attention Required</p>
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
 
-              <p className="text-sm text-red-500 mt-1">
-                Requires attention soon
-              </p>
+          {/* Expiring Soon — wide card with breakdown bars */}
+          <div className="lg:col-span-1 relative overflow-hidden bg-white rounded-xl border border-gray-100 shadow-sm p-5 flex flex-col gap-4 hover:scale-[1.01] transition-transform duration-200">
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-xs font-semibold tracking-widest text-gray-400 uppercase mb-2">Expiring Soon</p>
+                <p className="text-4xl font-bold text-gray-900">{expiringSoonAll}</p>
+                <p className="text-xs text-orange-500 font-medium mt-1">Requires attention soon</p>
+              </div>
+              <span className="w-10 h-10 rounded-xl bg-orange-50 flex items-center justify-center shrink-0">
+                <Clock className="w-5 h-5 text-orange-400" />
+              </span>
             </div>
 
-            <div className="p-3 rounded-lg bg-red-100">
-              <Clock className="w-6 h-6 text-red-500" />
-            </div>
-          </div>
-        </div>
-        {/* 60-days Expiring Soon */}
-        <div className="bg-white p-4 rounded-xl shadow-md shadow-gray-300flex hover:scale-[1.02] transition-transform duration-200 ">
-          <div className="flex-1 flex items-center justify-between">
-            <div>
-              <p className="text-gray-700 font-medium">
-                Expiring Soon (60 days)
-              </p>
-
-              <p className="mt-2 text-xl font-medium text-gray-900">
-                {expiringSoon60}
-              </p>
-
-              <p className="text-sm text-orange-500 mt-1">
-                Requires attention soon
-              </p>
-            </div>
-
-            <div className="p-3 rounded-lg bg-orange-100">
-              <Clock className="w-6 h-6 text-orange-500" />
-            </div>
-          </div>
-        </div>
-        {/* 90-days Expiring Soon */}
-        <div className="bg-white p-4 rounded-xl shadow-md shadow-gray-300 flex hover:scale-[1.02] transition-transform duration-200 ">
-          <div className="flex-1 flex items-center justify-between">
-            <div>
-              <p className="text-gray-700 font-medium">
-                Expiring Soon (90 days)
-              </p>
-
-              <p className="mt-2 text-xl font-medium text-gray-900">
-                {expiringSoon90}
-              </p>
-
-              <p className="text-sm text-yellow-500 mt-1">
-                Requires attention soon
-              </p>
-            </div>
-
-            <div className="p-3 rounded-lg bg-yellow-100">
-              <Clock className="w-6 h-6 text-yellow-500" />
-            </div>
-          </div>
-        </div>
-
-        {/* Overdue */}
-        <div className="bg-white p-4 rounded-xl shadow flex hover:scale-[1.02] transition-transform duration-200">
-          {/* <div className="w-1 rounded-l-xl bg-red-500 mr-4" /> */}
-
-          <div className="flex-1 flex items-center justify-between">
-            <div>
-              <p className="text-gray-700 font-medium">
-                Overdue Contract{pluralS(overdueContracts)}
-              </p>
-
-              <p className="mt-2 text-xl font-medium text-gray-900">
-                {overdueContracts}
-              </p>
-
-              <p className="text-sm text-red-400 mt-1">
-                Immediate action required
-              </p>
-            </div>
-
-            <div className="p-3 rounded-lg bg-red-100">
-              <AlertTriangle className="w-6 h-6 text-red-500" />
-            </div>
-          </div>
-        </div>
-
-        {/* Active */}
-        <div className="bg-white p-4 rounded-xl shadow flex hover:scale-[1.02] transition-transform duration-200">
-          {/* <div className="w-1 rounded-l-xl bg-green-500 mr-4" /> */}
-
-          <div className="flex-1 flex items-center justify-between">
-            <div>
-              <p className="text-gray-700 font-medium">
-                Active Contract{pluralS(activeContracts)}
-              </p>
-
-              <p className="mt-2 text-xl font-medium text-gray-900">
-                {activeContracts}
-              </p>
-
-              <p className="text-sm text-green-400 mt-1">
-                Currently in progress
-              </p>
-            </div>
-
-            <div className="p-3 rounded-lg bg-green-100">
-              <CheckCircle className="w-6 h-6 text-green-500" />
-            </div>
-          </div>
-        </div>
-
-        {/* Total Contracts */}
-        <div className="bg-white p-4 rounded-xl shadow-md shadow-gray-300 flex hover:scale-[1.02] transition-transform duration-200">
-          {/* <div className="w-1 rounded-l-xl bg-blue-500 mr-4" /> */}
-
-          <div className="flex-1 flex items-center justify-between">
-            <div>
-              <p className="text-gray-700 font-medium">
-                Total Contract{pluralS(totalContracts)}
-              </p>
-
-              <p className="mt-2 text-xl font-medium text-gray-900">
-                {totalContracts}
-              </p>
-
-              <p className="text-sm text-gray-400 mt-1">
-                All registered contracts
-              </p>
-            </div>
-
-            <div className="p-3 rounded-lg bg-blue-100">
-              <FileText className="w-6 h-6 text-blue-500" />
-            </div>
-          </div>
-        </div>
-
-        {/* Total Value */}
-        <div className="bg-white p-4 rounded-xl shadow-md shadow-gray-300 flex hover:scale-[1.02] transition-transform duration-200">
-          {/* <div className="w-1 rounded-l-xl bg-green-500 mr-4" /> */}
-
-          <div className="flex-1 flex items-center justify-between">
-            <div>
-              <p className="text-gray-700 font-medium">
-                Total Contract Value
-              </p>
-
-              <p className="mt-2 text-xl font-medium text-gray-900">
-                {formatCurrency(totalValue)}
-              </p>
-
-              <p className="text-sm text-gray-400 mt-1">
-                Combined contract worth
-              </p>
-            </div>
-
-            <div className="p-3 rounded-lg bg-green-100">
-              <DollarSign className="w-6 h-6 text-green-500" />
-            </div>
-          </div>
-        </div>
-
-        {/* Partners */}
-        <div className="bg-white p-4 rounded-xl shadow-md shadow-gray-300 flex hover:scale-[1.02] transition-transform duration-200">
-          {/* <div className="w-1 rounded-l-xl bg-purple-500 mr-4" /> */}
-
-          <div className="flex-1 flex items-center justify-between">
-            <div>
-              <p className="text-gray-700 font-medium">
-                Total Partner{pluralS(uniquePartners)}
-              </p>
-
-              <p className="mt-2 text-xl font-medium text-gray-900">
-                {uniquePartners}
-              </p>
-
-              <p className="text-sm text-gray-400 mt-1">
-                Unique organizations
-              </p>
-            </div>
-
-            <div className="p-3 rounded-lg bg-purple-100">
-              <FileText className="w-6 h-6 text-purple-500" />
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Charts Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Contracts by Department */}
-        <div className="bg-white p-6 rounded-lg shadow-md shadow-gray-300 hover:scale-[1.02] transition-transform duration-200">
-          <div className="flex items-center justify-between gap-4 mb-6">
-            <h3 className="font-medium text-gray-900">Contracts by Department</h3>
-            <span className="text-sm text-gray-500 shrink-0">By contract count</span>
-          </div>
-          {departmentData.length === 0 ? (
-            <p className="text-center text-gray-500 py-16">No department data available</p>
-          ) : (
-            <ul className="space-y-6 min-h-65">
-              {departmentData.map((dept, index) => {
-                const barWidth = (dept.count / maxDepartmentCount) * 100;
-                const barColor = DEPARTMENT_COLORS[index % DEPARTMENT_COLORS.length];
-                return (
-                  <li key={dept.name}>
-                    <div className="flex items-center justify-between gap-3 mb-2">
-                      <div className="flex items-center gap-3 min-w-0">
-                        <span
-                          className="w-2.5 h-2.5 rounded-full shrink-0"
-                          style={{ backgroundColor: barColor }}
-                          aria-hidden
-                        />
-                        <span className="font-medium text-gray-900 truncate" title={dept.name}>
-                          {dept.name}
-                        </span>
-                      </div>
-                      <span className="text-sm text-gray-500 tabular-nums shrink-0">
-                        {dept.count.toLocaleString()}
-                      </span>
-                    </div>
-                    <div className="h-2.5 w-full rounded-full bg-gray-100 overflow-hidden">
-                      <div
-                        className="h-full rounded-full transition-all duration-500 ease-out"
-                        style={{ width: `${barWidth}%`, backgroundColor: barColor }}
-                        role="progressbar"
-                        aria-valuenow={dept.count}
-                        aria-valuemin={0}
-                        aria-valuemax={maxDepartmentCount}
-                        aria-label={`${dept.name}: ${dept.count} contracts`}
-                      />
-                    </div>
-                  </li>
-                );
-              })}
-            </ul>
-          )}
-        </div>
-
-        {/* Status Distribution */}
-        <div className="bg-white p-6 rounded-xl shadow-md shadow-gray-300 hover:scale-[1.02] transition-transform duration-200">
-          <h3 className="mb-4 text-gray-700 font-semibold">
-            Status Distribution
-          </h3>
-
-          <div className="flex items-center">
-            {/* CHART */}
-            <ResponsiveContainer width="50%" height={200}>
-              <PieChart>
-                <Pie
-                  data={statusData}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={55}
-                  outerRadius={75}
-                  paddingAngle={3}
-                  dataKey="value"
-                >
-                  {statusData.map((_, index) => (
-                    <Cell
-                      key={`cell-${index}`}
-                      fill={COLORS[index % COLORS.length]}
+            {/* Breakdown bars */}
+            <div className="space-y-2.5 pt-1 border-t border-gray-50">
+              {[
+                { label: 'Within 30 days', count: expiringSoon30, color: 'bg-red-400' },
+                { label: '31 – 60 days', count: expiringSoon60, color: 'bg-orange-400' },
+                { label: '61 – 90 days', count: expiringSoon90, color: 'bg-yellow-400' },
+              ].map(({ label, count, color }) => (
+                <div key={label} className="flex items-center gap-2">
+                  <span className={`w-2 h-2 rounded-full shrink-0 ${color}`} />
+                  <span className="text-xs text-gray-500 w-24 shrink-0">{label}</span>
+                  <div className="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                    <div
+                      className={`h-full rounded-full ${color}`}
+                      style={{ width: `${max30_60_90 > 0 ? Math.round((count / max30_60_90) * 100) : 0}%` }}
                     />
-                  ))}
-                </Pie>
-                <Tooltip
-                  formatter={(value: number) =>
-                    `${formatPercent(value, statusTotal)}%`
-                  }
-                />
-              </PieChart>
-            </ResponsiveContainer>
+                  </div>
+                  <span className="text-xs font-semibold text-gray-700 w-3 text-right">{count}</span>
+                </div>
+              ))}
+            </div>
 
-            {/* LEGEND / DETAILS */}
-            <div className="space-y-3 w-1/2 pl-4">
-              {statusData.map((item, index) => {
-                const percent = formatPercent(item.value, statusTotal);
+            <div className="absolute bottom-0 left-0 w-full h-1 bg-orange-400 rounded-b-xl" />
+          </div>
 
-                return (
-                  <div
-                    key={index}
-                    className="flex items-center gap-2 "
-                  >
-                    {/* LEFT */}
-                    <div className="flex items-center gap-3">
-                      <span
-                        className="w-3 h-3 rounded-full"
-                        style={{
-                          backgroundColor: COLORS[index % COLORS.length],
-                        }}
-                      />
+          {/* Overdue */}
+          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 flex flex-col justify-between hover:scale-[1.01] transition-transform duration-200 relative overflow-hidden">
+            <div className="flex items-start justify-between mb-3">
+              <p className="text-xs font-semibold tracking-widest text-gray-400 uppercase">Overdue</p>
+              <span className="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center shrink-0">
+                <AlertTriangle className="w-5 h-5 text-red-400" />
+              </span>
+            </div>
+            <div>
+              <p className="text-4xl font-bold text-gray-900">{overdueContracts}</p>
+              <p className="text-xs font-medium mt-1 text-red-400">
+                {overdueContracts === 0 ? 'All clear' : 'Immediate action required'}
+              </p>
+            </div>
+            <div className="absolute bottom-0 left-0 w-full h-1 bg-red-400 rounded-b-xl" />
+          </div>
 
-                      <p className="text-sm text-gray-600">
-                        {item.name}
-                      </p>
+          {/* Active */}
+          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 flex flex-col justify-between hover:scale-[1.01] transition-transform duration-200 relative overflow-hidden">
+            <div className="flex items-start justify-between mb-3">
+              <p className="text-xs font-semibold tracking-widest text-gray-400 uppercase">Active</p>
+              <span className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                <CheckCircle className="w-5 h-5 text-primary" />
+              </span>
+            </div>
+            <div>
+              <p className="text-4xl font-bold text-gray-900">{activeContracts}</p>
+              <p className="text-xs font-medium mt-1 text-primary">Currently in progress</p>
+            </div>
+            <div className="absolute bottom-0 left-0 w-full h-1 bg-primary rounded-b-xl" />
+          </div>
+
+          {/* Closed */}
+          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 flex flex-col justify-between hover:scale-[1.01] transition-transform duration-200 relative overflow-hidden">
+            <div className="flex items-start justify-between mb-3">
+              <p className="text-xs font-semibold tracking-widest text-gray-400 uppercase">Closed</p>
+              <span className="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center shrink-0">
+                <FileText className="w-5 h-5 text-gray-400" />
+              </span>
+            </div>
+            <div>
+              <p className="text-4xl font-bold text-gray-900">{closedContracts}</p>
+              <p className="text-xs font-medium mt-1 text-gray-400">Completed contracts</p>
+            </div>
+            <div className="absolute bottom-0 left-0 w-full h-1 bg-gray-300 rounded-b-xl" />
+          </div>
+        </div>
+      </section>
+
+      {/* ── OVERVIEW ── */}
+      <section>
+        <p className="text-xs font-semibold tracking-widest text-gray-400 uppercase mb-3">Overview</p>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+
+          {/* Total Contracts */}
+          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 flex items-center justify-between hover:scale-[1.01] transition-transform duration-200 relative overflow-hidden">
+            <div>
+              <p className="text-xs font-semibold tracking-widest text-gray-400 uppercase mb-2">Total Contracts</p>
+              <p className="text-3xl font-bold text-gray-900">{totalContracts}</p>
+              <p className="text-xs text-gray-400 mt-1">All registered contracts</p>
+            </div>
+            <span className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center shrink-0">
+              <FileText className="w-5 h-5 text-blue-400" />
+            </span>
+            <div className="absolute bottom-0 left-0 w-full h-1 bg-blue-400 rounded-b-xl" />
+          </div>
+
+          {/* Total Partners */}
+          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 flex items-center justify-between hover:scale-[1.01] transition-transform duration-200 relative overflow-hidden">
+            <div>
+              <p className="text-xs font-semibold tracking-widest text-gray-400 uppercase mb-2">Total Partners</p>
+              <p className="text-3xl font-bold text-gray-900">{uniquePartners}</p>
+              <p className="text-xs text-gray-400 mt-1">Unique organizations</p>
+            </div>
+            <span className="w-10 h-10 rounded-xl bg-purple-50 flex items-center justify-center shrink-0">
+              <Users className="w-5 h-5 text-purple-400" />
+            </span>
+            <div className="absolute bottom-0 left-0 w-full h-1 bg-purple-400 rounded-b-xl" />
+          </div>
+
+          {/* Total Contract Value */}
+          <div className="bg-[#1A2B4A] rounded-xl shadow-sm p-5 flex items-center justify-between hover:scale-[1.01] transition-transform duration-200 relative overflow-hidden">
+            <div>
+              <p className="text-xs font-semibold tracking-widest text-[#00B5C8] uppercase mb-2">Total Contract Value</p>
+              <p className="text-3xl font-bold text-white">{formatCurrency(totalValue)}</p>
+              <p className="text-xs text-[#00B5C8] mt-1">Combined contract worth</p>
+            </div>
+            <span className="w-10 h-10 rounded-xl bg-[#00B5C8]/20 flex items-center justify-center shrink-0">
+              <DollarSign className="w-5 h-5 text-[#00B5C8]" />
+            </span>
+            <div className="absolute bottom-0 left-0 w-full h-1 bg-[#00B5C8] rounded-b-xl" />
+          </div>
+        </div>
+      </section>
+
+      {/* ── ANALYTICS ── */}
+      <section>
+        <p className="text-xs font-semibold tracking-widest text-gray-400 uppercase mb-3">Analytics</p>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+
+          {/* Contracts by Department */}
+          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 hover:scale-[1.01] transition-transform duration-200">
+            <div className="flex items-center justify-between mb-5">
+              <h3 className="font-semibold text-gray-800">Contracts by Department</h3>
+              <span className="text-xs text-gray-400 bg-gray-50 px-2.5 py-1 rounded-full">by contract count</span>
+            </div>
+            {departmentData.length === 0 ? (
+              <p className="text-center text-gray-400 py-12 text-sm">No data available</p>
+            ) : (
+              <ul className="space-y-5">
+                {departmentData.map((dept, index) => {
+                  const barWidth = (dept.count / maxDepartmentCount) * 100;
+                  const color = DEPT_COLORS[index % DEPT_COLORS.length];
+                  return (
+                    <li key={dept.name}>
+                      <div className="flex items-center gap-2 mb-1.5">
+                        <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: color }} />
+                        <span className="text-sm text-gray-700 font-medium">{dept.name}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
+                          <div
+                            className="h-full rounded-full transition-all duration-500"
+                            style={{ width: `${barWidth}%`, backgroundColor: color }}
+                          />
+                        </div>
+                        <span className="text-sm font-semibold text-gray-600 w-4 text-right shrink-0">{dept.count}</span>
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+
+            {/* X-axis tick marks */}
+            <div className="flex justify-between mt-3 mr-5 px-0">
+              {Array.from({ length: maxDepartmentCount + 1 }, (_, i) => (
+                <span key={i} className="text-xs text-gray-300">{i}</span>
+              ))}
+            </div>
+          </div>
+
+          {/* Status Distribution */}
+          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 hover:scale-[1.01] transition-transform duration-200">
+            <div className="flex items-center justify-between mb-5">
+              <h3 className="font-semibold text-gray-800">Status Distribution</h3>
+              <span className="text-xs text-gray-400 bg-gray-50 px-2.5 py-1 rounded-full">{statusTotal} total</span>
+            </div>
+
+            <div className="flex items-center gap-6">
+              {/* Donut chart */}
+              <div className="relative shrink-0">
+                <ResponsiveContainer width={160} height={160}>
+                  <PieChart>
+                    <Pie
+                      data={statusData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={48}
+                      outerRadius={68}
+                      paddingAngle={3}
+                      dataKey="value"
+                    >
+                      {statusData.map((item, index) => (
+                        <Cell key={index} fill={item.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip formatter={(value: number) => [`${formatPercent(value, statusTotal)}%`, '']} />
+                  </PieChart>
+                </ResponsiveContainer>
+                {/* Center label */}
+                <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                  <span className="text-2xl font-bold text-gray-900">{statusTotal}</span>
+                  <span className="text-xs text-gray-400">contracts</span>
+                </div>
+              </div>
+
+              {/* Legend */}
+              <div className="flex-1 space-y-3">
+                {statusData.map((item) => (
+                  <div key={item.name} className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: item.color }} />
+                      <span className="text-sm text-gray-600 truncate">{item.name}</span>
                     </div>
-
-                    {/* RIGHT */}
-                    <div className="text-sm font-medium text-gray-800">
-                      {percent}%
+                    <div className="flex items-center gap-2 shrink-0">
+                      <span className="text-xs text-gray-400">{formatPercent(item.value, statusTotal)}%</span>
+                      <span className="text-sm font-semibold text-gray-700 w-4 text-right">{item.value}</span>
                     </div>
                   </div>
-                );
-              })}
+                ))}
+              </div>
             </div>
           </div>
         </div>
-      </div>
-
-      {/* Upcoming Expirations by Month */}
-      {/* <div className="bg-white p-6 rounded-lg shadow-sm hover:scale-[1.02] transition-transform duration-200">
-        <h3 className="mb-4 font-medium">Upcoming Expirations by Month</h3>
-        <ResponsiveContainer width="100%" height={300}>
-          <BarChart data={expiringByMonth}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="month" />
-            <YAxis allowDecimals={false} domain={[0, expirationYAxisMax]} ticks={expirationYTicks} />
-            <Tooltip formatter={(value: number) => [Math.round(value), 'Contracts']} />
-            <Bar dataKey="count" fill="#f97316" />
-          </BarChart>
-        </ResponsiveContainer>
-      </div> */}
+      </section>
     </div>
   );
-}                      
+}

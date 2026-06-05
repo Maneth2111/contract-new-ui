@@ -341,7 +341,7 @@ export function ReportDashboard({ currentUser, onSelectContract }: ReportDashboa
               className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/80 disabled:bg-gray-300 disabled:cursor-not-allowed cursor-pointer text-sm font-medium"
             >
               {exportingCSV ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
-              {exportingCSV ? 'Exporting...' : 'Export CSV'}
+              {exportingCSV ? 'Exporting...' : 'Export Excel'}
             </button>
             <button
               type="button"
@@ -584,10 +584,9 @@ export function ReportDashboard({ currentUser, onSelectContract }: ReportDashboa
             </tbody>
           </table>
         </div>
-      </div>
-
+        
       {/* Results count + pagination */}
-      <div className="flex flex-col sm:flex-row justify-between w-full items-start sm:items-center gap-3 sm:gap-0">
+      <div className="flex flex-col sm:flex-row justify-between items-center gap-3 px-4 py-3 border-t border-gray-100">
         <div className="text-gray-600 text-sm sm:text-base whitespace-nowrap">
           Showing {sortedContracts.length} of {total} contracts
         </div>
@@ -610,6 +609,8 @@ export function ReportDashboard({ currentUser, onSelectContract }: ReportDashboa
           />
         </div>
       </div>
+      </div>
+
     </div>
   );
 }
