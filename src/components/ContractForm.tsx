@@ -158,7 +158,14 @@ export function ContractForm({
   formId,
   hideFooter = false,
 }: ContractFormProps) {
-  const { departments, contractTypesByDepartment, departmentList, contractTypeList } = useContractFormData();
+  const {
+    departments,
+    contractTypesByDepartment,
+    departmentList,
+    contractTypeList,
+    isLoading: formDataLoading,
+    error: formDataError,
+  } = useContractFormData();
   const [partnerOptionsMap, setPartnerOptionsMap] = useState<Record<number, any[]>>({});
   const statuses = mockContractStatuses;
   const [fileError, setFileError] = useState<string | null>(null);
@@ -496,6 +503,16 @@ export function ContractForm({
 
   const body = (
     <div className={`${scrollableBody} ${readOnlyShell}`.trim()}>
+      {formDataLoading && (
+        <div className="rounded-lg border border-dashed border-gray-300 bg-gray-50 p-4 text-sm text-gray-600">
+          Loading departments and contract types...
+        </div>
+      )}
+      {formDataError && (
+        <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+          {formDataError}
+        </div>
+      )}
       {/* Contract Information */}
       <section className="space-y-4">
         <h3 className="font-semibold text-gray-800">Contract Information</h3>
@@ -537,9 +554,9 @@ export function ContractForm({
                       key: type,
                       label: type,
                     }))}
-                    placeholder={!watchedDepartment ? 'Select Department First' : 'Select Contract Type'}
+                    placeholder={formDataLoading ? 'Loading contract types...' : !watchedDepartment ? 'Select Department First' : 'Select Contract Type'}
                     showPlaceholder={false}
-                    disabled={!watchedDepartment}
+                    disabled={!watchedDepartment || formDataLoading || Boolean(formDataError)}
                   />
                 )}
               />
@@ -569,9 +586,9 @@ export function ContractForm({
                       key: dept,
                       label: dept,
                     }))}
-                    placeholder="Select Department"
+                    placeholder={formDataLoading ? 'Loading departments...' : 'Select Department'}
                     showPlaceholder={false}
-                    disabled={isSingleDepartment}
+                    disabled={isSingleDepartment || formDataLoading || Boolean(formDataError)}
                   />
                 )}
               />
