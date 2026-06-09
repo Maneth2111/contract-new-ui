@@ -77,7 +77,7 @@ export default function Dashboard() {
                 <p className="text-4xl font-bold text-gray-900">{expiringSoonAll}</p>
                 <p className="text-xs text-orange-500 font-medium mt-1">Requires attention soon</p>
               </div>
-              <span className="w-10 h-10 rounded-xl bg-orange-50 flex items-center justify-center shrink-0">
+              <span className="w-10 h-10 rounded-xl bg-orange-100 flex items-center justify-center shrink-0">
                 <Clock className="w-5 h-5 text-orange-400" />
               </span>
             </div>
@@ -110,7 +110,7 @@ export default function Dashboard() {
           <div className="bg-white rounded-xl  shadow-sm p-5 hover:scale-[1.01] transition-transform duration-200 relative overflow-hidden">
             <div className="flex items-start justify-between">
               <p className="text-xs font-semibold tracking-widest text-gray-400 uppercase">Overdue</p>
-              <span className="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center shrink-0">
+              <span className="w-10 h-10 rounded-xl bg-red-100 flex items-center justify-center shrink-0">
                 <AlertTriangle className="w-5 h-5 text-red-400" />
               </span>
             </div>
@@ -127,7 +127,7 @@ export default function Dashboard() {
           <div className="bg-white rounded-xl  shadow-sm p-5  hover:scale-[1.01] transition-transform duration-200 relative overflow-hidden">
             <div className="flex items-start justify-between">
               <p className="text-xs font-semibold tracking-widest text-gray-400 uppercase">Active</p>
-              <span className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+              <span className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center shrink-0">
                 <CheckCircle className="w-5 h-5 text-primary" />
               </span>
             </div>
@@ -142,7 +142,7 @@ export default function Dashboard() {
           <div className="bg-white rounded-xl  shadow-sm p-5 hover:scale-[1.01] transition-transform duration-200 relative overflow-hidden">
             <div className="flex items-start justify-between">
               <p className="text-xs font-semibold tracking-widest text-gray-400 uppercase">Closed</p>
-              <span className="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center shrink-0">
+              <span className="w-10 h-10 rounded-xl bg-gray-200 flex items-center justify-center shrink-0">
                 <FileText className="w-5 h-5 text-gray-400" />
               </span>
             </div>
@@ -167,7 +167,7 @@ export default function Dashboard() {
               <p className="text-3xl font-bold text-gray-900">{totalContracts}</p>
               <p className="text-xs text-gray-400 mt-1">All registered contracts</p>
             </div>
-            <span className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center shrink-0">
+            <span className="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center shrink-0">
               <FileText className="w-5 h-5 text-blue-400" />
             </span>
             <div className="absolute bottom-0 left-0 w-full h-1 bg-blue-400 rounded-b-xl" />
@@ -180,7 +180,7 @@ export default function Dashboard() {
               <p className="text-3xl font-bold text-gray-900">{uniquePartners}</p>
               <p className="text-xs text-gray-400 mt-1">Unique organizations</p>
             </div>
-            <span className="w-10 h-10 rounded-xl bg-purple-50 flex items-center justify-center shrink-0">
+            <span className="w-10 h-10 rounded-xl bg-purple-100 flex items-center justify-center shrink-0">
               <Users className="w-5 h-5 text-purple-400" />
             </span>
             <div className="absolute bottom-0 left-0 w-full h-1 bg-purple-400 rounded-b-xl" />
@@ -193,7 +193,7 @@ export default function Dashboard() {
               <p className="text-3xl font-bold text-white">{formatCurrency(totalValue)}</p>
               <p className="text-xs text-primary mt-1">Combined contract worth</p>
             </div>
-            <span className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center shrink-0">
+            <span className="c rounded-xl bg-primary/20 flex items-center justify-center shrink-0">
               <DollarSign className="w-5 h-5 text-primary" />
             </span>
             <div className="absolute bottom-0 left-0 w-full h-1 bg-primary rounded-b-xl" />
@@ -226,7 +226,7 @@ export default function Dashboard() {
                         <span className="text-sm text-gray-700 font-medium">{dept.name}</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
+                        <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
                           <div
                             className="h-full rounded-full transition-all duration-500"
                             style={{ width: `${barWidth}%`, backgroundColor: color }}

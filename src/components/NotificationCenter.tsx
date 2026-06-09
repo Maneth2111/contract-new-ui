@@ -356,7 +356,7 @@ export function NotificationCenter({ onSelectContract, onUnreadChange }: Notific
 
       {/* ── Contract cards ── */}
       {pageItems.length === 0 ? (
-        <div className="text-center py-12">
+        <div className="text-center py-12 bg-white rounded-md shadow">
           <p className="text-gray-400 text-sm">No contracts match this filter.</p>
         </div>
       ) : (
