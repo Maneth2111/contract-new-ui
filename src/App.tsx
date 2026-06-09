@@ -309,7 +309,7 @@ export default function App() {
         onClick={activeContractFormMode !== 'view' ? () => contractDetailActionsRef.current.exitFormMode() : undefined}
         className={`font-medium transition-colors ${activeContractFormMode !== 'view'
             ? 'text-primary hover:text-primary/80 cursor-pointer'
-            : 'text-[#1A2B4A] cursor-default'
+            : 'text-brand-navy cursor-default'
           }`}
       >
         {selectedContractTitle || 'Contract Details'}
@@ -358,7 +358,7 @@ export default function App() {
         onClick={activeUserFormMode !== 'view' ? () => userDetailActionsRef.current.exitFormMode() : undefined}
         className={`font-medium transition-colors ${activeUserFormMode !== 'view'
             ? 'text-primary hover:text-primary/80 cursor-pointer'
-            : 'text-[#1A2B4A] cursor-default'
+            : 'text-brand-navy cursor-default'
           }`}
       >
         {selectedUserName || 'User Details'}
@@ -375,7 +375,7 @@ export default function App() {
         {modeLabel && (
           <>
             <ChevronRight className="w-5 h-5 text-gray-400 shrink-0" />
-            <span className="font-medium text-[#1A2B4A]">{modeLabel}</span>
+            <span className="font-medium text-brand-navy">{modeLabel}</span>
           </>
         )}
       </div>
@@ -574,7 +574,7 @@ export default function App() {
         <div className="flex items-center gap-3 px-5 py-5 border-b border-primary/15">
           <img src="/color.png" alt="Chokchey Finance" className="w-9 h-9 object-contain shrink-0" />
           <div className="min-w-0 flex-1">
-            <p className="text-[#1A2B4A] font-semibold text-sm leading-tight truncate">Contract Management</p>
+            <p className="text-brand-navy text-sm mb-1 font-medium leading-tight truncate">Contract Management</p>
             <p className="text-primary text-xs leading-tight truncate">CHOKCHEY Finance Plc.</p>
           </div>
           <button
@@ -594,7 +594,7 @@ export default function App() {
             onClick={() => navTo('dashboard')}
             className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all cursor-pointer ${activeTab === 'dashboard'
               ? 'bg-primary text-white shadow-sm shadow-primary/30'
-              : 'text-[#1A2B4A] hover:bg-[#e0f7fa] hover:text-primary'
+              : 'text-brand-navy hover:bg-[#e0f7fa] hover:text-primary'
               }`}
           >
             <LayoutDashboard className="w-4 h-4 shrink-0" />
@@ -605,7 +605,7 @@ export default function App() {
             onClick={() => navTo('contracts')}
             className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all cursor-pointer ${activeTab === 'contracts'
               ? 'bg-primary text-white shadow-sm shadow-primary/30'
-              : 'text-[#1A2B4A] hover:bg-[#e0f7fa] hover:text-primary'
+              : 'text-brand-navy hover:bg-[#e0f7fa] hover:text-primary'
               }`}
           >
             <FileText className="w-4 h-4 shrink-0" />
@@ -616,7 +616,7 @@ export default function App() {
             onClick={() => navTo('notifications')}
             className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all cursor-pointer relative ${activeTab === 'notifications'
               ? 'bg-primary text-white shadow-sm shadow-primary/30'
-              : 'text-[#1A2B4A] hover:bg-[#e0f7fa] hover:text-primary'
+              : 'text-brand-navy hover:bg-[#e0f7fa] hover:text-primary'
               }`}
           >
             <Bell className="w-4 h-4 shrink-0" />
@@ -632,7 +632,7 @@ export default function App() {
             onClick={() => navTo('reports')}
             className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all cursor-pointer ${activeTab === 'reports'
               ? 'bg-primary text-white shadow-sm shadow-primary/30'
-              : 'text-[#1A2B4A] hover:bg-[#e0f7fa] hover:text-primary'
+              : 'text-brand-navy hover:bg-[#e0f7fa] hover:text-primary'
               }`}
           >
             <BarChart3 className="w-4 h-4 shrink-0" />
@@ -648,7 +648,7 @@ export default function App() {
             }}
             className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all cursor-pointer disabled:opacity-50 disabled:cursor-default ${activeTab === 'users' && userDetailsSource === 'profile'
                 ? 'bg-primary text-white shadow-sm shadow-primary/30'
-                : 'text-[#1A2B4A] hover:bg-[#e0f7fa] hover:text-primary'
+                : 'text-brand-navy hover:bg-[#e0f7fa] hover:text-primary'
               }`}
           >
             <UserIcon className="w-4 h-4 shrink-0" />
@@ -662,7 +662,7 @@ export default function App() {
                 onClick={() => navTo('users')}
                 className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all cursor-pointer ${activeTab === 'users' && userDetailsSource !== 'profile'
                     ? 'bg-primary text-white shadow-sm shadow-primary/30'
-                    : 'text-[#1A2B4A] hover:bg-[#e0f7fa] hover:text-primary'
+                    : 'text-brand-navy hover:bg-[#e0f7fa] hover:text-primary'
                   }`}
               >
                 <Users className="w-4 h-4 shrink-0" />
@@ -684,7 +684,7 @@ export default function App() {
               <UserIcon className="w-4 h-4 text-primary" />
             </div>
             <div className="min-w-0 flex-1">
-              <p className="font-medium text-[#1A2B4A] truncate leading-tight">
+              <p className="font-medium text-brand-navy truncate leading-tight">
                 {user?.fullName ?? 'N/A'}
               </p>
               <p className="text-xs text-[#5b7a85] truncate leading-tight">
@@ -720,7 +720,7 @@ export default function App() {
           <button
             type="button"
             onClick={() => setSidebarOpen(true)}
-            className="lg:hidden p-2 rounded-lg text-[#1A2B4A] hover:bg-[#e0f7fa] hover:text-primary transition-colors cursor-pointer shrink-0"
+            className="lg:hidden p-2 rounded-lg text-brand-navy hover:bg-[#e0f7fa] hover:text-primary transition-colors cursor-pointer shrink-0"
           >
             <Menu className="w-5 h-5" />
           </button>

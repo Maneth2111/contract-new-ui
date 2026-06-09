@@ -622,7 +622,7 @@ export function UserDetails({
                 <FieldRow label="User Permissions">
                   <div className="flex flex-wrap gap-1.5">
                     {userPermNames.map(p => (
-                      <span key={p} className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium whitespace-nowrap shrink-0 bg-brand-navy/8 text-brand-navy border border-brand-navy/5">
+                      <span key={p} className="inline-flex items-center px-2.5 py-1 bg-primary/8 text-primary border border-primary/20 rounded-md text-xs font-medium whitespace-nowrap shrink-0">
                         {p.replace('USER_', '')}
                       </span>
                     ))}
