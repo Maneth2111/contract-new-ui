@@ -197,7 +197,7 @@ export function UserForm({
               <div className={readOnlyBoxClass}>{formData.employeeId || 'N/A'}</div>
             ) : (
               <>
-                <input {...register('employeeId')} placeholder="e.g. 1010" className={fieldClass} disabled />
+                <input {...register('employeeId')} placeholder="e.g. 1010" className={fieldClass} />
                 <ErrorMsg message={errors.employeeId?.message} />
               </>
             )}

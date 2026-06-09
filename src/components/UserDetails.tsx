@@ -114,7 +114,7 @@ function FieldRow({
 
 function SectionCard({ children }: { children: React.ReactNode }) {
   return (
-    <div className="border border-gray-200 rounded-lg overflow-hidden mb-4">
+    <div className="shadow-sm rounded-lg overflow-hidden mb-4">
       {children}
     </div>
   );

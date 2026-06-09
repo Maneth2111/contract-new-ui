@@ -1,6 +1,6 @@
 import React, { useMemo, useState, type ChangeEvent } from 'react';
 import { User, UserProfile } from '../types/user';
-import { Search, Eye, Edit2, UserX, Plus, ChevronDown, Users } from 'lucide-react';
+import { Search, Eye, PenSquare, UserX, Plus, ChevronDown, Users } from 'lucide-react';
 import { CreateUser } from './CreateUser';
 import { titleCase } from 'text-case';
 import { usePagination } from '../hook/usePagination';
@@ -54,9 +54,10 @@ interface UserManagementProps {
   };
   onSelectUser?: (user: User, formMode?: 'view' | 'edit') => void;
   onRefetchReady?: (refetch: () => void) => void;
+  onCreateUserReady?: (open: () => void) => void;
 }
 
-export function UserManagement({ currentUser, userPermission, onSelectUser, onRefetchReady }: UserManagementProps) {
+export function UserManagement({ currentUser, userPermission, onSelectUser, onRefetchReady, onCreateUserReady }: UserManagementProps) {
   const [searchText, setSearchText] = useState('');
   const [selectedDepartmentId, setSelectedDepartmentId] = useState<number | undefined>(undefined);
   const [selectedRoleName, setSelectedRoleName] = useState<string | undefined>(undefined);
@@ -96,6 +97,10 @@ export function UserManagement({ currentUser, userPermission, onSelectUser, onRe
   React.useEffect(() => {
     onRefetchReady?.(refetch);
   }, [refetch, onRefetchReady]);
+
+  React.useEffect(() => {
+    onCreateUserReady?.(() => setShowCreateUser(true));
+  }, [onCreateUserReady]);
 
   // ── Summary derived from full user list ───────────────────────────────────
   const summary = useMemo(() => ({
@@ -194,7 +199,7 @@ export function UserManagement({ currentUser, userPermission, onSelectUser, onRe
     <div className="space-y-6">
       {/* Summary cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="bg-white p-6 rounded-lg shadow-md hover:scale-[1.02] border border-gray-200transition-transform duration-200">
+        <div className="bg-white p-6 rounded-lg shadow-md hover:scale-[1.02] transition-transform duration-200">
           <div className="flex items-center gap-3">
             <span><Users className="w-7 h-7" /></span>
             <div>
@@ -203,7 +208,7 @@ export function UserManagement({ currentUser, userPermission, onSelectUser, onRe
             </div>
           </div>
         </div>
-        <div className="bg-white p-6 rounded-lg shadow-md hover:scale-[1.02] border border-gray-200transition-transform duration-200">
+        <div className="bg-white p-6 rounded-lg shadow-md hover:scale-[1.02] transition-transform duration-200">
           <div className="flex items-center gap-3">
             <span><Users className="w-7 h-7" /></span>
             <div>
@@ -212,7 +217,7 @@ export function UserManagement({ currentUser, userPermission, onSelectUser, onRe
             </div>
           </div>
         </div>
-        <div className="bg-white p-6 rounded-lg shadow-md hover:scale-[1.02] border border-gray-200transition-transform duration-200">
+        <div className="bg-white p-6 rounded-lg shadow-md hover:scale-[1.02] transition-transform duration-200">
           <div className="flex items-center gap-3">
             <span><Users className="w-7 h-7 text-red-600" /></span>
             <div>
@@ -221,7 +226,7 @@ export function UserManagement({ currentUser, userPermission, onSelectUser, onRe
             </div>
           </div>
         </div>
-        <div className="bg-white p-6 rounded-lg shadow-md hover:scale-[1.02] border border-gray-200transition-transform duration-200">
+        <div className="bg-white p-6 rounded-lg shadow-md hover:scale-[1.02] transition-transform duration-200">
           <div className="flex items-center gap-3">
             <span><Users className="w-7 h-7" /></span>
             <div>
@@ -234,20 +239,6 @@ export function UserManagement({ currentUser, userPermission, onSelectUser, onRe
 
       {/* Filters */}
       <div className="bg-white p-4 rounded-lg shadow-md">
-        <div className="flex items-center justify-between mb-4 gap-3">
-          <h2 className="text-lg sm:text-2xl font-medium truncate">User Management</h2>
-          {userPermission.create && (
-            <button
-              type="button"
-              onClick={() => setShowCreateUser(true)}
-              className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 cursor-pointer shrink-0"
-            >
-              <Plus className="w-4 h-4" />
-              <span className="text-sm sm:inline">Create User</span>
-            </button>
-          )}
-        </div>
-
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           {/* Search */}
           <div>
@@ -347,7 +338,6 @@ export function UserManagement({ currentUser, userPermission, onSelectUser, onRe
                   >
 
                     <td className="relative">
-                      <span className="absolute left-0 text-left top-0 h-full w-1 bg-brand-pink opacity-0 group-hover:opacity-100 transition-opacity"></span>
                       <span className='text-right ml-5 text-primary font-medium'>
                         {user.employeeId}
                       </span>
@@ -381,7 +371,7 @@ export function UserManagement({ currentUser, userPermission, onSelectUser, onRe
                             className="p-2 hover:bg-gray-100 rounded-lg text-primary cursor-pointer"
                             title="Edit"
                           >
-                            <Edit2 className="w-4 h-4" />
+                            <PenSquare className="w-4 h-4" />
                           </button>
                         )}
                         {userPermission.inactive && user.status === 'Active' && Number(user.id) !== Number(currentUser?.id) && (
@@ -400,34 +390,35 @@ export function UserManagement({ currentUser, userPermission, onSelectUser, onRe
                 ))
               )}
             </tbody>
+            {/* Results count + pagination */}
+            <div className="flex flex-col sm:flex-row justify-between items-center gap-3 px-4 py-3 border-t border-gray-100">
+              <div className="text-gray-600 text-sm sm:text-base whitespace-nowrap">
+                Showing {sortedUsers.length} of {total} users
+              </div>
+              <div className="flex items-center gap-3">
+                {total > 10 && (
+                  <select
+                    value={pagination.size}
+                    onChange={(e) => { setSize(Number(e.target.value)); goToPage(1); }}
+                    className="px-2 py-1.5 sm:py-2 border border-gray-300 rounded-lg text-sm bg-white cursor-pointer"
+                  >
+                    {[10, 20, 50].map((s) => (
+                      <option key={s} value={s}>Show {s}</option>
+                    ))}
+                  </select>
+                )}
+                <PaginationBar
+                  currentPage={pagination.page}
+                  totalPages={totalPages}
+                  onPageChange={goToPage}
+                />
+              </div>
+            </div>
           </table>
         </div>
       </div>
 
-      {/* Results count + pagination */}
-      <div className="flex flex-col sm:flex-row justify-between w-full items-start sm:items-center gap-3 sm:gap-0">
-        <div className="text-gray-600 text-sm sm:text-base whitespace-nowrap">
-          Showing {sortedUsers.length} of {total} users
-        </div>
-        <div className="flex items-center gap-3">
-          {total > 10 && (
-            <select
-              value={pagination.size}
-              onChange={(e) => { setSize(Number(e.target.value)); goToPage(1); }}
-              className="px-2 py-1.5 sm:py-2 border border-gray-300 rounded-lg text-sm bg-white cursor-pointer"
-            >
-              {[10, 20, 50].map((s) => (
-                <option key={s} value={s}>Show {s}</option>
-              ))}
-            </select>
-          )}
-          <PaginationBar
-            currentPage={pagination.page}
-            totalPages={totalPages}
-            onPageChange={goToPage}
-          />
-        </div>
-      </div>
+
 
       {/* Create user modal */}
       {showCreateUser && (
