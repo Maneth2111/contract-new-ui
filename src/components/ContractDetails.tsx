@@ -851,7 +851,7 @@ function renderAlertBanner(detail: { remainingDays: number; expireDate: string }
   }
   if (days <= 90) {
     return (
-      <div className="flex items-start gap-2 mt-3 mb-3 px-3 py-2.5 rounded-lg bg-amber-50 border border-amber-200 text-sm text-orange-600">
+      <div className="flex items-start gap-2 mt-3 mb-3 px-3 py-2.5 rounded-lg bg-amber-100 border border-amber-200 text-sm text-orange-600">
         <AlertTriangle className="w-6 h-6 text-yellow-500" />
         <span>
           This contract expires on{' '}
