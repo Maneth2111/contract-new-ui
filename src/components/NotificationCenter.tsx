@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { PaginationBar } from "./PaginationBar";
+import { Check } from "lucide-react";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -91,7 +92,7 @@ function SummaryCard({
   sublabelColor: string; accentBar: string;
 }) {
   return (
-    <div className="flex-1 min-w-0 bg-white p-3 rounded-xl border border-gray-100 shadow-sm relative overflow-hidden hover:scale-[1.02] transition-transform duration-200">
+    <div className="flex-1 min-w-0 bg-white p-3 rounded-xl  shadow-sm relative overflow-hidden hover:scale-[1.02] transition-transform duration-200">
       <p className="text-sm font-semibold tracking-widest text-gray-400 uppercase mb-2">{label}</p>
       <p className="text-2xl font-bold text-gray-900 mb-0.5">{count}</p>
       <p className={`text-xs font-medium ${sublabelColor}`}>{sublabel}</p>
@@ -168,7 +169,7 @@ function ContractCard({ contract, maxDays, isRead, onRead, onSelectContract }: C
   return (
     <div
       onClick={() => { onRead(contract.id); onSelectContract?.(contract.id); }}
-      className={`relative flex items-stretch rounded-xl border border-gray-100 overflow-hidden cursor-pointer hover:shadow-md hover:scale-[1.01] transition-transform duration-200 ${isRead ? "bg-white shadow-sm shadow-gray-200" : "bg-white shadow-md shadow-gray-300"
+      className={`relative flex items-stretch rounded-xl  overflow-hidden cursor-pointer hover:shadow-md hover:scale-[1.01] transition-transform duration-200 ${isRead ? "bg-white shadow-sm shadow-gray-200" : "bg-white shadow-md "
         }`}
     >
       {/* Left accent bar */}
@@ -344,11 +345,9 @@ export function NotificationCenter({ onSelectContract, onUnreadChange }: Notific
           {unreadCount > 0 && (
             <button
               onClick={handleMarkAllRead}
-              className="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-white shadow-sm shadow-primary/20 transition duration-150 hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary/40"
+              className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white shadow-sm shadow-primary/20 transition duration-150 hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary/40"
             >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="20 6 9 17 4 12" />
-              </svg>
+              <span><Check className="w-5 h-5 text-white"/> </span>
               Mark all as read
             </button>
           )}

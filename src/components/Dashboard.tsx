@@ -66,14 +66,14 @@ export default function Dashboard() {
 
       {/* ── ATTENTION REQUIRED ── */}
       <section>
-        <p className="text-xs font-semibold tracking-widest text-gray-400 uppercase mb-3">Attention Required</p>
+        <p className="text-xs font-semibold tracking-widest text-gray-500 uppercase mb-3">Attention Required</p>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
 
           {/* Expiring Soon — wide card with breakdown bars */}
-          <div className="lg:col-span-1 relative overflow-hidden bg-white rounded-xl border border-gray-100 shadow-sm p-5 flex flex-col gap-4 hover:scale-[1.01] transition-transform duration-200">
+          <div className="lg:col-span-1 relative overflow-hidden bg-white rounded-xl  shadow-sm p-5 flex flex-col gap-4 hover:scale-[1.01] transition-transform duration-200">
             <div className="flex items-start justify-between">
               <div>
-                <p className="text-xs font-semibold tracking-widest text-gray-400 uppercase mb-2">Expiring Soon</p>
+                <p className="text-xs font-semibold tracking-widest text-gray-00 uppercase mb-2">Expiring Soon</p>
                 <p className="text-4xl font-bold text-gray-900">{expiringSoonAll}</p>
                 <p className="text-xs text-orange-500 font-medium mt-1">Requires attention soon</p>
               </div>
@@ -107,7 +107,7 @@ export default function Dashboard() {
           </div>
 
           {/* Overdue */}
-          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 hover:scale-[1.01] transition-transform duration-200 relative overflow-hidden">
+          <div className="bg-white rounded-xl  shadow-sm p-5 hover:scale-[1.01] transition-transform duration-200 relative overflow-hidden">
             <div className="flex items-start justify-between">
               <p className="text-xs font-semibold tracking-widest text-gray-400 uppercase">Overdue</p>
               <span className="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center shrink-0">
@@ -124,7 +124,7 @@ export default function Dashboard() {
           </div>
 
           {/* Active */}
-          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5  hover:scale-[1.01] transition-transform duration-200 relative overflow-hidden">
+          <div className="bg-white rounded-xl  shadow-sm p-5  hover:scale-[1.01] transition-transform duration-200 relative overflow-hidden">
             <div className="flex items-start justify-between">
               <p className="text-xs font-semibold tracking-widest text-gray-400 uppercase">Active</p>
               <span className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
@@ -139,7 +139,7 @@ export default function Dashboard() {
           </div>
 
           {/* Closed */}
-          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 hover:scale-[1.01] transition-transform duration-200 relative overflow-hidden">
+          <div className="bg-white rounded-xl  shadow-sm p-5 hover:scale-[1.01] transition-transform duration-200 relative overflow-hidden">
             <div className="flex items-start justify-between">
               <p className="text-xs font-semibold tracking-widest text-gray-400 uppercase">Closed</p>
               <span className="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center shrink-0">
@@ -157,11 +157,11 @@ export default function Dashboard() {
 
       {/* ── OVERVIEW ── */}
       <section>
-        <p className="text-xs font-semibold tracking-widest text-gray-400 uppercase mb-3">Overview</p>
+        <p className="text-xs font-semibold tracking-widest text-gray-500 uppercase mb-3">Overview</p>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
 
           {/* Total Contracts */}
-          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 flex items-center justify-between hover:scale-[1.01] transition-transform duration-200 relative overflow-hidden">
+          <div className="bg-white rounded-xl  shadow-sm p-5 flex items-center justify-between hover:scale-[1.01] transition-transform duration-200 relative overflow-hidden">
             <div>
               <p className="text-xs font-semibold tracking-widest text-gray-400 uppercase mb-2">Total Contracts</p>
               <p className="text-3xl font-bold text-gray-900">{totalContracts}</p>
@@ -174,7 +174,7 @@ export default function Dashboard() {
           </div>
 
           {/* Total Partners */}
-          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 flex items-center justify-between hover:scale-[1.01] transition-transform duration-200 relative overflow-hidden">
+          <div className="bg-white rounded-xl  shadow-sm p-5 flex items-center justify-between hover:scale-[1.01] transition-transform duration-200 relative overflow-hidden">
             <div>
               <p className="text-xs font-semibold tracking-widest text-gray-400 uppercase mb-2">Total Partners</p>
               <p className="text-3xl font-bold text-gray-900">{uniquePartners}</p>
@@ -189,25 +189,25 @@ export default function Dashboard() {
           {/* Total Contract Value */}
           <div className="bg-[#1A2B4A] rounded-xl shadow-sm p-5 flex items-center justify-between hover:scale-[1.01] transition-transform duration-200 relative overflow-hidden">
             <div>
-              <p className="text-xs font-semibold tracking-widest text-[#00B5C8] uppercase mb-2">Total Contract Value</p>
+              <p className="text-xs font-semibold tracking-widest text-primary uppercase mb-2">Total Contract Value</p>
               <p className="text-3xl font-bold text-white">{formatCurrency(totalValue)}</p>
-              <p className="text-xs text-[#00B5C8] mt-1">Combined contract worth</p>
+              <p className="text-xs text-primary mt-1">Combined contract worth</p>
             </div>
-            <span className="w-10 h-10 rounded-xl bg-[#00B5C8]/20 flex items-center justify-center shrink-0">
-              <DollarSign className="w-5 h-5 text-[#00B5C8]" />
+            <span className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center shrink-0">
+              <DollarSign className="w-5 h-5 text-primary" />
             </span>
-            <div className="absolute bottom-0 left-0 w-full h-1 bg-[#00B5C8] rounded-b-xl" />
+            <div className="absolute bottom-0 left-0 w-full h-1 bg-primary rounded-b-xl" />
           </div>
         </div>
       </section>
 
       {/* ── ANALYTICS ── */}
       <section>
-        <p className="text-xs font-semibold tracking-widest text-gray-400 uppercase mb-3">Analytics</p>
+        <p className="text-xs font-semibold tracking-widest text-gray-500 uppercase mb-3">Analytics</p>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
 
           {/* Contracts by Department */}
-          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 hover:scale-[1.01] transition-transform duration-200">
+          <div className="bg-white rounded-xl  shadow-sm p-5 hover:scale-[1.01] transition-transform duration-200">
             <div className="flex items-center justify-between mb-5">
               <h3 className="font-semibold text-gray-800">Contracts by Department</h3>
               <span className="text-xs text-gray-400 bg-gray-50 px-2.5 py-1 rounded-full">by contract count</span>
@@ -249,7 +249,7 @@ export default function Dashboard() {
           </div>
 
           {/* Status Distribution */}
-          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 hover:scale-[1.01] transition-transform duration-200">
+          <div className="bg-white rounded-xl  shadow-sm p-5 hover:scale-[1.01] transition-transform duration-200">
             <div className="flex items-center justify-between mb-5">
               <h3 className="font-semibold text-gray-800">Status Distribution</h3>
               <span className="text-xs text-gray-400 bg-gray-50 px-2.5 py-1 rounded-full">{statusTotal} total</span>

@@ -198,7 +198,7 @@ function FieldRow({ label, children, empty }: { label: string; children: React.R
 }
 
 function SectionCard({ children }: { children: React.ReactNode }) {
-  return <div className="border border-gray-200 rounded-lg overflow-hidden mb-4">{children}</div>;
+  return <div className="shadow-sm rounded-lg overflow-hidden mb-4">{children}</div>;
 }
 
 function FieldTable({ children }: { children: React.ReactNode }) {
@@ -852,7 +852,7 @@ function renderAlertBanner(detail: { remainingDays: number; expireDate: string }
   if (days <= 90) {
     return (
       <div className="flex items-start gap-2 mt-3 mb-3 px-3 py-2.5 rounded-lg bg-amber-50 border border-amber-200 text-sm text-orange-600">
-        <AlertTriangle className="w-6 h-6 text-yellow-600" />
+        <AlertTriangle className="w-6 h-6 text-yellow-500" />
         <span>
           This contract expires on{' '}
           <strong>{new Date(detail.expireDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</strong>

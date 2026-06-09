@@ -551,7 +551,7 @@ export default function App() {
 
   // ── Render ────────────────────────────────────────────────────────────────
   return (
-    <div className="flex h-screen bg-[#f0fafb] overflow-hidden">
+    <div className="flex h-screen bg-primary/20 overflow-hidden">
       <Toaster position="top-center" toastOptions={{ duration: 4000 }} />
 
       {/* ── Mobile overlay ── */}

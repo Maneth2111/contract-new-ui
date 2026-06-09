@@ -198,7 +198,7 @@ export function ContractList({
       {/* Notification summary cards */}
       <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 gap-4">
         {/* Overdue */}
-        <div className="bg-white p-3 rounded-xl border border-gray-100 shadow-sm relative overflow-hidden hover:scale-[1.02] transition-transform duration-200">
+        <div className="bg-white p-3 rounded-xl  shadow-sm relative overflow-hidden hover:scale-[1.02] transition-transform duration-200">
           <div className="flex items-center justify-between mb-2">
             <p className="text-xs font-semibold tracking-widest text-gray-400 uppercase">Overdue</p>
             <span className="flex items-center justify-center w-8 h-8 rounded-full bg-red-50 shrink-0">
@@ -213,7 +213,7 @@ export function ContractList({
         </div>
 
         {/* 30 Days */}
-        <div className="bg-white p-3 rounded-xl border border-gray-100 shadow-sm relative overflow-hidden hover:scale-[1.02] transition-transform duration-200">
+        <div className="bg-white p-3 rounded-xl  shadow-sm relative overflow-hidden hover:scale-[1.02] transition-transform duration-200">
           <div className="flex items-center justify-between mb-2">
             <p className="text-xs font-semibold tracking-widest text-gray-400 uppercase">≤ 30 Days</p>
             <span className="flex items-center justify-center w-8 h-8 rounded-full bg-red-50 shrink-0">
@@ -228,7 +228,7 @@ export function ContractList({
         </div>
 
         {/* 60 Days */}
-        <div className="bg-white p-3 rounded-xl border border-gray-100 shadow-sm relative overflow-hidden hover:scale-[1.02] transition-transform duration-200">
+        <div className="bg-white p-3 rounded-xl  shadow-sm relative overflow-hidden hover:scale-[1.02] transition-transform duration-200">
           <div className="flex items-center justify-between mb-2">
             <p className="text-xs font-semibold tracking-widest text-gray-400 uppercase">≤ 60 Days</p>
             <span className="flex items-center justify-center w-8 h-8 rounded-full bg-orange-50 shrink-0">
@@ -243,7 +243,7 @@ export function ContractList({
         </div>
 
         {/* 90 Days */}
-        <div className="bg-white p-3 rounded-xl border border-gray-100 shadow-sm relative overflow-hidden hover:scale-[1.02] transition-transform duration-200">
+        <div className="bg-white p-3 rounded-xl  shadow-sm relative overflow-hidden hover:scale-[1.02] transition-transform duration-200">
           <div className="flex items-center justify-between mb-2">
             <p className="text-xs font-semibold tracking-widest text-gray-400 uppercase">≤ 90 Days</p>
             <span className="flex items-center justify-center w-8 h-8 rounded-full bg-yellow-100 shrink-0">
@@ -259,7 +259,7 @@ export function ContractList({
       </div>
 
       {/* Filters */}
-      <div className="bg-white p-4 rounded-lg shadow-md shadow-gray-300">
+      <div className="bg-white p-4 rounded-lg shadow-md ">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* Department */}
           <div>
@@ -315,7 +315,7 @@ export function ContractList({
       </div>
 
       {/* Contract Table */}
-      <div className="bg-white rounded-lg shadow-md shadow-gray-300 ">
+      <div className="bg-white rounded-lg shadow-md  ">
         <div
           className={[
             'overflow-x-auto',

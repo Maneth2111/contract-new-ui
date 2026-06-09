@@ -816,7 +816,7 @@ export function ContractForm({
             <label className="block text-gray-700 mb-2">Renewal Frequency (months)</label>
             <input
               type="text"
-              value={renewalFrequency > 0 ? `${renewalFrequency} month${pluralS(renewalFrequency)}` : 'Not calculated'}
+              value={renewalFrequency > 0 ? `${renewalFrequency} month${pluralS(renewalFrequency)}` : 'Auto calculated'}
               disabled
               className={readOnly ? fieldClass : 'w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-500'}
             />
