@@ -34,25 +34,11 @@ export interface ApiResponse<T> {
 }
 
 // GET all contract types
-type ContractTypeListPayload =
-  | ContractType[]
-  | {
-      items: ContractType[];
-      paginationResponse?: PaginationResponse;
-    };
-
 export const getContractTypes = async (): Promise<ContractType[]> => {
-  const response = await ssoApi.get<ApiResponse<ContractTypeListPayload>>(
+  const response = await ssoApi.get<ApiResponse<ContractType[]>>(
     '/contract-types'
   );
-  const payload = response.data.payload;
-  if (Array.isArray(payload)) {
-    return payload;
-  }
-  if (payload && typeof payload === 'object' && Array.isArray((payload as any).items)) {
-    return (payload as any).items;
-  }
-  return [];
+  return response.data.payload;
 };
 
 // GET contract type by ID
