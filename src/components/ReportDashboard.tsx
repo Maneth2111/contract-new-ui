@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import type { DateRange } from 'react-day-picker';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
@@ -66,6 +66,9 @@ const delay = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve,
 interface ReportDashboardProps {
   currentUser?: import('../services/userService').UserProfile | null;
   onSelectContract?: (contract: Contract) => void;
+  onExportCsvReady?: (exportCsv: () => Promise<void>) => void;
+  onExportPdfReady?: (exportPdf: () => Promise<void>) => void;
+  onReportExportStatusChange?: (status: { total: number; exportingCSV: boolean; exportingPDF: boolean }) => void;
 }
 
 // ── Convert a raw mock contract to the Contract shape the table expects ────────
@@ -96,7 +99,13 @@ function mockToContract(c: MockContract): Contract {
   };
 }
 
-export function ReportDashboard({ currentUser, onSelectContract }: ReportDashboardProps) {
+export function ReportDashboard({
+  currentUser,
+  onSelectContract,
+  onExportCsvReady,
+  onExportPdfReady,
+  onReportExportStatusChange,
+}: ReportDashboardProps) {
   const [reportType] = useState('Contract Summary Report');
   const [selectedDepartment, setSelectedDepartment] = useState<number | undefined>(undefined);
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('ALL');
@@ -190,6 +199,14 @@ export function ReportDashboard({ currentUser, onSelectContract }: ReportDashboa
     (pagination.page - 1) * pagination.size,
     pagination.page * pagination.size,
   );
+
+  useEffect(() => {
+    onReportExportStatusChange?.({
+      total,
+      exportingCSV,
+      exportingPDF,
+    });
+  }, [onReportExportStatusChange, total, exportingCSV, exportingPDF]);
 
   // ── Sort ───────────────────────────────────────────────────────────────────
   const { sortKey, sortDirection, toggleSort, sortedItems: sortedContracts } =
@@ -326,34 +343,19 @@ export function ReportDashboard({ currentUser, onSelectContract }: ReportDashboa
     }
   };
 
+  useEffect(() => {
+    onExportCsvReady?.(handleExportCSV);
+  }, [onExportCsvReady, handleExportCSV]);
+
+  useEffect(() => {
+    onExportPdfReady?.(handleExportPDF);
+  }, [onExportPdfReady, handleExportPDF]);
+
   // ── Render ────────────────────────────────────────────────────────────────
   return (
     <div className="space-y-6">
       {/* Report Filters */}
       <div className="bg-white rounded-lg shadow-md shadow-gray-300 p-6">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6">
-          <h2 className="font-bold text-xl text-gray-900 shrink-0">Contract Summary Report</h2>
-          <div className="flex flex-wrap items-center gap-3 sm:justify-end">
-            <button
-              type="button"
-              onClick={handleExportCSV}
-              disabled={total === 0 || exportingCSV}
-              className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/80 disabled:bg-gray-300 disabled:cursor-not-allowed cursor-pointer text-sm font-medium"
-            >
-              {exportingCSV ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
-              {exportingCSV ? 'Exporting...' : 'Export Excel'}
-            </button>
-            <button
-              type="button"
-              onClick={handleExportPDF}
-              disabled={total === 0 || exportingPDF}
-              className="flex items-center gap-2 px-4 py-2 bg-brand-pink text-white rounded-lg hover:bg-brand-pink/80 disabled:bg-gray-300 disabled:cursor-not-allowed cursor-pointer text-sm font-medium"
-            >
-              {exportingPDF ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
-              {exportingPDF ? 'Exporting...' : 'Export PDF'}
-            </button>
-          </div>
-        </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
 
@@ -501,10 +503,10 @@ export function ReportDashboard({ currentUser, onSelectContract }: ReportDashboa
         <div
           className={[
             'overflow-x-auto',
-            sortedContracts.length > 10 ? 'overflow-y-auto max-h-[70vh]' : '',
+            sortedContracts.length > 10 ? 'overflow-y-auto max-h-[70vh] lg:overflow-y-hidden' : '',
           ].join(' ').trim() || undefined}
         >
-          <table className={`w-full text-sm rounded-t-lg overflow-hidden [&_th]:px-2 [&_th]:py-5 [&_th]:whitespace-nowrap [&_td]:px-2 [&_td]:py-3.5 ${tableRowHover}`}>
+          <table className={`w-full min-w-max text-sm rounded-t-lg overflow-hidden [&_th]:px-2 [&_th]:py-5 [&_th]:whitespace-nowrap [&_td]:px-2 [&_td]:py-3.5 ${tableRowHover}`}>
             <thead className={tableTheadClass}>
               <tr>
                 <SortableTableHead label="Contract ID" columnKey="id" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="w-fit" />
@@ -530,10 +532,9 @@ export function ReportDashboard({ currentUser, onSelectContract }: ReportDashboa
                 sortedContracts.map((contract) => {
                   const daysRemaining = calculateDaysRemaining(contract.expiryDate);
                   return (
-                    <tr key={contract.id} onClick={() => onSelectContract?.(contract)} className="group relative transition-all hover:bg-primary/10 cursor-pointer">
+                    <tr key={contract.id} onClick={() => onSelectContract?.(contract)} className="relative transition-all hover:bg-primary cursor-pointer">
                       <td className="relative whitespace-nowrap lg:max-w-0 text-primary font-medium" title={contract.contractCode}>
-                        <span className="absolute left-0 top-0 h-full w-1 bg-brand-pink opacity-0 group-hover:opacity-100 transition-opacity"></span>
-                        {contract.contractCode}
+                        <span className='text-primary'> {contract.contractCode}</span>
                       </td>
                       <td className="whitespace-nowrap lg:truncate lg:max-w-0" title={contract.title}>
                         <div className="flex items-center gap-1 min-w-0">

@@ -67,7 +67,7 @@ export default function Dashboard() {
       {/* ── ATTENTION REQUIRED ── */}
       <section>
         <p className="text-xs font-semibold tracking-widest text-gray-400 uppercase mb-3">Attention Required</p>
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
 
           {/* Expiring Soon — wide card with breakdown bars */}
           <div className="lg:col-span-1 relative overflow-hidden bg-white rounded-xl border border-gray-100 shadow-sm p-5 flex flex-col gap-4 hover:scale-[1.01] transition-transform duration-200">
@@ -107,8 +107,8 @@ export default function Dashboard() {
           </div>
 
           {/* Overdue */}
-          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 flex flex-col justify-between hover:scale-[1.01] transition-transform duration-200 relative overflow-hidden">
-            <div className="flex items-start justify-between mb-3">
+          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 hover:scale-[1.01] transition-transform duration-200 relative overflow-hidden">
+            <div className="flex items-start justify-between">
               <p className="text-xs font-semibold tracking-widest text-gray-400 uppercase">Overdue</p>
               <span className="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center shrink-0">
                 <AlertTriangle className="w-5 h-5 text-red-400" />
@@ -124,8 +124,8 @@ export default function Dashboard() {
           </div>
 
           {/* Active */}
-          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 flex flex-col justify-between hover:scale-[1.01] transition-transform duration-200 relative overflow-hidden">
-            <div className="flex items-start justify-between mb-3">
+          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5  hover:scale-[1.01] transition-transform duration-200 relative overflow-hidden">
+            <div className="flex items-start justify-between">
               <p className="text-xs font-semibold tracking-widest text-gray-400 uppercase">Active</p>
               <span className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
                 <CheckCircle className="w-5 h-5 text-primary" />
@@ -139,8 +139,8 @@ export default function Dashboard() {
           </div>
 
           {/* Closed */}
-          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 flex flex-col justify-between hover:scale-[1.01] transition-transform duration-200 relative overflow-hidden">
-            <div className="flex items-start justify-between mb-3">
+          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 hover:scale-[1.01] transition-transform duration-200 relative overflow-hidden">
+            <div className="flex items-start justify-between">
               <p className="text-xs font-semibold tracking-widest text-gray-400 uppercase">Closed</p>
               <span className="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center shrink-0">
                 <FileText className="w-5 h-5 text-gray-400" />

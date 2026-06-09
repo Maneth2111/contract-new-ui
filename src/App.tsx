@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { Suspense, useCallback, useEffect, useRef, useState } from 'react';
 import { Contract } from './types/contract';
 import { User } from './types/user';
 
@@ -17,8 +17,12 @@ import {
   Menu,
   X,
   ChevronRight,
-  Edit2,
+  PenSquare,
   RefreshCw,
+  FilePlus,
+  Plus,
+  Download,
+  Loader2,
 } from 'lucide-react';
 import toast, { Toaster } from 'react-hot-toast';
 import { ConfirmDialog } from './components/ConfirmationDialog';
@@ -125,6 +129,13 @@ export default function App() {
     setTotal(mockContracts.length);
   }, []);
 
+  const currentDate = new Date().toLocaleDateString('en-US', {
+    weekday: 'long',
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric',
+  });
+
   const MOCK_CONTRACTS_TOTAL = 8;
   const [unreadCount, setUnreadCount] = useState(MOCK_CONTRACTS_TOTAL);
 
@@ -230,7 +241,16 @@ export default function App() {
 
   // ── Refs shared with child components ─────────────────────────────────────
   const contractRefetchRef = useRef<() => void>(() => { });
+  const contractRegisterRef = useRef<() => void>(() => { });
   const userRefetchRef = useRef<() => void>(() => { });
+  const userCreateRef = useRef<() => void>(() => { });
+  const reportExportCsvRef = useRef<() => Promise<void>>(() => Promise.resolve());
+  const reportExportPdfRef = useRef<() => Promise<void>>(() => Promise.resolve());
+  const [reportExportStatus, setReportExportStatus] = useState({
+    total: 0,
+    exportingCSV: false,
+    exportingPDF: false,
+  });
 
   // ── Handlers ──────────────────────────────────────────────────────────────
   const handleUpdateUser = (updatedUser: User) => {
@@ -271,28 +291,23 @@ export default function App() {
 
   // ── Breadcrumb segments for the contracts tab ─────────────────────────────
   const contractBreadcrumbs = (() => {
-    if (activeTab !== 'contracts') return null;
+    if (activeTab !== 'contracts' || selectedContractId === null) return null;
 
-    const base = (
+    const root = (
       <button
         type="button"
-        onClick={selectedContractId !== null ? closeContractDetails : undefined}
-        className={`transition-colors text-brand-navy text-lg font-semibold leading-tight ${selectedContractId !== null
-            ? 'text-primary hover:text-primary/80 cursor-pointer'
-            : 'text-[#1A2B4A] cursor-default'
-          }`}
+        onClick={closeContractDetails}
+        className="text-primary hover:text-primary/80 cursor-pointer font-medium transition-colors"
       >
         Contract Management
       </button>
     );
 
-    if (selectedContractId === null) return <div className="flex items-center">{base}</div>;
-
     const details = (
       <button
         type="button"
         onClick={activeContractFormMode !== 'view' ? () => contractDetailActionsRef.current.exitFormMode() : undefined}
-        className={`text-sm font-medium transition-colors ${activeContractFormMode !== 'view'
+        className={`font-medium transition-colors ${activeContractFormMode !== 'view'
             ? 'text-primary hover:text-primary/80 cursor-pointer'
             : 'text-[#1A2B4A] cursor-default'
           }`}
@@ -310,13 +325,13 @@ export default function App() {
 
     return (
       <div className="flex items-center gap-1.5 flex-wrap">
-        {base}
-        <ChevronRight className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+        {root}
+        <ChevronRight className="w-5 h-5 text-gray-400 shrink-0" />
         {details}
         {modeLabel && (
           <>
-            <ChevronRight className="w-3.5 h-3.5 text-gray-400 shrink-0" />
-            <span className="text-sm font-medium text-[#1A2B4A]">{modeLabel}</span>
+            <ChevronRight className="w-5 h-5 text-gray-400 shrink-0" />
+            <span className="font-medium text-primary">{modeLabel}</span>
           </>
         )}
       </div>
@@ -325,38 +340,23 @@ export default function App() {
 
   // ── Breadcrumb segments for the users tab ────────────────────────────────
   const userBreadcrumbs = (() => {
-    if (activeTab !== 'users') return null;
+    if (activeTab !== 'users' || selectedUserId === null || userDetailsSource === 'profile') return null;
 
-    const isProfile = userDetailsSource === 'profile';
-
-    // Root label: "User Management" when from list, "My Profile" when from profile link
-    const rootLabel = isProfile ? 'My Profile' : 'User Management';
-    // Clicking root when a user is selected: go back to list (list source) or just close (profile source)
-    const handleRootClick = selectedUserId !== null
-      ? isProfile ? closeUserDetails : closeUserDetails
-      : undefined;
-
-    const base = (
+    const root = (
       <button
         type="button"
-        onClick={handleRootClick}
-        className={`transition-colors text-brand-navy text-lg font-semibold leading-tight ${selectedUserId !== null
-            ? 'text-primary hover:text-primary/80 cursor-pointer'
-            : 'text-[#1A2B4A] cursor-default'
-          }`}
+        onClick={closeUserDetails}
+        className="text-primary hover:text-primary/80 cursor-pointer font-medium transition-colors"
       >
-        {rootLabel}
+        User Management
       </button>
     );
-
-    // When source is 'profile' and no user selected yet, just show "My Profile" with no chevron
-    if (selectedUserId === null) return <div className="flex items-center">{base}</div>;
 
     const details = (
       <button
         type="button"
         onClick={activeUserFormMode !== 'view' ? () => userDetailActionsRef.current.exitFormMode() : undefined}
-        className={`text-sm font-medium transition-colors ${activeUserFormMode !== 'view'
+        className={`font-medium transition-colors ${activeUserFormMode !== 'view'
             ? 'text-primary hover:text-primary/80 cursor-pointer'
             : 'text-[#1A2B4A] cursor-default'
           }`}
@@ -369,13 +369,13 @@ export default function App() {
 
     return (
       <div className="flex items-center gap-1.5 flex-wrap">
-        {base}
-        <ChevronRight className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+        {root}
+        <ChevronRight className="w-5 h-5 text-gray-400 shrink-0" />
         {details}
         {modeLabel && (
           <>
-            <ChevronRight className="w-3.5 h-3.5 text-gray-400 shrink-0" />
-            <span className="text-sm font-medium text-[#1A2B4A]">{modeLabel}</span>
+            <ChevronRight className="w-5 h-5 text-gray-400 shrink-0" />
+            <span className="font-medium text-[#1A2B4A]">{modeLabel}</span>
           </>
         )}
       </div>
@@ -384,7 +384,21 @@ export default function App() {
 
   // ── Top-bar action buttons for contract detail ────────────────────────────
   const contractTopBarActions = (() => {
-    if (activeTab !== 'contracts' || selectedContractId === null) return null;
+    if (activeTab !== 'contracts') return null;
+    if (selectedContractId === null) {
+      return permissions.contractCreate ? (
+        <div className="flex items-center gap-2 shrink-0">
+          <button
+            type="button"
+            onClick={() => contractRegisterRef.current?.()}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-primary text-white rounded-lg hover:bg-primary/90 cursor-pointer text-sm font-medium"
+          >
+            <FilePlus className="w-3.5 h-3.5" />
+            New Contract
+          </button>
+        </div>
+      ) : null;
+    }
     const actions = contractDetailActionsRef.current;
 
     if (activeContractFormMode !== 'view') {
@@ -416,7 +430,7 @@ export default function App() {
             onClick={() => actions.enterEditMode()}
             className="flex items-center gap-1.5 px-3 py-1.5 bg-primary text-white rounded-lg hover:bg-primary/90 cursor-pointer text-sm font-medium"
           >
-            <Edit2 className="w-3.5 h-3.5" />
+            <PenSquare className="w-3.5 h-3.5" />
             Edit
           </button>
         )}
@@ -434,9 +448,51 @@ export default function App() {
     );
   })();
 
+  // ── Top-bar action buttons for report export ──────────────────────────────
+  const reportTopBarActions = (() => {
+    if (activeTab !== 'reports') return null;
+
+    return (
+      <div className="flex items-center gap-2 shrink-0">
+        <button
+          type="button"
+          onClick={() => { reportExportCsvRef.current?.(); }}
+          disabled={reportExportStatus.total === 0 || reportExportStatus.exportingCSV}
+          className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/80 disabled:bg-gray-300 disabled:cursor-not-allowed cursor-pointer text-sm font-medium"
+        >
+          {reportExportStatus.exportingCSV ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+          {reportExportStatus.exportingCSV ? 'Exporting...' : 'Export Excel'}
+        </button>
+        <button
+          type="button"
+          onClick={() => { reportExportPdfRef.current?.(); }}
+          disabled={reportExportStatus.total === 0 || reportExportStatus.exportingPDF}
+          className="flex items-center gap-2 px-4 py-2 bg-brand-pink text-white rounded-lg hover:bg-brand-pink/80 disabled:bg-gray-300 disabled:cursor-not-allowed cursor-pointer text-sm font-medium"
+        >
+          {reportExportStatus.exportingPDF ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+          {reportExportStatus.exportingPDF ? 'Exporting...' : 'Export PDF'}
+        </button>
+      </div>
+    );
+  })();
+
   // ── Top-bar action buttons for user detail ────────────────────────────────
   const userTopBarActions = (() => {
-    if (activeTab !== 'users' || selectedUserId === null) return null;
+    if (activeTab !== 'users') return null;
+    if (selectedUserId === null) {
+      return permissions.userCreate ? (
+        <div className="flex items-center gap-2 shrink-0">
+          <button
+            type="button"
+            onClick={() => userCreateRef.current?.()}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-primary text-white rounded-lg hover:bg-primary/90 cursor-pointer text-sm font-medium"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            Create User
+          </button>
+        </div>
+      ) : null;
+    }
     const actions = userDetailActionsRef.current;
 
     if (activeUserFormMode === 'edit') {
@@ -468,7 +524,7 @@ export default function App() {
             onClick={() => actions.enterEditMode()}
             className="flex items-center gap-1.5 px-3 py-1.5 bg-primary text-white rounded-lg hover:bg-primary/90 cursor-pointer text-sm font-medium"
           >
-            <Edit2 className="w-3.5 h-3.5" />
+            <PenSquare className="w-3.5 h-3.5" />
             Edit
           </button>
         )}
@@ -489,7 +545,9 @@ export default function App() {
       ? contractTopBarActions
       : activeTab === 'users'
         ? userTopBarActions
-        : null;
+        : activeTab === 'reports'
+          ? reportTopBarActions
+          : null;
 
   // ── Render ────────────────────────────────────────────────────────────────
   return (
@@ -626,7 +684,7 @@ export default function App() {
               <UserIcon className="w-4 h-4 text-primary" />
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-medium text-[#1A2B4A] truncate leading-tight">
+              <p className="font-medium text-[#1A2B4A] truncate leading-tight">
                 {user?.fullName ?? 'N/A'}
               </p>
               <p className="text-xs text-[#5b7a85] truncate leading-tight">
@@ -657,7 +715,7 @@ export default function App() {
       <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
 
         {/* Top bar */}
-        <header className="shrink-0 bg-white border-b border-primary/20 px-4 sm:px-8 py-6.5 flex items-center gap-4">
+        <header className="shrink-0 bg-white border-b border-primary/20 px-4 sm:px-8 py-3.5 flex items-center gap-4">
           {/* Hamburger — mobile/tablet only */}
           <button
             type="button"
@@ -669,26 +727,31 @@ export default function App() {
 
           {/* Title / breadcrumb area */}
           <div className="flex-1 min-w-0">
-            {activeBreadcrumb ? (
-              activeBreadcrumb
-            ) : (
-              <>
-                <h1 className="text-brand-navy text-lg font-semibold leading-tight truncate">
-                  {activeTab === 'dashboard' && 'Dashboard'}
-                  {activeTab === 'contracts' && 'Contract Management'}
-                  {activeTab === 'notifications' && 'Notifications'}
-                  {activeTab === 'reports' && 'Reports'}
-                  {activeTab === 'users' && (userDetailsSource === 'profile' ? 'My Profile' : 'User Management')}
-                </h1>
-                {/* <p className="text-gray-600 text-sm mt-0.5 truncate">
-                  {activeTab === 'dashboard' && 'Overview of all contract activity'}
-                  {activeTab === 'contracts' && 'Manage and track all your contracts'}
-                  {activeTab === 'notifications' && 'Alerts for expiring and overdue contracts'}
-                  {activeTab === 'reports' && 'Analytics and export reports'}
-                  {activeTab === 'users' && (userDetailsSource === 'profile' ? 'View and edit your profile' : 'Manage system users and roles')}
-                </p> */}
-              </>
-            )}
+            <div className="flex flex-col gap-1 min-w-0">
+              {activeBreadcrumb ? (
+                <>
+                  <div className="text-lg font-semibold leading-tight">
+                    {activeBreadcrumb}
+                  </div>
+                  <p className="text-gray-600 text-sm truncate">
+                    {currentDate}
+                  </p>
+                </>
+              ) : (
+                <>
+                  <h1 className="text-brand-navy text-lg font-semibold leading-tight truncate">
+                    {activeTab === 'dashboard' && 'Dashboard'}
+                    {activeTab === 'contracts' && 'Contract Management'}
+                    {activeTab === 'notifications' && 'Notifications'}
+                    {activeTab === 'reports' && 'Reports'}
+                    {activeTab === 'users' && (userDetailsSource === 'profile' ? 'My Profile' : 'User Management')}
+                  </h1>
+                  <p className="text-gray-600 text-sm truncate">
+                    {currentDate}
+                  </p>
+                </>
+              )}
+            </div>
           </div>
 
           {/* Action buttons */}
@@ -697,7 +760,9 @@ export default function App() {
 
         {/* Scrollable content */}
         <main className="flex-1 overflow-y-auto px-4 sm:px-8 py-6">
-          {activeTab === 'dashboard' && <Dashboard />}
+          <Suspense fallback={<div>Loading dashboard...</div>}>
+            {activeTab === 'dashboard' && <Dashboard />}
+          </Suspense>
 
           {activeTab === 'contracts' && (
             <div>
@@ -735,6 +800,7 @@ export default function App() {
                 <ContractList
                   onRefetchReady={(fn) => { contractRefetchRef.current = fn; }}
                   onTotalsRefresh={() => { refetchTotal(); }}
+                  onRegisterContractReady={(fn) => { contractRegisterRef.current = fn; }}
                   isLoggedIn={true}
                   currentUser={user}
                   userConfidentialAccess={userHasConfidentialContractAccess(user)}
@@ -773,6 +839,9 @@ export default function App() {
                 openContractDetails(contract.contractId, 'details');
                 setActiveTab('contracts');
               }}
+              onExportCsvReady={(fn) => { reportExportCsvRef.current = fn; }}
+              onExportPdfReady={(fn) => { reportExportPdfRef.current = fn; }}
+              onReportExportStatusChange={setReportExportStatus}
             />
           )}
 
@@ -790,6 +859,7 @@ export default function App() {
                       inactive: Boolean(permissions.userDelete),
                     }}
                     onRefetchReady={(fn) => { userRefetchRef.current = fn; }}
+                    onCreateUserReady={(fn) => { userCreateRef.current = fn; }}
                     onSelectUser={(selectedUser, formMode = 'view') => {
                       openUserDetails(
                         Number(selectedUser.id),

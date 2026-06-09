@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Contract } from '../types/contract';
 import { calculateDaysRemaining, formatCurrency, formatDate, pluralS } from '../utils/contractUtils';
-import { Search, Eye, Edit2, Trash2, ChevronDown, FilePlus, AlertTriangle, Clock } from 'lucide-react';
+import { Search, Eye, Trash2, AlertTriangle, Clock, PenSquare } from 'lucide-react';
 import { RegisterContract } from './RegisterContract';
 import { titleCase } from 'text-case';
 import { usePagination } from '../hook/usePagination';
@@ -69,6 +69,7 @@ interface ContractListProps {
     viewDocuments: boolean;
   };
   onRefetchReady?: (refetch: () => void) => void;
+  onRegisterContractReady?: (open: () => void) => void;
   onTotalsRefresh?: () => void;
   currentUser?: UserProfile | null;
   onSelectContract?: (contract: Contract, formMode?: 'view' | 'edit') => void;
@@ -79,6 +80,7 @@ export function ContractList({
   contractPermission,
   isLoggedIn,
   onRefetchReady,
+  onRegisterContractReady,
   onTotalsRefresh,
   currentUser,
   onSelectContract,
@@ -117,6 +119,10 @@ export function ContractList({
   useEffect(() => {
     onRefetchReady?.(refetch);
   }, [refetch, onRefetchReady]);
+
+  useEffect(() => {
+    onRegisterContractReady?.(() => setShowRegisterContract(true));
+  }, [onRegisterContractReady]);
 
   // ── Notification summary (static from mock) ────────────────────────────────
   const notificationSummary = MOCK_NOTIFICATION_SUMMARY;
@@ -254,19 +260,6 @@ export function ContractList({
 
       {/* Filters */}
       <div className="bg-white p-4 rounded-lg shadow-md shadow-gray-300">
-        <div className="flex items-center justify-between mb-4 gap-3">
-          <h2 className="text-lg sm:text-2xl font-medium ">Contract Management</h2>
-          {contractPermission.create && (
-            <button
-              type="button"
-              onClick={() => setShowRegisterContract(true)}
-              className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 cursor-pointer shrink-0"
-            >
-              <FilePlus className="w-4 h-4" />
-              <span className="text-sm sm:inline">New Contract</span>
-            </button>
-          )}
-        </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* Department */}
           <div>
@@ -362,7 +355,7 @@ export function ContractList({
                       onClick={() => contractPermission.viewDocuments && handleViewContractDetails(contract)}
                       className={`relative transition-all cursor-pointer ${isDeleting ? 'opacity-40 pointer-events-none' : ''}`}
                     >
-                      <td className="relative whitespace-nowrap lg:max-w-0 font-medium" title={contract.id}>
+                      <td className="relative whitespace-nowrap lg:max-w-0 text-primary font-medium" title={contract.id}>
                         <span className="text-primary">{contract.id}</span>
                       </td>
                       <td className="whitespace-nowrap lg:truncate lg:max-w-0" title={contract.title}>
@@ -445,7 +438,7 @@ export function ContractList({
                               className="p-1.5 hover:bg-gray-100 rounded-lg text-primary cursor-pointer "
                               title="Edit"
                             >
-                              <Edit2 className="w-4 h-4 " />
+                              <PenSquare className="w-4 h-4 " />
                             </button>
                           )}
                           {contractPermission.delete && (
