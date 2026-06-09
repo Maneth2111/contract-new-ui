@@ -339,7 +339,7 @@ export function ContractList({
             </thead>
             <tbody className="divide-y divide-gray-200">
               {pagedContracts.length === 0 ? (
-                <tr data-empty>
+                <tr data-empty className='h-28'>
                   <td colSpan={10} className="px-4 py-10 text-center text-gray-500">
                     No contracts found
                   </td>

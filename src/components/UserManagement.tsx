@@ -319,7 +319,7 @@ export function UserManagement({ currentUser, userPermission, onSelectUser, onRe
             </thead>
             <tbody className="divide-y divide-gray-200">
               {sortedUsers.length === 0 ? (
-                <tr data-empty>
+                <tr data-empty className='h-28'>
                   <td colSpan={7} className="px-4 py-8 text-center text-gray-500">
                     No users found
                   </td>
