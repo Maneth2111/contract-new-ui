@@ -564,14 +564,14 @@ export default function App() {
 
       {/* ── Sidebar ── */}
       <aside className={`
-        fixed inset-y-0 left-0 z-40 w-60 flex flex-col bg-white border-r border-primary/20 shadow-sm shadow-primary/10
+        fixed inset-y-0 left-0 z-40 w-60 flex flex-col bg-white border-r border-primary/30 shadow-sm shadow-primary/10
         transition-transform duration-300 ease-in-out
         ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
         lg:relative lg:translate-x-0 lg:z-auto lg:shrink-0
       `}>
 
         {/* Logo / Brand */}
-        <div className="flex items-center gap-3 px-5 py-5 border-b border-primary/15">
+        <div className="flex items-center gap-3 px-5 py-5 border-b border-primary/20">
           <img src="/color.png" alt="Chokchey Finance" className="w-9 h-9 object-contain shrink-0" />
           <div className="min-w-0 flex-1">
             <p className="text-brand-navy text-sm mb-1 font-medium leading-tight truncate">Contract Management</p>
@@ -678,7 +678,7 @@ export default function App() {
         </nav>
 
         {/* User info + logout at bottom */}
-        <div className="border-t border-primary/15 p-4 space-y-3">
+        <div className="border-t border-primary/30 p-4 space-y-3">
           <div className="flex items-center gap-3 px-1 py-1">
             <div className="w-8 h-8 rounded-full bg-[#e0f7fa] border border-primary/30 flex items-center justify-center shrink-0">
               <UserIcon className="w-4 h-4 text-primary" />
@@ -701,7 +701,7 @@ export default function App() {
           <button
             type="button"
             onClick={() => setShowLogoutConfirm(true)}
-            className="w-full flex items-center justify-center gap-2 px-3 py-2 text-sm text-[#5b7a85] hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors cursor-pointer border border-primary/15 hover:border-red-200"
+            className="w-full flex items-center justify-center gap-2 px-3 py-2 text-sm text-[#5b7a85] hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors cursor-pointer border border-primary/30 hover:border-red-200"
           >
             <LogOut className="w-4 h-4" />
             Logout

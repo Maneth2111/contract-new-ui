@@ -186,8 +186,8 @@ function SectionHeader({ icon, title }: { icon: React.ReactNode; title: string }
 
 function FieldRow({ label, children, empty }: { label: string; children: React.ReactNode; empty?: boolean }) {
   return (
-    <tr className="border-b border-gray-100 last:border-b-0 block sm:table-row">
-      <td className="block sm:table-cell border-r w-full sm:w-55 sm:min-w-55 px-4 pt-3 pb-1 sm:py-3 border sm:border-r border-gray-100 bg-gray-50">
+    <tr className="border-b border-gray-200 last:border-b-0 block sm:table-row">
+      <td className="block sm:table-cell border-r w-full sm:w-55 sm:min-w-55 px-4 pt-3 pb-1 sm:py-3 border sm:border-r border-gray-200 bg-gray-100">
         <span className="text-xs font-medium text-brand-navy uppercase">{label}</span>
       </td>
       <td className="block sm:table-cell w-full px-4 pb-3 pt-1 sm:py-3 bg-white">
@@ -198,7 +198,7 @@ function FieldRow({ label, children, empty }: { label: string; children: React.R
 }
 
 function SectionCard({ children }: { children: React.ReactNode }) {
-  return <div className="shadow-sm rounded-lg overflow-hidden mb-4">{children}</div>;
+  return <div className="shadow-lg border border-gray-100 rounded-lg overflow-hidden mb-4">{children}</div>;
 }
 
 function FieldTable({ children }: { children: React.ReactNode }) {
@@ -538,7 +538,7 @@ export function ContractDetails({
                 </div>
               </FieldRow>
               <FieldRow label="Renewal Frequency">
-                {detail.renewalFrequencyMonths ? `${detail.renewalFrequencyMonths} months` : 'Not calculated'}
+                {detail.renewalFrequencyMonths ? `${detail.renewalFrequencyMonths} months` : 'Auto calculated'}
               </FieldRow>
               <FieldRow label="Total Contract Value">
                 <div className="inline-flex items-center gap-1 bg-green-50 px-3 py-1 rounded-full">
@@ -551,22 +551,22 @@ export function ContractDetails({
           </div>
 
           {/* Desktop */}
-          <table className="hidden sm:table w-full border-collapse">
+          <table className="hidden sm:table w-full border border-gray-100 border-collapse">
             <tbody>
-              <tr className="border-b border-gray-100">
-                <td className="w-1/4 bg-gray-50 px-4 py-3 border-r border-gray-100">
+              <tr className="border-b border-gray-200">
+                <td className="w-1/4 bg-gray-50 px-4 py-3 border-r border-gray-200">
                   <span className="text-xs font-medium text-brand-navy uppercase">Effective Date</span>
                 </td>
-                <td className="w-1/4 px-4 py-3 border-r border-gray-100">
+                <td className="w-1/4 px-4 py-3 border-r border-gray-200">
                   <div className="text-sm flex items-center gap-1.5 whitespace-nowrap">
                     <CalendarDays className="w-3.5 h-3.5 text-gray-400" />
                     {new Date(detail.effectiveDate).toLocaleDateString()}
                   </div>
                 </td>
-                <td className="bg-gray-50 px-4 py-3 border-r border-gray-100">
+                <td className="bg-gray-100 px-4 py-3 border-r border-gray-200">
                   <span className="text-xs font-medium text-brand-navy uppercase">Expiry Date</span>
                 </td>
-                <td className="px-4 py-3 border-r border-gray-100">
+                <td className="px-4 py-3 border-r border-gray-200">
                   <div className="flex items-center justify-between gap-2">
                     <span className="flex items-center gap-1.5 whitespace-nowrap">
                       <CalendarDays className="w-3.5 h-3.5 text-gray-400" />
@@ -581,15 +581,15 @@ export function ContractDetails({
                 </td>
               </tr>
               <tr>
-                <td className="bg-gray-50 px-4 py-3 border-r border-gray-100">
+                <td className="bg-gray-100 px-4 py-3 border-r border-gray-200">
                   <span className="text-xs font-medium text-brand-navy uppercase">Renewal Frequency</span>
                 </td>
-                <td className="px-4 py-3 border-r border-gray-100">
+                <td className="px-4 py-3 border-r border-gray-200">
                   {detail.renewalFrequencyMonths
                     ? `${detail.renewalFrequencyMonths} months`
                     : <span className="italic text-gray-400">Not calculated</span>}
                 </td>
-                <td className="bg-gray-50 px-4 py-3 border-r border-gray-100">
+                <td className="bg-gray-50 px-4 py-3 border-r border-gray-200">
                   <span className="text-xs font-medium text-brand-navy uppercase">Total Contract Value</span>
                 </td>
                 <td className="px-4 py-3">

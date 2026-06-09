@@ -201,7 +201,7 @@ export function ContractList({
         <div className="bg-white p-3 rounded-xl  shadow-sm relative overflow-hidden hover:scale-[1.02] transition-transform duration-200">
           <div className="flex items-center justify-between mb-2">
             <p className="text-xs font-semibold tracking-widest text-gray-400 uppercase">Overdue</p>
-            <span className="flex items-center justify-center w-8 h-8 rounded-full bg-red-50 shrink-0">
+            <span className="flex items-center justify-center  w-8 h-8 rounded-lg bg-red-100 shrink-0">
               <AlertTriangle className="w-4 h-4 text-red-500" />
             </span>
           </div>
@@ -209,14 +209,14 @@ export function ContractList({
           <p className="text-xs text-red-500 font-medium">
             {overdueCount === 0 ? 'All clear' : 'Requires immediate action'}
           </p>
-          <div className="absolute bottom-0 left-0 w-full h-1 bg-red-500 rounded-b-xl" />
+          <div className="absolute bottom-0 left-0 w-full h-1  bg-red-500 rounded-b-xl" />
         </div>
 
         {/* 30 Days */}
         <div className="bg-white p-3 rounded-xl  shadow-sm relative overflow-hidden hover:scale-[1.02] transition-transform duration-200">
           <div className="flex items-center justify-between mb-2">
             <p className="text-xs font-semibold tracking-widest text-gray-400 uppercase">≤ 30 Days</p>
-            <span className="flex items-center justify-center w-8 h-8 rounded-full bg-red-50 shrink-0">
+            <span className="flex items-center justify-center w-8 h-8 rounded-lg bg-red-100 shrink-0">
               <Clock className="w-4 h-4 text-red-500" />
             </span>
           </div>
@@ -231,7 +231,7 @@ export function ContractList({
         <div className="bg-white p-3 rounded-xl  shadow-sm relative overflow-hidden hover:scale-[1.02] transition-transform duration-200">
           <div className="flex items-center justify-between mb-2">
             <p className="text-xs font-semibold tracking-widest text-gray-400 uppercase">≤ 60 Days</p>
-            <span className="flex items-center justify-center w-8 h-8 rounded-full bg-orange-50 shrink-0">
+            <span className="flex items-center justify-center  w-8 h-8 rounded-lg bg-orange-100 shrink-0">
               <Clock className="w-4 h-4 text-orange-500" />
             </span>
           </div>
@@ -246,7 +246,7 @@ export function ContractList({
         <div className="bg-white p-3 rounded-xl  shadow-sm relative overflow-hidden hover:scale-[1.02] transition-transform duration-200">
           <div className="flex items-center justify-between mb-2">
             <p className="text-xs font-semibold tracking-widest text-gray-400 uppercase">≤ 90 Days</p>
-            <span className="flex items-center justify-center w-8 h-8 rounded-full bg-yellow-100 shrink-0">
+            <span className="flex items-center justify-center w-8 h-8 rounded-lg bg-yellow-100 shrink-0">
               <Clock className="w-4 h-4 text-yellow-500" />
             </span>
           </div>
@@ -337,10 +337,10 @@ export function ContractList({
                 <th className="w-fit text-white font-medium text-center">Action</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200">
+            <tbody className="divide-y divide-gray-300">
               {pagedContracts.length === 0 ? (
-                <tr data-empty>
-                  <td colSpan={10} className="px-4 py-10 text-center text-gray-500">
+                <tr data-empty className='h-28'>
+                  <td colSpan={10}  className="px-4 py-10 text-center text-gray-500">
                     No contracts found
                   </td>
                 </tr>

@@ -99,8 +99,8 @@ function FieldRow({
   empty?: boolean;
 }) {
   return (
-    <tr className="border-b border-gray-100 last:border-b-0 block sm:table-row">
-      <td className="block sm:table-cell w-full sm:w-55 sm:min-w-55 px-4 pt-3 pb-1 sm:py-3 border border-r sm:border-r border-gray-100 bg-gray-50">
+    <tr className="border-b border-gray-200 last:border-b-0 block sm:table-row">
+      <td className="block sm:table-cell w-full sm:w-55 sm:min-w-55 px-4 pt-3 pb-1 sm:py-3 border border-r sm:border-r border-gray-200 bg-gray-100">
         <span className="text-xs font-medium text-brand-navy uppercase">{label}</span>
       </td>
       <td className="block sm:table-cell w-full px-4 pb-3 pt-1 sm:py-3 bg-white">

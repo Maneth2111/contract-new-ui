@@ -421,7 +421,7 @@ export function ReportDashboard({
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-4">
 
             {/* Total Contracts */}
-            <div className="bg-white p-4 sm:p-5 rounded-lg shadow-md hover:shadow-md   hover:scale-[1.02] border border-gray-100 transition-transform duration-200">
+            <div className="bg-white p-4 sm:p-5 rounded-lg shadow-md hover:shadow-md   hover:scale-[1.02] border border-gray-200 transition-transform duration-200">
               <div className="flex items-center justify-between">
                 <div className="min-w-0">
                   <p className="text-xs sm:text-sm text-gray-600">
@@ -440,7 +440,7 @@ export function ReportDashboard({
             </div>
 
             {/* Total Value */}
-            <div className="bg-white p-4 sm:p-5 rounded-lg shadow-md hover:shadow-md  hover:scale-[1.02] border border-gray-100 transition-transform duration-200">
+            <div className="bg-white p-4 sm:p-5 rounded-lg shadow-md hover:shadow-md  hover:scale-[1.02] border border-gray-200 transition-transform duration-200">
               <div className="flex items-center justify-between">
                 <div className="min-w-0">
                   <p className="text-xs sm:text-sm text-gray-600">
@@ -459,7 +459,7 @@ export function ReportDashboard({
             </div>
 
             {/* Active */}
-            <div className="bg-white p-4 sm:p-5 rounded-lg shadow-md hover:shadow-md  hover:scale-[1.02] border border-gray-100 transition-transform duration-200">
+            <div className="bg-white p-4 sm:p-5 rounded-lg shadow-md hover:shadow-md  hover:scale-[1.02] border border-gray-200 transition-transform duration-200">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-xs sm:text-sm text-gray-600">
@@ -478,7 +478,7 @@ export function ReportDashboard({
             </div>
 
             {/* Expiring Soon */}
-            <div className="bg-white p-4 sm:p-5 rounded-lg shadow-md hover:shadow-md  hover:scale-[1.02] border border-gray-100 transition-transform duration-200">
+            <div className="bg-white p-4 sm:p-5 rounded-lg shadow-md hover:shadow-md  hover:scale-[1.02] border border-gray-200 transition-transform duration-200">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-xs sm:text-sm text-gray-600">
@@ -521,9 +521,9 @@ export function ReportDashboard({
                 <SortableTableHead label="Total Contract Value" columnKey="contractValue" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="w-fit" />
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200">
+            <tbody className="divide-y divide-gray-300">
               {sortedContracts.length === 0 ? (
-                <tr data-empty>
+                <tr data-empty className='h-28'>
                   <td colSpan={10} className="px-4 py-8 text-center text-gray-500">
                     No contracts found
                   </td>
