@@ -30,15 +30,9 @@ export function useContractFormData(): ContractFormData {
           getContractTypes(),
         ]);
 
-        const deptItems: Department[] = Array.isArray(deptData)
-          ? deptData
-          : deptData?.items ?? [];
+        const deptItems: Department[] = deptData.items;
         setDepartmentList(deptItems);
-
-        const contractTypeItems: ContractType[] = Array.isArray(contractTypesData)
-          ? contractTypesData
-          : (contractTypesData as any)?.items ?? [];
-        setContractTypeList(contractTypeItems);
+        setContractTypeList(contractTypesData);
 
         // Departments list
         const departmentNames = deptItems.map(d => d.departmentName);
@@ -52,7 +46,7 @@ export function useContractFormData(): ContractFormData {
 
         // Group contract types by department name
         const grouped: Record<string, string[]> = {};
-        contractTypeItems.forEach((ct: ContractType) => {
+        contractTypesData.forEach((ct: ContractType) => {
           const deptName = deptIdToName[String(ct.departmentId)];
           if (!deptName) return;
 
