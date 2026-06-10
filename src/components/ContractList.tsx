@@ -22,10 +22,9 @@ import {
   mockDepartments,
   mockContractStatuses,
   type Contract as MockContract,
-} from '../data/mockData'; // adjust path to wherever you placed the mock data file
+} from '../data/mockData';
 import { CustomSelect } from './ui/CustomSelect';
 
-// Map raw mock contracts once to the Contract shape ContractList expects
 const MOCK_CONTRACTS: Contract[] = RAW_CONTRACTS.map((c: MockContract) =>
   mapApiContractToListRow({
     contractId: c.contractId,
@@ -49,7 +48,6 @@ const MOCK_CONTRACTS: Contract[] = RAW_CONTRACTS.map((c: MockContract) =>
   } as any)
 );
 
-// Notification summary derived from mock contracts
 const MOCK_NOTIFICATION_SUMMARY = {
   overdue: RAW_CONTRACTS.filter((c) => c.status === 'OVERDUE').length,
   expire30: RAW_CONTRACTS.filter((c) => c.remainingDays >= 0 && c.remainingDays <= 30).length,
@@ -93,26 +91,21 @@ export function ContractList({
   const [deleteTarget, setDeleteTarget] = useState<Contract | null>(null);
   const [showRegisterContract, setShowRegisterContract] = useState(false);
 
-  // ── Mock-data equivalents for useDepartments / useContractStatus ──────────
   const departmentList = mockDepartments;
-  const statuses = mockContractStatuses; // [{ label, key }, …]
+  const statuses = mockContractStatuses;
 
   const { allowedDepartments, isSingleDepartment, defaultDepartmentId } =
     getAllowedDepartments(departmentList, currentUser?.moduleAccess);
 
-  // Initialise department from allowed list (mirrors original useEffect)
   useEffect(() => {
     if (isSingleDepartment && defaultDepartmentId != null) {
       setSelectedDepartmentId(defaultDepartmentId);
     }
   }, [defaultDepartmentId, isSingleDepartment]);
 
-  // ── In-memory "contracts" state so delete / register can mutate it ─────────
   const [contracts, setContracts] = useState<Contract[]>(MOCK_CONTRACTS);
 
-  // Expose a no-op refetch reference so the parent's contractRefetchRef works
   const refetch = useCallback(() => {
-    // Nothing to re-fetch in mock mode; just re-derive from current state
     setContracts((prev) => [...prev]);
   }, []);
 
@@ -124,19 +117,15 @@ export function ContractList({
     onRegisterContractReady?.(() => setShowRegisterContract(true));
   }, [onRegisterContractReady]);
 
-  // ── Notification summary (static from mock) ────────────────────────────────
   const notificationSummary = MOCK_NOTIFICATION_SUMMARY;
   const overdueCount = notificationSummary.overdue;
 
-  // ── Pagination ─────────────────────────────────────────────────────────────
   const { pagination, goToPage, setSize } = usePagination(10);
 
-  // ── Client-side filter → sort → paginate ──────────────────────────────────
   const filteredContracts = useMemo(() => {
     return contracts.filter((contract) => {
       if (!userConfidentialAccess && contract.confidential) return false;
       if (selectedDepartmentId !== undefined && (contract as any).departmentId !== selectedDepartmentId) {
-        // Fall back to matching on the department name if departmentId isn't on the mapped row
         if (contract.department !== departmentList.find((d) => d.departmentId === selectedDepartmentId)?.departmentName) {
           return false;
         }
@@ -167,11 +156,9 @@ export function ContractList({
     pagination.page * pagination.size,
   );
 
-  // ── Delete (in-memory) ────────────────────────────────────────────────────
   const handleDelete = async (contract: Contract) => {
     try {
       setDeletingId(contract.contractId);
-      // Simulate async work
       await new Promise((r) => setTimeout(r, 400));
       setContracts((prev) => prev.filter((c) => c.contractId !== contract.contractId));
       toast.success(`Contract ${contract.id} has been Deleted!`);
@@ -185,7 +172,6 @@ export function ContractList({
     }
   };
 
-  // ── View / edit handler ───────────────────────────────────────────────────
   const handleViewContractDetails = (contract: Contract, formMode: 'view' | 'edit' = 'view') => {
     if (formMode === 'view' && !contractPermission.viewDocuments) return;
     if (formMode === 'edit' && !contractPermission.edit) return;
@@ -194,64 +180,66 @@ export function ContractList({
 
   // ── Render ────────────────────────────────────────────────────────────────
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 xl:space-y-7 2xl:space-y-8">
+
       {/* Notification summary cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 gap-4 xl:gap-5 2xl:gap-6">
+
         {/* Overdue */}
-        <div className="bg-white p-3 rounded-xl  shadow-sm relative overflow-hidden hover:scale-[1.02] transition-transform duration-200">
-          <div className="flex items-center justify-between mb-2">
-            <p className="text-xs font-semibold tracking-widest text-gray-400 uppercase">Overdue</p>
-            <span className="flex items-center justify-center  w-8 h-8 rounded-lg bg-red-100 shrink-0">
-              <AlertTriangle className="w-4 h-4 text-red-500" />
+        <div className="bg-white p-3 xl:p-4 2xl:p-5 rounded-lg shadow-sm relative overflow-hidden transition-transform duration-200">
+          <div className="flex items-center justify-between mb-2 xl:mb-3">
+            <p className="text-xs xl:text-[13px] font-semibold tracking-widest text-gray-400 uppercase">Overdue</p>
+            <span className="flex items-center justify-center w-8 h-8 xl:w-9 xl:h-9 2xl:w-10 2xl:h-10 rounded-lg bg-red-50 shrink-0">
+              <AlertTriangle className="w-4 h-4 xl:w-4.5 xl:h-4.5 2xl:w-5 2xl:h-5 text-red-500" />
             </span>
           </div>
-          <p className="text-2xl font-bold text-gray-900 mb-0.5">{overdueCount}</p>
-          <p className="text-xs text-red-500 font-medium">
+          <p className="text-2xl xl:text-3xl 2xl:text-3xl font-bold text-gray-900 mb-0.5">{overdueCount}</p>
+          <p className="text-xs xl:text-[13px] text-red-500 font-medium">
             {overdueCount === 0 ? 'All clear' : 'Requires immediate action'}
           </p>
-          <div className="absolute bottom-0 left-0 w-full h-1  bg-red-500 rounded-b-xl" />
+          <div className="absolute bottom-0 left-0 w-full h-1 bg-red-500 rounded-b-xl" />
         </div>
 
         {/* 30 Days */}
-        <div className="bg-white p-3 rounded-xl  shadow-sm relative overflow-hidden hover:scale-[1.02] transition-transform duration-200">
-          <div className="flex items-center justify-between mb-2">
-            <p className="text-xs font-semibold tracking-widest text-gray-400 uppercase">≤ 30 Days</p>
-            <span className="flex items-center justify-center w-8 h-8 rounded-lg bg-red-100 shrink-0">
-              <Clock className="w-4 h-4 text-red-500" />
+        <div className="bg-white p-3 xl:p-4 2xl:p-5 rounded-lg shadow-sm relative overflow-hidden transition-transform duration-200">
+          <div className="flex items-center justify-between mb-2 xl:mb-3">
+            <p className="text-xs xl:text-[13px] font-semibold tracking-widest text-gray-400 uppercase">≤ 30 Days</p>
+            <span className="flex items-center justify-center w-8 h-8 xl:w-9 xl:h-9 2xl:w-10 2xl:h-10 rounded-lg bg-red-50 shrink-0">
+              <Clock className="w-4 h-4 xl:w-4.5 xl:h-4.5 2xl:w-5 2xl:h-5 text-red-500" />
             </span>
           </div>
-          <p className="text-2xl font-bold text-gray-900 mb-0.5">{notificationSummary.expire30}</p>
-          <p className="text-xs text-red-400 font-medium">
+          <p className="text-2xl xl:text-3xl 2xl:text-3xl font-bold text-gray-900 mb-0.5">{notificationSummary.expire30}</p>
+          <p className="text-xs xl:text-[13px] text-red-400 font-medium">
             {notificationSummary.expire30 === 0 ? 'None expiring' : 'Critical — act now'}
           </p>
           <div className="absolute bottom-0 left-0 w-full h-1 bg-red-400 rounded-b-xl" />
         </div>
 
         {/* 60 Days */}
-        <div className="bg-white p-3 rounded-xl  shadow-sm relative overflow-hidden hover:scale-[1.02] transition-transform duration-200">
-          <div className="flex items-center justify-between mb-2">
-            <p className="text-xs font-semibold tracking-widest text-gray-400 uppercase">≤ 60 Days</p>
-            <span className="flex items-center justify-center  w-8 h-8 rounded-lg bg-orange-100 shrink-0">
-              <Clock className="w-4 h-4 text-orange-500" />
+        <div className="bg-white p-3 xl:p-4 2xl:p-5 rounded-lg shadow-sm relative overflow-hidden transition-transform duration-200">
+          <div className="flex items-center justify-between mb-2 xl:mb-3">
+            <p className="text-xs xl:text-[13px] font-semibold tracking-widest text-gray-400 uppercase">≤ 60 Days</p>
+            <span className="flex items-center justify-center w-8 h-8 xl:w-9 xl:h-9 2xl:w-10 2xl:h-10 rounded-lg bg-orange-50 shrink-0">
+              <Clock className="w-4 h-4 xl:w-4.5 xl:h-4.5 2xl:w-5 2xl:h-5 text-orange-500" />
             </span>
           </div>
-          <p className="text-2xl font-bold text-gray-900 mb-0.5">{notificationSummary.expire60}</p>
-          <p className="text-xs text-orange-400 font-medium">
+          <p className="text-2xl xl:text-3xl 2xl:text-3xl font-bold text-gray-900 mb-0.5">{notificationSummary.expire60}</p>
+          <p className="text-xs xl:text-[13px] text-orange-400 font-medium">
             {notificationSummary.expire60 === 0 ? 'None expiring' : 'Urgent attention needed'}
           </p>
           <div className="absolute bottom-0 left-0 w-full h-1 bg-orange-400 rounded-b-xl" />
         </div>
 
         {/* 90 Days */}
-        <div className="bg-white p-3 rounded-xl  shadow-sm relative overflow-hidden hover:scale-[1.02] transition-transform duration-200">
-          <div className="flex items-center justify-between mb-2">
-            <p className="text-xs font-semibold tracking-widest text-gray-400 uppercase">≤ 90 Days</p>
-            <span className="flex items-center justify-center w-8 h-8 rounded-lg bg-yellow-100 shrink-0">
-              <Clock className="w-4 h-4 text-yellow-500" />
+        <div className="bg-white p-3 xl:p-4 2xl:p-5 rounded-lg shadow-sm relative overflow-hidden transition-transform duration-200">
+          <div className="flex items-center justify-between mb-2 xl:mb-3">
+            <p className="text-xs xl:text-[13px] font-semibold tracking-widest text-gray-400 uppercase">≤ 90 Days</p>
+            <span className="flex items-center justify-center w-8 h-8 xl:w-9 xl:h-9 2xl:w-10 2xl:h-10 rounded-lg bg-yellow-50 shrink-0">
+              <Clock className="w-4 h-4 xl:w-4.5 xl:h-4.5 2xl:w-5 2xl:h-5 text-yellow-500" />
             </span>
           </div>
-          <p className="text-2xl font-bold text-gray-900 mb-0.5">{notificationSummary.expire90}</p>
-          <p className="text-xs text-yellow-500 font-medium">
+          <p className="text-2xl xl:text-3xl 2xl:text-3xl font-bold text-gray-900 mb-0.5">{notificationSummary.expire90}</p>
+          <p className="text-xs xl:text-[13px] text-yellow-500 font-medium">
             {notificationSummary.expire90 === 0 ? 'None expiring' : 'Plan renewal soon'}
           </p>
           <div className="absolute bottom-0 left-0 w-full h-1 bg-yellow-400 rounded-b-xl" />
@@ -259,11 +247,12 @@ export function ContractList({
       </div>
 
       {/* Filters */}
-      <div className="bg-white p-4 rounded-lg shadow-md ">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="bg-white p-4 xl:p-5 2xl:p-6 rounded-lg shadow-sm">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 xl:gap-5">
+
           {/* Department */}
           <div>
-            <label className="block text-gray-700 mb-2 font-medium">Department</label>
+            <label className="block text-gray-700 xl:text-[15px] 2xl:text-base mb-2 font-medium">Department</label>
             <CustomSelect
               value={selectedDepartmentId?.toString() ?? ''}
               disabled={isSingleDepartment}
@@ -282,7 +271,7 @@ export function ContractList({
 
           {/* Status */}
           <div>
-            <label className="block text-gray-700 mb-2 font-medium">Status</label>
+            <label className="block text-gray-700 xl:text-[15px] 2xl:text-base mb-2 font-medium">Status</label>
             <CustomSelect
               value={selectedStatus}
               onChange={(value) => {
@@ -299,15 +288,15 @@ export function ContractList({
 
           {/* Search */}
           <div>
-            <label className="block text-gray-700 mb-2 font-medium">Search</label>
+            <label className="block text-gray-700 xl:text-[15px] 2xl:text-base mb-2 font-medium">Search</label>
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 xl:w-4.5 xl:h-4.5 text-gray-500" />
               <input
                 type="text"
                 placeholder="Contract ID, Title, Partner..."
                 value={searchText}
                 onChange={(e) => { setSearchText(e.target.value); goToPage(1); }}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg"
+                className="w-full pl-10 xl:pl-11 pr-4 py-2 xl:py-2.5 xl:text-[15px] 2xl:text-base border border-gray-300 rounded-lg"
               />
             </div>
           </div>
@@ -315,32 +304,32 @@ export function ContractList({
       </div>
 
       {/* Contract Table */}
-      <div className="bg-white rounded-lg shadow-md  ">
+      <div className="bg-white rounded-lg shadow-sm">
         <div
           className={[
             'overflow-x-auto',
             pagedContracts.length > 10 ? 'overflow-y-auto max-h-[70vh] lg:overflow-y-hidden' : '',
           ].join(' ').trim() || undefined}
         >
-          <table className={`w-full min-w-max text-sm rounded-t-lg overflow-hidden [&_th]:px-2 [&_th]:py-5 [&_th]:whitespace-nowrap [&_td]:px-2 [&_td]:py-3.5 ${tableRowHover}`}>
+          <table className={`w-full min-w-max text-sm xl:text-[15px] 2xl:text-base rounded-t-lg overflow-hidden [&_th]:px-2 [&_th]:py-5 xl:[&_th]:py-5 2xl:[&_th]:py-6 [&_th]:whitespace-nowrap [&_td]:px-2 [&_td]:py-3.5 xl:[&_td]:py-4 2xl:[&_td]:py-4.5 ${tableRowHover}`}>
             <thead className={tableTheadClass}>
               <tr>
                 <SortableTableHead label="Contract ID" columnKey="id" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="w-fit" />
-                <SortableTableHead label="Title" columnKey="title" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="w-40" />
-                <SortableTableHead label="Department" columnKey="department" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="w-40" />
-                <SortableTableHead label="Person In Charge" columnKey="personInCharge" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="w-35" />
-                <SortableTableHead label="Partner" columnKey="partnerName" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="w-36" />
-                <SortableTableHead label="Expiry" columnKey="expiryDate" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="w-28" />
-                <SortableTableHead label="Days Left" columnKey="daysRemaining" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="w-24" />
+                <SortableTableHead label="Title" columnKey="title" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="w-40 xl:w-48 2xl:w-56" />
+                <SortableTableHead label="Department" columnKey="department" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="w-40 xl:w-48" />
+                <SortableTableHead label="Person In Charge" columnKey="personInCharge" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="w-35 xl:w-40" />
+                <SortableTableHead label="Partner" columnKey="partnerName" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="w-36 xl:w-40" />
+                <SortableTableHead label="Expiry" columnKey="expiryDate" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="w-28 xl:w-32" />
+                <SortableTableHead label="Days Left" columnKey="daysRemaining" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="w-24 xl:w-28" />
                 <SortableTableHead label="Status" columnKey="status" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="w-fit" />
-                <SortableTableHead label="Total Contract Value" columnKey="contractValue" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="w-35" />
+                <SortableTableHead label="Total Contract Value" columnKey="contractValue" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="w-35 xl:w-44 2xl:w-48" />
                 <th className="w-fit text-white font-medium text-center">Action</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-300">
               {pagedContracts.length === 0 ? (
-                <tr data-empty className='h-28'>
-                  <td colSpan={10}  className="px-4 py-10 text-center text-gray-500">
+                <tr data-empty className="h-28">
+                  <td colSpan={10} className="px-4 py-10 text-center text-gray-500 xl:text-[15px]">
                     No contracts found
                   </td>
                 </tr>
@@ -373,7 +362,7 @@ export function ContractList({
                           };
                           const color = colorMap[name] ?? 'bg-gray-100 text-gray-600';
                           return (
-                            <span className={`inline-block px-2.5 py-1 rounded-md text-xs font-medium ${color}`}>
+                            <span className={`inline-block px-2.5 py-1 rounded-md text-xs xl:text-[13px] font-medium ${color}`}>
                               {name}
                             </span>
                           );
@@ -398,10 +387,10 @@ export function ContractList({
 
                           return (
                             <div className="flex flex-col gap-1 min-w-18">
-                              <span className={`text-sm font-semibold ${textColor}`}>
+                              <span className={`text-sm xl:text-[15px] font-semibold ${textColor}`}>
                                 {days < 0 ? `${Math.abs(days)} overdue` : `${days} days`}
                               </span>
-                              <div className="h-1 w-full bg-gray-100 rounded-full overflow-hidden">
+                              <div className="h-1 xl:h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
                                 <div className={`h-full rounded-full ${barColor}`} style={{ width: `${barWidth}%` }} />
                               </div>
                             </div>
@@ -410,7 +399,7 @@ export function ContractList({
                       </td>
                       <td className="whitespace-nowrap">
                         <span
-                          className={`inline-block px-1.5 py-0.5 rounded-full text-xs whitespace-nowrap ${listStatusBadgeClass(contract.status)}`}
+                          className={`inline-block px-1.5 py-0.5 rounded-full text-xs xl:text-[13px] whitespace-nowrap ${listStatusBadgeClass(contract.status)}`}
                           title={contract.status}
                         >
                           {contract.status}
@@ -420,25 +409,25 @@ export function ContractList({
                         {formatCurrency(contract.contractValue)}
                       </td>
                       <td className="whitespace-nowrap">
-                        <div className="flex items-center gap-0.5">
+                        <div className="flex items-center gap-0.5 xl:gap-1">
                           {contractPermission.viewDocuments && (
                             <button
                               type="button"
                               onClick={(e) => { e.stopPropagation(); handleViewContractDetails(contract); }}
-                              className="p-1.5 hover:bg-gray-100 rounded-lg text-primary cursor-pointer"
+                              className="p-1.5 xl:p-2 hover:bg-gray-100 rounded-lg text-primary cursor-pointer"
                               title="View details"
                             >
-                              <Eye className="w-4 h-4" />
+                              <Eye className="w-4 h-4 xl:w-4.5 xl:h-4.5" />
                             </button>
                           )}
                           {contractPermission.edit && contract.status !== 'Closed' && (
                             <button
                               type="button"
                               onClick={(e) => { e.stopPropagation(); handleViewContractDetails(contract, 'edit'); }}
-                              className="p-1.5 hover:bg-gray-100 rounded-lg text-primary cursor-pointer "
+                              className="p-1.5 xl:p-2 hover:bg-gray-100 rounded-lg text-primary cursor-pointer"
                               title="Edit"
                             >
-                              <PenSquare className="w-4 h-4 " />
+                              <PenSquare className="w-4 h-4 xl:w-4.5 xl:h-4.5" />
                             </button>
                           )}
                           {contractPermission.delete && (
@@ -446,10 +435,10 @@ export function ContractList({
                               type="button"
                               onClick={(e) => { e.stopPropagation(); setDeleteTarget(contract); }}
                               disabled={isDeleting}
-                              className="p-1.5 hover:bg-gray-100 rounded-lg text-red-600 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                              className="p-1.5 xl:p-2 hover:bg-gray-100 rounded-lg text-red-600 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                               title="Delete"
                             >
-                              <Trash2 className="w-4 h-4" />
+                              <Trash2 className="w-4 h-4 xl:w-4.5 xl:h-4.5" />
                             </button>
                           )}
                         </div>
@@ -461,18 +450,18 @@ export function ContractList({
             </tbody>
           </table>
         </div>
+
         {/* Results count + pagination */}
-        <div className="flex flex-col sm:flex-row justify-between items-center gap-3 px-4 py-3 border-t border-gray-100">
-          <div className="text-gray-600 text-sm sm:text-base whitespace-nowrap">
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-3 px-4 xl:px-5 2xl:px-6 py-3 xl:py-4 border-t border-gray-100">
+          <div className="text-gray-600 text-sm xl:text-[15px] 2xl:text-base sm:text-base whitespace-nowrap">
             Showing {pagedContracts.length} of {total} contracts
           </div>
-
           <div className="flex items-center gap-3">
             {total > 10 && (
               <select
                 value={pagination.size}
                 onChange={(e) => { setSize(Number(e.target.value)); goToPage(1); }}
-                className="px-2 py-1.5 sm:py-2 border border-gray-300 rounded-lg text-sm bg-white cursor-pointer"
+                className="px-2 py-1.5 xl:py-2 sm:py-2 border border-gray-300 rounded-lg text-sm xl:text-[15px] bg-white cursor-pointer"
               >
                 {[10, 20, 50].map((s) => (
                   <option key={s} value={s}>Show {s}</option>

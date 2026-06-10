@@ -355,7 +355,7 @@ export function ReportDashboard({
   return (
     <div className="space-y-6">
       {/* Report Filters */}
-      <div className="bg-white rounded-lg shadow-md  p-6">
+      <div className="bg-white rounded-lg shadow-sm  p-6">
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
 
@@ -416,12 +416,12 @@ export function ReportDashboard({
       </div>
 
       {/* Report Preview */}
-      <div className="bg-white rounded-lg shadow-md  p-6">
+      <div className="bg-white rounded-lg shadow-sm  p-6">
         <div className="mb-6 pb-6 border-b border-gray-200">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-4">
 
             {/* Total Contracts */}
-            <div className="bg-white p-4 sm:p-5 rounded-lg shadow-md hover:shadow-md   hover:scale-[1.02] border border-gray-200 transition-transform duration-200">
+            <div className="bg-white p-4 sm:p-5 rounded-lg shadow-sm hover:shadow-sm     transition-transform duration-200">
               <div className="flex items-center justify-between">
                 <div className="min-w-0">
                   <p className="text-xs sm:text-sm text-gray-600">
@@ -440,7 +440,7 @@ export function ReportDashboard({
             </div>
 
             {/* Total Value */}
-            <div className="bg-white p-4 sm:p-5 rounded-lg shadow-md hover:shadow-md  hover:scale-[1.02] border border-gray-200 transition-transform duration-200">
+            <div className="bg-white p-4 sm:p-5 rounded-lg shadow-sm hover:shadow-sm    transition-transform duration-200">
               <div className="flex items-center justify-between">
                 <div className="min-w-0">
                   <p className="text-xs sm:text-sm text-gray-600">
@@ -459,7 +459,7 @@ export function ReportDashboard({
             </div>
 
             {/* Active */}
-            <div className="bg-white p-4 sm:p-5 rounded-lg shadow-md hover:shadow-md  hover:scale-[1.02] border border-gray-200 transition-transform duration-200">
+            <div className="bg-white p-4 sm:p-5 rounded-lg shadow-sm hover:shadow-sm    transition-transform duration-200">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-xs sm:text-sm text-gray-600">
@@ -478,7 +478,7 @@ export function ReportDashboard({
             </div>
 
             {/* Expiring Soon */}
-            <div className="bg-white p-4 sm:p-5 rounded-lg shadow-md hover:shadow-md  hover:scale-[1.02] border border-gray-200 transition-transform duration-200">
+            <div className="bg-white p-4 sm:p-5 rounded-lg shadow-sm hover:shadow-sm     transition-transform duration-200">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-xs sm:text-sm text-gray-600">

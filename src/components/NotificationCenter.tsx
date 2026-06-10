@@ -92,10 +92,10 @@ function SummaryCard({
   sublabelColor: string; accentBar: string;
 }) {
   return (
-    <div className="flex-1 min-w-0 bg-white p-3 rounded-xl  shadow-sm relative overflow-hidden hover:scale-[1.02] transition-transform duration-200">
-      <p className="text-sm font-semibold tracking-widest text-gray-400 uppercase mb-2">{label}</p>
-      <p className="text-2xl font-bold text-gray-900 mb-0.5">{count}</p>
-      <p className={`text-xs font-medium ${sublabelColor}`}>{sublabel}</p>
+    <div className="flex-1 min-w-0 bg-white p-3 xl:p-4 2xl:p-5 rounded-lg shadow-sm relative overflow-hidden transition-transform duration-200">
+      <p className="text-sm xl:text-[13px] font-semibold tracking-widest text-gray-400 uppercase mb-2 xl:mb-3">{label}</p>
+      <p className="text-2xl xl:text-3xl 2xl:text-3xl font-bold text-gray-900 mb-0.5">{count}</p>
+      <p className={`text-xs xl:text-[13px] font-medium ${sublabelColor}`}>{sublabel}</p>
       <div className={`absolute bottom-0 left-0 w-full h-1 ${accentBar} rounded-b-xl`} />
     </div>
   );
@@ -118,19 +118,19 @@ function FilterPills({
     { key: "90", label: "≤ 90 days" },
   ];
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className="flex flex-wrap gap-2 xl:gap-2.5">
       {filters.map(f => (
         <button
           key={f.key}
           onClick={() => onChange(f.key)}
-          className={`inline-flex items-center gap-2 rounded-md px-3.5 py-1.5 text-sm font-medium shadow-sm shadow-gray-200 transition-colors cursor-pointer ${current === f.key
+          className={`inline-flex items-center gap-2 rounded-md px-3.5 py-1.5 xl:px-4 xl:py-2 text-sm xl:text-[15px] font-medium shadow-sm shadow-gray-200 transition-colors cursor-pointer ${current === f.key
               ? "bg-primary text-white"
               : "bg-white text-gray-500 hover:bg-gray-50"
             }`}
         >
           {f.label}
           <span
-            className={`inline-flex items-center justify-center min-w-5 h-5 rounded-full px-1.5 text-xs font-semibold ${current === f.key
+            className={`inline-flex items-center justify-center min-w-5 h-5 xl:min-w-5.5 xl:h-5.5 rounded-full px-1.5 text-xs xl:text-[13px] font-semibold ${current === f.key
                 ? "bg-white/20 text-white"
                 : "bg-gray-100 text-gray-500"
               }`}
@@ -169,20 +169,19 @@ function ContractCard({ contract, maxDays, isRead, onRead, onSelectContract }: C
   return (
     <div
       onClick={() => { onRead(contract.id); onSelectContract?.(contract.id); }}
-      className={`relative flex items-stretch rounded-xl  overflow-hidden cursor-pointer hover:shadow-md hover:scale-[1.01] transition-transform duration-200 ${isRead ? "bg-white shadow-sm shadow-gray-200" : "bg-white shadow-md "
-        }`}
+      className={`relative flex items-stretch rounded-md overflow-hidden cursor-pointer hover:shadow-sm transition-transform duration-200 ${isRead ? "bg-white shadow-sm" : "bg-white shadow-sm"}`}
     >
       {/* Left accent bar */}
       <div className={`w-1 shrink-0 ${w.accentBg}`} />
 
       {/* Card body */}
-      <div className="flex flex-1 min-w-0 flex-col lg:flex-row lg:items-center gap-3 lg:gap-6 px-4 lg:px-5 py-4">
+      <div className="flex flex-1 min-w-0 flex-col lg:flex-row lg:items-center gap-3 lg:gap-6 xl:gap-8 px-4 lg:px-5 xl:px-6 py-4 xl:py-5">
 
-        {/* Row 1 on mobile: code + badge + time (mobile only shows time here) */}
-        <div className="flex items-center justify-between lg:block lg:w-40 lg:shrink-0">
-          <div className="flex flex-col gap-1.5">
-            <span className="text-sm font-semibold text-gray-800">{contract.code}</span>
-            <span className={`inline-flex items-center gap-1 self-start text-xs font-semibold rounded-md px-2.5 py-0.5 ${w.badgeBg} ${w.badgeText}`}>
+        {/* Row 1: code + badge + time (mobile only shows time here) */}
+        <div className="flex items-center justify-between lg:block lg:w-40 xl:w-44 2xl:w-48 lg:shrink-0">
+          <div className="flex flex-col gap-1.5 xl:gap-2">
+            <span className="text-sm xl:text-[15px] 2xl:text-base font-semibold text-gray-800">{contract.code}</span>
+            <span className={`inline-flex items-center gap-1 self-start text-xs xl:text-[13px] font-semibold rounded-md px-2.5 py-0.5 ${w.badgeBg} ${w.badgeText}`}>
               {contract.days < 0
                 ? <span className="text-[10px] leading-none">⚠</span>
                 : (
@@ -194,8 +193,8 @@ function ContractCard({ contract, maxDays, isRead, onRead, onSelectContract }: C
               {w.label}
             </span>
           </div>
-          {/* Time ago — mobile only (top-right of first row) */}
-          <div className="flex items-center gap-1 text-xs text-gray-400 whitespace-nowrap lg:hidden">
+          {/* Time ago — mobile only */}
+          <div className="flex items-center gap-1 text-xs xl:text-[13px] text-gray-400 whitespace-nowrap lg:hidden">
             {!isRead && <span className="w-2 h-2 rounded-full bg-primary mr-0.5" />}
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" />
@@ -204,51 +203,51 @@ function ContractCard({ contract, maxDays, isRead, onRead, onSelectContract }: C
           </div>
         </div>
 
-        {/* Middle columns: 2-col grid on mobile, flex row on desktop */}
-        <div className="grid grid-cols-2 gap-x-4 gap-y-3 lg:contents">
+        {/* Middle columns */}
+        <div className="grid grid-cols-2 gap-x-4 gap-y-3 xl:gap-x-6 xl:gap-y-4 lg:contents">
 
           {/* Department */}
           <div className="min-w-0 lg:flex-1">
-            <p className="text-[10px] font-semibold tracking-widest text-gray-400 uppercase mb-0.5">Department</p>
-            <p className={`text-sm text-gray-800 wrap-break-word ${isRead ? "font-normal" : "font-medium"}`}>{contract.dept}</p>
+            <p className="text-[10px] xl:text-[11px] font-semibold tracking-widest text-gray-400 uppercase mb-0.5">Department</p>
+            <p className={`text-sm xl:text-[15px] 2xl:text-base text-gray-800 wrap-break-word ${isRead ? "font-normal" : "font-medium"}`}>{contract.dept}</p>
           </div>
 
           {/* Person in Charge */}
           <div className="min-w-0 lg:flex-1">
-            <p className="text-[10px] font-semibold tracking-widest text-gray-400 uppercase mb-0.5">Person in Charge</p>
-            <p className={`text-sm text-gray-800 wrap-break-word ${isRead ? "font-normal" : "font-medium"}`}>{contract.pic}</p>
+            <p className="text-[10px] xl:text-[11px] font-semibold tracking-widest text-gray-400 uppercase mb-0.5">Person in Charge</p>
+            <p className={`text-sm xl:text-[15px] 2xl:text-base text-gray-800 wrap-break-word ${isRead ? "font-normal" : "font-medium"}`}>{contract.pic}</p>
           </div>
 
           {/* Partner */}
           <div className="min-w-0 lg:flex-1">
-            <p className="text-[10px] font-semibold tracking-widest text-gray-400 uppercase mb-0.5">Partner</p>
-            <p className={`text-sm text-gray-800 wrap-break-word ${isRead ? "font-normal" : "font-medium"}`}>{contract.partner}</p>
+            <p className="text-[10px] xl:text-[11px] font-semibold tracking-widest text-gray-400 uppercase mb-0.5">Partner</p>
+            <p className={`text-sm xl:text-[15px] 2xl:text-base text-gray-800 wrap-break-word ${isRead ? "font-normal" : "font-medium"}`}>{contract.partner}</p>
           </div>
 
           {/* Expiry + progress bar */}
-          <div className="min-w-0 lg:w-44 lg:shrink-0">
-            <p className="text-[10px] font-semibold tracking-widest text-gray-400 uppercase mb-0.5">
+          <div className="min-w-0 lg:w-44 xl:w-52 2xl:w-56 lg:shrink-0">
+            <p className="text-[10px] xl:text-[11px] font-semibold tracking-widest text-gray-400 uppercase mb-0.5">
               {contract.days < 0 ? "Expired On" : "Expiry Date"}
             </p>
-            <p className="text-sm font-semibold text-gray-800">{formatDate(contract.expiry)}</p>
-            <div className="mt-1.5 mb-1 h-1 w-full bg-gray-100 rounded-full overflow-hidden">
+            <p className="text-sm xl:text-[15px] font-semibold text-gray-800">{formatDate(contract.expiry)}</p>
+            <div className="mt-1.5 mb-1 h-1 xl:h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
               <div
                 className={`h-full rounded-full ${w.progressBg}`}
                 style={{ width: `${progressPct}%` }}
               />
             </div>
-            <p className={`text-xs font-semibold ${w.daysColor}`}>{daysText}</p>
+            <p className={`text-xs xl:text-[13px] font-semibold ${w.daysColor}`}>{daysText}</p>
           </div>
 
         </div>
       </div>
 
       {/* Right section: unread dot + time ago — desktop only */}
-      <div className="hidden lg:flex flex-col items-end justify-center gap-1.5 pr-5 pl-2 shrink-0">
+      <div className="hidden lg:flex flex-col items-end justify-center gap-1.5 pr-5 xl:pr-6 pl-2 shrink-0">
         {!isRead && (
           <span className="w-2 h-2 rounded-full bg-primary" />
         )}
-        <div className="flex items-center gap-1 text-xs text-gray-400 whitespace-nowrap">
+        <div className="flex items-center gap-1 text-xs xl:text-[13px] text-gray-400 whitespace-nowrap">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" />
           </svg>
@@ -269,11 +268,8 @@ export function NotificationCenter({ onSelectContract, onUnreadChange }: Notific
 
   const enriched = MOCK_CONTRACTS.map(c => ({ ...c, days: daysDiff(c.expiry) }));
 
-  // Global max across ALL contracts — used for progress bar scaling so bars
-  // remain proportionally consistent regardless of which filter is active.
   const globalMaxDays = Math.max(0, ...enriched.map(c => c.days));
 
-  // Summary counts
   const counts: Record<FilterKey, number> = {
     all: enriched.length,
     overdue: enriched.filter(c => c.days < 0).length,
@@ -282,7 +278,6 @@ export function NotificationCenter({ onSelectContract, onUnreadChange }: Notific
     "90": enriched.filter(c => c.days > 60 && c.days <= 90).length,
   };
 
-  // Filter
   const filtered = enriched.filter(c => {
     if (filter === "overdue") return c.days < 0;
     if (filter === "30") return c.days >= 0 && c.days <= 30;
@@ -291,7 +286,6 @@ export function NotificationCenter({ onSelectContract, onUnreadChange }: Notific
     return true;
   });
 
-  // Sort
   const sorted = [...filtered].sort((a, b) => {
     if (sort === "days_asc") return a.days - b.days;
     if (sort === "days_desc") return b.days - a.days;
@@ -322,10 +316,10 @@ export function NotificationCenter({ onSelectContract, onUnreadChange }: Notific
     ];
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 xl:space-y-5 2xl:space-y-6">
 
       {/* ── Summary cards ── */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 xl:gap-5 2xl:gap-6">
         {summaryCards.map(card => (
           <SummaryCard
             key={card.key}
@@ -341,13 +335,13 @@ export function NotificationCenter({ onSelectContract, onUnreadChange }: Notific
       {/* ── Filter pills + Mark all read ── */}
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <FilterPills current={filter} counts={counts} onChange={handleFilter} />
-        <div className="flex items-center gap-2 text-sm text-gray-500">
+        <div className="flex items-center gap-2 text-sm xl:text-[15px] text-gray-500">
           {unreadCount > 0 && (
             <button
               onClick={handleMarkAllRead}
-              className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white shadow-sm shadow-primary/20 transition duration-150 hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary/40"
+              className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 xl:px-5 xl:py-2.5 text-sm xl:text-[15px] font-semibold text-white shadow-sm shadow-primary/20 transition duration-150 hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary/40"
             >
-              <span><Check className="w-5 h-5 text-white"/> </span>
+              <span><Check className="w-5 h-5 text-white" /></span>
               Mark all as read
             </button>
           )}
@@ -356,11 +350,11 @@ export function NotificationCenter({ onSelectContract, onUnreadChange }: Notific
 
       {/* ── Contract cards ── */}
       {pageItems.length === 0 ? (
-        <div className="text-center py-12 bg-white rounded-md shadow">
-          <p className="text-gray-400 text-sm">No contracts match this filter.</p>
+        <div className="text-center py-12 xl:py-16 bg-white rounded-md shadow">
+          <p className="text-gray-400 text-sm xl:text-[15px]">No contracts match this filter.</p>
         </div>
       ) : (
-        <div className="flex flex-col gap-2.5">
+        <div className="flex flex-col gap-2.5 xl:gap-3">
           {pageItems.map(c => (
             <ContractCard
               key={c.id}
