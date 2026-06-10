@@ -38,7 +38,17 @@ export const getContractTypes = async (): Promise<ContractType[]> => {
   const response = await ssoApi.get<ApiResponse<ContractType[]>>(
     '/contract-types'
   );
-  return response.data.payload;
+
+  const payload = response.data.payload as unknown;
+  if (Array.isArray(payload)) {
+    return payload;
+  }
+
+  if (payload && typeof payload === 'object' && 'items' in payload) {
+    return (payload as { items: ContractType[] }).items;
+  }
+
+  return response.data.payload as ContractType[];
 };
 
 // GET contract type by ID

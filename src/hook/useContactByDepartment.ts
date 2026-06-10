@@ -30,9 +30,15 @@ export function useContractFormData(): ContractFormData {
           getContractTypes(),
         ]);
 
-        const deptItems: Department[] = deptData.items;
+        const deptItems: Department[] = Array.isArray(deptData)
+          ? deptData
+          : deptData?.items ?? [];
         setDepartmentList(deptItems);
-        setContractTypeList(contractTypesData);
+
+        const contractTypeItems: ContractType[] = Array.isArray(contractTypesData)
+          ? contractTypesData
+          : (contractTypesData as any)?.items ?? [];
+        setContractTypeList(contractTypeItems);
 
         // Departments list
         const departmentNames = deptItems.map(d => d.departmentName);
