@@ -391,9 +391,9 @@ export default function App() {
           <button
             type="button"
             onClick={() => contractRegisterRef.current?.()}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-primary text-white rounded-lg hover:bg-primary/90 cursor-pointer text-sm font-medium"
+            className="flex items-center gap-1.5 px-3 py-1.5 xl:px-4 xl:py-2 bg-primary text-white rounded-lg hover:bg-primary/90 cursor-pointer text-sm xl:text-[15px] font-medium"
           >
-            <FilePlus className="w-3.5 h-3.5" />
+            <FilePlus className="w-3.5 h-3.5 xl:w-4 xl:h-4" />
             New Contract
           </button>
         </div>
@@ -407,14 +407,14 @@ export default function App() {
           <button
             type="button"
             onClick={() => actions.exitFormMode()}
-            className="px-3 py-1.5 text-sm text-primary rounded-lg bg-white border border-primary hover:bg-primary/10 cursor-pointer transition-colors"
+            className="px-3 py-1.5 xl:px-4 xl:py-2 text-sm xl:text-[15px] text-primary rounded-lg bg-white border border-primary hover:bg-primary/10 cursor-pointer transition-colors"
           >
             Cancel
           </button>
           <button
             type="submit"
             form={`contract-details-form-${selectedContractId}-${activeContractFormMode}`}
-            className="px-3 py-1.5 bg-primary text-white rounded-lg hover:bg-primary/90 cursor-pointer text-sm"
+            className="px-3 py-1.5 xl:px-4 xl:py-2 bg-primary text-white rounded-lg hover:bg-primary/90 cursor-pointer text-sm xl:text-[15px]"
           >
             {activeContractFormMode === 'renew' ? 'Renew Contract' : 'Save Changes'}
           </button>
@@ -428,9 +428,9 @@ export default function App() {
           <button
             type="button"
             onClick={() => actions.enterEditMode()}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-primary text-white rounded-lg hover:bg-primary/90 cursor-pointer text-sm font-medium"
+            className="flex items-center gap-1.5 px-3 py-1.5 xl:px-4 xl:py-2 bg-primary text-white rounded-lg hover:bg-primary/90 cursor-pointer text-sm xl:text-[15px] font-medium"
           >
-            <PenSquare className="w-3.5 h-3.5" />
+            <PenSquare className="w-3.5 h-3.5 xl:w-4 xl:h-4" />
             Edit
           </button>
         )}
@@ -438,9 +438,9 @@ export default function App() {
           <button
             type="button"
             onClick={() => actions.enterRenewMode()}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-brand-pink text-white rounded-lg hover:bg-brand-pink/80 cursor-pointer text-sm font-medium"
+            className="flex items-center gap-1.5 px-3 py-1.5 xl:px-4 xl:py-2 bg-brand-pink text-white rounded-lg hover:bg-brand-pink/80 cursor-pointer text-sm xl:text-[15px] font-medium"
           >
-            <RefreshCw className="w-3.5 h-3.5" />
+            <RefreshCw className="w-3.5 h-3.5 xl:w-4 xl:h-4" />
             Renew
           </button>
         )}
@@ -458,18 +458,18 @@ export default function App() {
           type="button"
           onClick={() => { reportExportCsvRef.current?.(); }}
           disabled={reportExportStatus.total === 0 || reportExportStatus.exportingCSV}
-          className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/80 disabled:bg-gray-300 disabled:cursor-not-allowed cursor-pointer text-sm font-medium"
+          className="flex items-center gap-2 px-4 py-2 xl:px-5 xl:py-2.5 bg-primary text-white rounded-lg hover:bg-primary/80 disabled:bg-gray-300 disabled:cursor-not-allowed cursor-pointer text-sm xl:text-[15px] font-medium"
         >
-          {reportExportStatus.exportingCSV ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+          {reportExportStatus.exportingCSV ? <Loader2 className="w-4 h-4 xl:w-4.5 xl:h-4.5 animate-spin" /> : <Download className="w-4 h-4 xl:w-4.5 xl:h-4.5" />}
           {reportExportStatus.exportingCSV ? 'Exporting...' : 'Export Excel'}
         </button>
         <button
           type="button"
           onClick={() => { reportExportPdfRef.current?.(); }}
           disabled={reportExportStatus.total === 0 || reportExportStatus.exportingPDF}
-          className="flex items-center gap-2 px-4 py-2 bg-brand-pink text-white rounded-lg hover:bg-brand-pink/80 disabled:bg-gray-300 disabled:cursor-not-allowed cursor-pointer text-sm font-medium"
+          className="flex items-center gap-2 px-4 py-2 xl:px-5 xl:py-2.5 bg-brand-pink text-white rounded-lg hover:bg-brand-pink/80 disabled:bg-gray-300 disabled:cursor-not-allowed cursor-pointer text-sm xl:text-[15px] font-medium"
         >
-          {reportExportStatus.exportingPDF ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+          {reportExportStatus.exportingPDF ? <Loader2 className="w-4 h-4 xl:w-4.5 xl:h-4.5 animate-spin" /> : <Download className="w-4 h-4 xl:w-4.5 xl:h-4.5" />}
           {reportExportStatus.exportingPDF ? 'Exporting...' : 'Export PDF'}
         </button>
       </div>
@@ -485,9 +485,9 @@ export default function App() {
           <button
             type="button"
             onClick={() => userCreateRef.current?.()}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-primary text-white rounded-lg hover:bg-primary/90 cursor-pointer text-sm font-medium"
+            className="flex items-center gap-1.5 px-3 py-1.5 xl:px-4 xl:py-2 bg-primary text-white rounded-lg hover:bg-primary/90 cursor-pointer text-sm xl:text-[15px] font-medium"
           >
-            <Plus className="w-3.5 h-3.5" />
+            <Plus className="w-3.5 h-3.5 xl:w-4 xl:h-4" />
             Create User
           </button>
         </div>
@@ -501,14 +501,14 @@ export default function App() {
           <button
             type="button"
             onClick={() => actions.exitFormMode()}
-            className="px-3 py-1.5 text-sm text-primary rounded-lg bg-white border border-primary hover:bg-primary/10 cursor-pointer transition-colors"
+            className="px-3 py-1.5 xl:px-4 xl:py-2 text-sm xl:text-[15px] text-primary rounded-lg bg-white border border-primary hover:bg-primary/10 cursor-pointer transition-colors"
           >
             Cancel
           </button>
           <button
             type="submit"
             form={`user-details-form-${selectedUserId}`}
-            className="px-3 py-1.5 bg-primary text-white rounded-lg hover:bg-primary/90 cursor-pointer text-sm"
+            className="px-3 py-1.5 xl:px-4 xl:py-2 bg-primary text-white rounded-lg hover:bg-primary/90 cursor-pointer text-sm xl:text-[15px]"
           >
             Save Changes
           </button>
@@ -522,9 +522,9 @@ export default function App() {
           <button
             type="button"
             onClick={() => actions.enterEditMode()}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-primary text-white rounded-lg hover:bg-primary/90 cursor-pointer text-sm font-medium"
+            className="flex items-center gap-1.5 px-3 py-1.5 xl:px-4 xl:py-2 bg-primary text-white rounded-lg hover:bg-primary/90 cursor-pointer text-sm xl:text-[15px] font-medium"
           >
-            <PenSquare className="w-3.5 h-3.5" />
+            <PenSquare className="w-3.5 h-3.5 xl:w-4 xl:h-4" />
             Edit
           </button>
         )}
@@ -551,7 +551,7 @@ export default function App() {
 
   // ── Render ────────────────────────────────────────────────────────────────
   return (
-    <div className="flex h-screen bg-primary/20 overflow-hidden">
+    <div className="flex h-screen bg-gray-50 overflow-hidden">
       <Toaster position="top-center" toastOptions={{ duration: 4000 }} />
 
       {/* ── Mobile overlay ── */}
@@ -564,18 +564,18 @@ export default function App() {
 
       {/* ── Sidebar ── */}
       <aside className={`
-        fixed inset-y-0 left-0 z-40 w-60 flex flex-col bg-white border-r border-primary/30 shadow-sm shadow-primary/10
+        fixed inset-y-0 left-0 z-40 w-60 xl:w-64 2xl:w-72 flex flex-col bg-white border-r border-primary/30 shadow-sm shadow-primary/10
         transition-transform duration-300 ease-in-out
         ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
         lg:relative lg:translate-x-0 lg:z-auto lg:shrink-0
       `}>
 
         {/* Logo / Brand */}
-        <div className="flex items-center gap-3 px-5 py-5 border-b border-primary/20">
-          <img src="/color.png" alt="Chokchey Finance" className="w-9 h-9 object-contain shrink-0" />
+        <div className="flex items-center gap-3 px-5 py-5 xl:px-6 xl:py-5 2xl:px-7 2xl:py-6 border-b border-primary/20">
+          <img src="/color.png" alt="Chokchey Finance" className="w-9 h-9 xl:w-10 xl:h-10 2xl:w-11 2xl:h-11 object-contain shrink-0" />
           <div className="min-w-0 flex-1">
-            <p className="text-brand-navy text-sm mb-1 font-medium leading-tight truncate">Contract Management</p>
-            <p className="text-primary text-xs leading-tight truncate">CHOKCHEY Finance Plc.</p>
+            <p className="text-brand-navy text-sm xl:text-[15px] 2xl:text-base mb-1 font-medium leading-tight truncate">Contract Management</p>
+            <p className="text-primary text-xs xl:text-[13px] 2xl:text-sm leading-tight truncate">CHOKCHEY Finance Plc.</p>
           </div>
           <button
             type="button"
@@ -587,42 +587,42 @@ export default function App() {
         </div>
 
         {/* Nav links */}
-        <nav className="flex-1 overflow-y-auto py-3 px-3 space-y-0.5">
-          <p className="text-[10px] font-semibold text-[#5b7a85] uppercase tracking-widest px-3 pt-2 pb-1">Main Menu</p>
+        <nav className="flex-1 overflow-y-auto py-3 xl:py-4 px-3 xl:px-3.5 2xl:px-4 space-y-0.5">
+          <p className="text-[10px] xl:text-[11px] font-semibold text-[#5b7a85] uppercase tracking-widest px-3 pt-2 pb-1">Main Menu</p>
 
           <button
             onClick={() => navTo('dashboard')}
-            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all cursor-pointer ${activeTab === 'dashboard'
+            className={`w-full flex items-center gap-3 px-3 py-2.5 xl:py-3 2xl:px-4 2xl:py-3 rounded-lg text-sm xl:text-[15px] 2xl:text-base transition-all cursor-pointer ${activeTab === 'dashboard'
               ? 'bg-primary text-white shadow-sm shadow-primary/30'
               : 'text-brand-navy hover:bg-[#e0f7fa] hover:text-primary'
               }`}
           >
-            <LayoutDashboard className="w-4 h-4 shrink-0" />
+            <LayoutDashboard className="w-4 h-4 xl:w-4.5 xl:h-4.5 2xl:w-5 2xl:h-5 shrink-0" />
             <span>Dashboard</span>
           </button>
 
           <button
             onClick={() => navTo('contracts')}
-            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all cursor-pointer ${activeTab === 'contracts'
+            className={`w-full flex items-center gap-3 px-3 py-2.5 xl:py-3 2xl:px-4 2xl:py-3 rounded-lg text-sm xl:text-[15px] 2xl:text-base transition-all cursor-pointer ${activeTab === 'contracts'
               ? 'bg-primary text-white shadow-sm shadow-primary/30'
               : 'text-brand-navy hover:bg-[#e0f7fa] hover:text-primary'
               }`}
           >
-            <FileText className="w-4 h-4 shrink-0" />
+            <FileText className="w-4 h-4 xl:w-4.5 xl:h-4.5 2xl:w-5 2xl:h-5 shrink-0" />
             <span>Contract Management</span>
           </button>
 
           <button
             onClick={() => navTo('notifications')}
-            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all cursor-pointer relative ${activeTab === 'notifications'
+            className={`w-full flex items-center gap-3 px-3 py-2.5 xl:py-3 2xl:px-4 2xl:py-3 rounded-lg text-sm xl:text-[15px] 2xl:text-base transition-all cursor-pointer relative ${activeTab === 'notifications'
               ? 'bg-primary text-white shadow-sm shadow-primary/30'
               : 'text-brand-navy hover:bg-[#e0f7fa] hover:text-primary'
               }`}
           >
-            <Bell className="w-4 h-4 shrink-0" />
+            <Bell className="w-4 h-4 xl:w-4.5 xl:h-4.5 2xl:w-5 2xl:h-5 shrink-0" />
             <span>Notifications</span>
             {unreadCount > 0 && (
-              <span className="ml-auto bg-red-500 text-white text-[10px] font-bold rounded-full min-w-4.5 h-4.5 flex items-center justify-center px-1 shrink-0">
+              <span className="ml-auto bg-red-500 text-white text-[10px] xl:text-[11px] font-bold rounded-full min-w-4.5 h-4.5 xl:min-w-5 xl:h-5 flex items-center justify-center px-1 shrink-0">
                 {unreadCount}
               </span>
             )}
@@ -630,14 +630,15 @@ export default function App() {
 
           <button
             onClick={() => navTo('reports')}
-            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all cursor-pointer ${activeTab === 'reports'
+            className={`w-full flex items-center gap-3 px-3 py-2.5 xl:py-3 2xl:px-4 2xl:py-3 rounded-lg text-sm xl:text-[15px] 2xl:text-base transition-all cursor-pointer ${activeTab === 'reports'
               ? 'bg-primary text-white shadow-sm shadow-primary/30'
               : 'text-brand-navy hover:bg-[#e0f7fa] hover:text-primary'
               }`}
           >
-            <BarChart3 className="w-4 h-4 shrink-0" />
+            <BarChart3 className="w-4 h-4 xl:w-4.5 xl:h-4.5 2xl:w-5 2xl:h-5 shrink-0" />
             <span>Reports</span>
           </button>
+
           <button
             type="button"
             disabled={!user?.id}
@@ -646,48 +647,48 @@ export default function App() {
               openUserDetails(user.id, 'view', user.fullName, 'profile');
               setSidebarOpen(false);
             }}
-            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all cursor-pointer disabled:opacity-50 disabled:cursor-default ${activeTab === 'users' && userDetailsSource === 'profile'
+            className={`w-full flex items-center gap-3 px-3 py-2.5 xl:py-3 2xl:px-4 2xl:py-3 rounded-lg text-sm xl:text-[15px] 2xl:text-base transition-all cursor-pointer disabled:opacity-50 disabled:cursor-default ${activeTab === 'users' && userDetailsSource === 'profile'
                 ? 'bg-primary text-white shadow-sm shadow-primary/30'
                 : 'text-brand-navy hover:bg-[#e0f7fa] hover:text-primary'
               }`}
           >
-            <UserIcon className="w-4 h-4 shrink-0" />
+            <UserIcon className="w-4 h-4 xl:w-4.5 xl:h-4.5 2xl:w-5 2xl:h-5 shrink-0" />
             <span>My Profile</span>
           </button>
 
           {permissions.userRead && (
             <>
-              <p className="text-[10px] font-semibold text-[#5b7a85] uppercase tracking-widest px-3 pt-4 pb-1">Administration</p>
+              <p className="text-[10px] xl:text-[11px] font-semibold text-[#5b7a85] uppercase tracking-widest px-3 pt-4 pb-1">Administration</p>
               <button
                 onClick={() => navTo('users')}
-                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all cursor-pointer ${activeTab === 'users' && userDetailsSource !== 'profile'
+                className={`w-full flex items-center gap-3 px-3 py-2.5 xl:py-3 2xl:px-4 2xl:py-3 rounded-lg text-sm xl:text-[15px] 2xl:text-base transition-all cursor-pointer ${activeTab === 'users' && userDetailsSource !== 'profile'
                     ? 'bg-primary text-white shadow-sm shadow-primary/30'
                     : 'text-brand-navy hover:bg-[#e0f7fa] hover:text-primary'
                   }`}
               >
-                <Users className="w-4 h-4 shrink-0" />
+                <Users className="w-4 h-4 xl:w-4.5 xl:h-4.5 2xl:w-5 2xl:h-5 shrink-0" />
                 <span>User Management</span>
               </button>
             </>
           )}
 
           {!permissions.userRead && (
-            <p className="text-[10px] font-semibold text-[#5b7a85] uppercase tracking-widest px-3 pt-4 pb-1">Administration</p>
+            <p className="text-[10px] xl:text-[11px] font-semibold text-[#5b7a85] uppercase tracking-widest px-3 pt-4 pb-1">Administration</p>
           )}
 
         </nav>
 
         {/* User info + logout at bottom */}
-        <div className="border-t border-primary/30 p-4 space-y-3">
+        <div className="border-t border-primary/30 p-4 xl:p-5 2xl:p-6 space-y-3">
           <div className="flex items-center gap-3 px-1 py-1">
-            <div className="w-8 h-8 rounded-full bg-[#e0f7fa] border border-primary/30 flex items-center justify-center shrink-0">
-              <UserIcon className="w-4 h-4 text-primary" />
+            <div className="w-8 h-8 xl:w-9 xl:h-9 2xl:w-10 2xl:h-10 rounded-full bg-[#e0f7fa] border border-primary/30 flex items-center justify-center shrink-0">
+              <UserIcon className="w-4 h-4 xl:w-4.5 xl:h-4.5 2xl:w-5 2xl:h-5 text-primary" />
             </div>
             <div className="min-w-0 flex-1">
-              <p className="font-medium text-brand-navy truncate leading-tight">
+              <p className="font-medium text-brand-navy text-sm xl:text-[15px] 2xl:text-base truncate leading-tight">
                 {user?.fullName ?? 'N/A'}
               </p>
-              <p className="text-xs text-[#5b7a85] truncate leading-tight">
+              <p className="text-xs xl:text-[13px] 2xl:text-sm text-[#5b7a85] truncate leading-tight">
                 {(() => {
                   const roleName = user?.roles?.[0]?.name ?? '';
                   return roleName.includes('ROLE_')
@@ -701,13 +702,13 @@ export default function App() {
           <button
             type="button"
             onClick={() => setShowLogoutConfirm(true)}
-            className="w-full flex items-center justify-center gap-2 px-3 py-2 text-sm text-[#5b7a85] hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors cursor-pointer border border-primary/30 hover:border-red-200"
+            className="w-full flex items-center justify-center gap-2 px-3 py-2 xl:py-2.5 text-sm xl:text-[15px] 2xl:text-base text-[#5b7a85] hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors cursor-pointer border border-primary/30 hover:border-red-200"
           >
-            <LogOut className="w-4 h-4" />
+            <LogOut className="w-4 h-4 xl:w-4.5 xl:h-4.5" />
             Logout
           </button>
 
-          <p className="text-sm text-center text-[#5b7a85]/60">© 2026 CHOKCHEY Finance</p>
+          <p className="text-sm xl:text-[13px] 2xl:text-sm text-center text-[#5b7a85]/60">© 2026 CHOKCHEY Finance</p>
         </div>
       </aside>
 
@@ -715,7 +716,7 @@ export default function App() {
       <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
 
         {/* Top bar */}
-        <header className="shrink-0 bg-white border-b border-primary/20 px-4 sm:px-8 py-3.5 flex items-center gap-4">
+        <header className="shrink-0 bg-white border-b border-primary/20 px-4 sm:px-8 xl:px-10 2xl:px-12 py-3.5 xl:py-4 2xl:py- flex items-center gap-4">
           {/* Hamburger — mobile/tablet only */}
           <button
             type="button"
@@ -730,23 +731,23 @@ export default function App() {
             <div className="flex flex-col gap-1 min-w-0">
               {activeBreadcrumb ? (
                 <>
-                  <div className="text-lg font-semibold leading-tight">
+                  <div className="text-lg xl:text-xl 2xl:text-2xl font-semibold leading-tight">
                     {activeBreadcrumb}
                   </div>
-                  <p className="text-gray-600 text-sm truncate">
+                  <p className="text-gray-600 text-sm xl:text-[15px] 2xl:text-base truncate">
                     {currentDate}
                   </p>
                 </>
               ) : (
                 <>
-                  <h1 className="text-brand-navy text-lg font-semibold leading-tight truncate">
+                  <h1 className="text-brand-navy text-lg xl:text-xl 2xl:text-2xl font-semibold leading-tight truncate">
                     {activeTab === 'dashboard' && 'Dashboard'}
                     {activeTab === 'contracts' && 'Contract Management'}
                     {activeTab === 'notifications' && 'Notifications'}
                     {activeTab === 'reports' && 'Reports'}
                     {activeTab === 'users' && (userDetailsSource === 'profile' ? 'My Profile' : 'User Management')}
                   </h1>
-                  <p className="text-gray-600 text-sm truncate">
+                  <p className="text-gray-600 text-sm xl:text-[15px] 2xl:text-base truncate">
                     {currentDate}
                   </p>
                 </>
@@ -759,7 +760,7 @@ export default function App() {
         </header>
 
         {/* Scrollable content */}
-        <main className="flex-1 overflow-y-auto px-4 sm:px-8 py-6">
+        <main className="flex-1 overflow-y-auto px-4 sm:px-8 xl:px-10 2xl:px-12 py-6 xl:py-7 2xl:py-8">
           <Suspense fallback={<div>Loading dashboard...</div>}>
             {activeTab === 'dashboard' && <Dashboard />}
           </Suspense>

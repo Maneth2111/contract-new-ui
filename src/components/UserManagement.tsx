@@ -199,7 +199,7 @@ export function UserManagement({ currentUser, userPermission, onSelectUser, onRe
     <div className="space-y-6">
       {/* Summary cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="bg-white p-6 rounded-lg shadow-md hover:scale-[1.02] transition-transform duration-200">
+        <div className="bg-white p-6 rounded-lg shadow-md  transition-transform duration-200">
           <div className="flex items-center gap-3">
             <span><Users className="w-7 h-7" /></span>
             <div>
@@ -208,7 +208,7 @@ export function UserManagement({ currentUser, userPermission, onSelectUser, onRe
             </div>
           </div>
         </div>
-        <div className="bg-white p-6 rounded-lg shadow-md hover:scale-[1.02] transition-transform duration-200">
+        <div className="bg-white p-6 rounded-lg shadow-md  transition-transform duration-200">
           <div className="flex items-center gap-3">
             <span><Users className="w-7 h-7" /></span>
             <div>
@@ -217,7 +217,7 @@ export function UserManagement({ currentUser, userPermission, onSelectUser, onRe
             </div>
           </div>
         </div>
-        <div className="bg-white p-6 rounded-lg shadow-md hover:scale-[1.02] transition-transform duration-200">
+        <div className="bg-white p-6 rounded-lg shadow-md  transition-transform duration-200">
           <div className="flex items-center gap-3">
             <span><Users className="w-7 h-7 text-red-600" /></span>
             <div>
@@ -226,7 +226,7 @@ export function UserManagement({ currentUser, userPermission, onSelectUser, onRe
             </div>
           </div>
         </div>
-        <div className="bg-white p-6 rounded-lg shadow-md hover:scale-[1.02] transition-transform duration-200">
+        <div className="bg-white p-6 rounded-lg shadow-md  transition-transform duration-200">
           <div className="flex items-center gap-3">
             <span><Users className="w-7 h-7" /></span>
             <div>

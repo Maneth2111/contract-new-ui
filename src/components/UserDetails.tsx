@@ -99,8 +99,8 @@ function FieldRow({
   empty?: boolean;
 }) {
   return (
-    <tr className="border-b border-gray-200 last:border-b-0 block sm:table-row">
-      <td className="block sm:table-cell w-full sm:w-55 sm:min-w-55 px-4 pt-3 pb-1 sm:py-3 border border-r sm:border-r border-gray-200 bg-gray-100">
+    <tr className="border-b border-gray-100 last:border-b-0 block sm:table-row">
+      <td className="block sm:table-cell w-full sm:w-55 sm:min-w-55 px-4 pt-3 pb-1 sm:py-3 border border-r sm:border-r border-gray-100 bg-gray-50">
         <span className="text-xs font-medium text-brand-navy uppercase">{label}</span>
       </td>
       <td className="block sm:table-cell w-full px-4 pb-3 pt-1 sm:py-3 bg-white">
@@ -224,7 +224,7 @@ function AuditEventCard({ event }: { event: AuditEvent }) {
 function UserAuditPanel({ audit }: { audit: Audit | undefined }) {
   if (!audit) {
     return (
-      <div className="flex flex-col items-center justify-center py-16 px-6 rounded-xl border border-dashed border-gray-300 bg-gray-50/50">
+      <div className="flex flex-col items-center justify-center py-16 px-6 rounded-lg border border-dashed border-gray-300 bg-gray-50/50">
         <History className="w-12 h-12 text-gray-300 mb-3" />
         <p className="text-gray-600 font-medium">No audit information available</p>
       </div>
@@ -237,7 +237,7 @@ function UserAuditPanel({ audit }: { audit: Audit | undefined }) {
   return (
     <div className="space-y-8">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div className="relative rounded-xl border border-gray-200 shadow bg-linear-to-br from-green-50 via-white to-white p-4 sm:p-5">
+        <div className="relative rounded-lg border border-gray-200 shadow bg-linear-to-br from-green-50 via-white to-white p-4 sm:p-5">
           <p className="absolute top-4 right-4 text-xs text-green-700/80 font-medium">
             {formatDateTime(audit.createdDateTime)}
           </p>
@@ -256,7 +256,7 @@ function UserAuditPanel({ audit }: { audit: Audit | undefined }) {
           </div>
         </div>
 
-        <div className="relative rounded-xl border border-gray-200 shadow bg-linear-to-br from-primary/5 via-white to-white p-4 sm:p-5">
+        <div className="relative rounded-lg border border-gray-200 shadow bg-linear-to-br from-primary/5 via-white to-white p-4 sm:p-5">
           <p className="absolute top-4 right-4 text-xs text-primary/80 font-medium">
             {lastActivityAt ? formatDateTime(lastActivityAt) : 'N/A'}
           </p>
