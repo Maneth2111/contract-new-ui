@@ -285,22 +285,29 @@ export function ContractForm({
   )
 
   const selectableDepartmentNames = useMemo(
-    () => allowedDepartments.map((d) => d.departmentName),
-    [allowedDepartments.map((d) => d.departmentName).join(',')]
+    () => hasRestrictedAccess
+      ? allowedDepartments.map((dept) => dept.departmentName)
+      : departments.filter((d) => d !== 'All Departments'),
+    [hasRestrictedAccess, allowedDepartments.map((d) => d.departmentName).join(','), departments.join(',')]
   )
 
-  const filteredDepartments = useMemo(
-    () => hasRestrictedAccess
-      ? selectableDepartmentNames
-      : departments.filter((d) => d !== 'All Departments'),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [selectableDepartmentNames.join(','), hasRestrictedAccess, departments.join(',')]
+  const departmentOptions = useMemo(
+    () => selectableDepartmentNames.map((label) => ({ key: label, label })),
+    [selectableDepartmentNames.join(',')]
   )
 
   const singleDepartmentName =
     isSingleDepartment && allowedDepartments[0]
       ? allowedDepartments[0].departmentName
       : ''
+
+  const contractTypeOptions = useMemo(
+    () => (watchedDepartment ? (contractTypesByDepartment[watchedDepartment] ?? []) : []).map((type) => ({
+      key: type,
+      label: type,
+    })),
+    [watchedDepartment, contractTypesByDepartment]
+  )
 
   const renewalFrequency = calculateRenewalFrequencyMonths(watchedEffectiveDate, watchedExpiryDate);
   useEffect(() => {
@@ -326,7 +333,7 @@ export function ContractForm({
     if (hasRestrictedAccess && allowedDepartments.length > 1) return
 
     // No module access restriction (fallback): auto-select first department.
-    const initialDept = selectableDepartmentNames[0] ?? ''
+    const initialDept = departmentOptions[0]?.label ?? ''
     if (!initialDept) return
     setValue('department', initialDept, { shouldDirty: true, shouldValidate: true })
     const initialType = contractTypesByDepartment[initialDept]?.[0] ?? ''
@@ -337,7 +344,7 @@ export function ContractForm({
     isSingleDepartment,
     allowedDepartments.length,
     hasRestrictedAccess,
-    selectableDepartmentNames.join(','),
+    departmentOptions.map((d) => d.key).join(','),
     watchedDepartment,
     setValue,
     singleDepartmentName,
@@ -533,10 +540,7 @@ export function ContractForm({
                   <CustomSelect
                     value={field.value ?? ''}
                     onChange={(value) => field.onChange(value)}
-                    options={(contractTypesByDepartment[watchedDepartment] ?? []).map((type) => ({
-                      key: type,
-                      label: type,
-                    }))}
+                    options={contractTypeOptions}
                     placeholder={!watchedDepartment ? 'Select Department First' : 'Select Contract Type'}
                     showPlaceholder={false}
                     disabled={!watchedDepartment}
@@ -565,10 +569,7 @@ export function ContractForm({
                       field.onChange(value);
                       handleDepartmentChange(value);
                     }}
-                    options={filteredDepartments.map((dept) => ({
-                      key: dept,
-                      label: dept,
-                    }))}
+                    options={departmentOptions}
                     placeholder="Select Department"
                     showPlaceholder={false}
                     disabled={isSingleDepartment}
