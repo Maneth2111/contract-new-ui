@@ -52,7 +52,7 @@ export function useContractFormData(): ContractFormData {
 
         // Group contract types by department name
         const grouped: Record<string, string[]> = {};
-        contractTypesData.forEach((ct: ContractType) => {
+        contractTypeItems.forEach((ct: ContractType) => {
           const deptName = deptIdToName[String(ct.departmentId)];
           if (!deptName) return;
 
