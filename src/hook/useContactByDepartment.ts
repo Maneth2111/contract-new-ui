@@ -1,6 +1,10 @@
 import { useState, useEffect } from 'react';
-import { ContractType, getContractTypes } from '../services/contractTypeService';
-import { getAllDepartment, Department } from '../services/departmentService';
+import {
+  mockDepartments,
+  mockContractTypes,
+  Department,
+  ContractType,
+} from '../data/mockData';
 
 interface ContractFormData {
   departments: string[];
@@ -20,56 +24,35 @@ export function useContractFormData(): ContractFormData {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setIsLoading(true);
+    try {
+      setIsLoading(true);
 
-        // Fetch both in parallel
-        const [deptData, contractTypesData] = await Promise.all([
-          getAllDepartment(1, 1000),
-          getContractTypes(),
-        ]);
+      setDepartmentList(mockDepartments);
+      setContractTypeList(mockContractTypes);
 
-        const deptItems: Department[] = deptData.items;
-        setDepartmentList(deptItems);
-        setContractTypeList(contractTypesData);
+      const departmentNames = mockDepartments.map(d => d.departmentName);
+      setDepartments(['All Departments', ...departmentNames]);
 
-        // Departments list
-        const departmentNames = deptItems.map(d => d.departmentName);
-        setDepartments(['All Departments', ...departmentNames]);
+      const deptIdToName: Record<string, string> = {};
+      mockDepartments.forEach(d => {
+        deptIdToName[String(d.departmentId)] = d.departmentName;
+      });
 
-        // departmentId -> departmentName
-        const deptIdToName: Record<string, string> = {};
-        deptItems.forEach(d => {
-          deptIdToName[String(d.departmentId)] = d.departmentName;
-        });
+      const grouped: Record<string, string[]> = {};
+      mockContractTypes.forEach((ct: ContractType) => {
+        const deptName = deptIdToName[String(ct.departmentId)];
+        if (!deptName) return;
+        if (!grouped[deptName]) grouped[deptName] = [];
+        grouped[deptName].push(ct.contractTypeName);
+      });
 
-        // Group contract types by department name
-        const grouped: Record<string, string[]> = {};
-        contractTypesData.forEach((ct: ContractType) => {
-          const deptName = deptIdToName[String(ct.departmentId)];
-          if (!deptName) return;
-
-          if (!grouped[deptName]) {
-            grouped[deptName] = [];
-          }
-          grouped[deptName].push(ct.contractTypeName);
-        });
-
-        console.log('deptIdToName:', deptIdToName);
-        console.log('contractTypesData:', contractTypesData);
-        console.log('grouped:', grouped);
-
-        setContractTypesByDepartment(grouped);
-      } catch (err) {
-        setError('Failed to load form data');
-        console.error(err);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchData();
+      setContractTypesByDepartment(grouped);
+    } catch (err) {
+      setError('Failed to load form data');
+      console.error(err);
+    } finally {
+      setIsLoading(false);
+    }
   }, []);
 
   return { departments, contractTypesByDepartment, isLoading, error, departmentList, contractTypeList };
