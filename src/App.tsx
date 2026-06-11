@@ -307,8 +307,8 @@ export default function App() {
         type="button"
         onClick={activeContractFormMode !== 'view' ? () => contractDetailActionsRef.current.exitFormMode() : undefined}
         className={`font-medium transition-colors text-sm 2xl:text-lg sm:text-base ${activeContractFormMode !== 'view'
-            ? 'text-brand-navy hover:text-primary cursor-pointer'  // parent — navigable
-            : 'text-primary cursor-default'                         // active current
+          ? 'text-brand-navy hover:text-primary cursor-pointer'  // parent — navigable
+          : 'text-primary cursor-default'                         // active current
           }`}
       >
         {selectedContractTitle || 'Contract Details'}
@@ -356,8 +356,8 @@ export default function App() {
         type="button"
         onClick={activeUserFormMode !== 'view' ? () => userDetailActionsRef.current.exitFormMode() : undefined}
         className={`font-medium transition-colors 2xl:text-lg  text-sm sm:text-base ${activeUserFormMode !== 'view'
-            ? 'text-brand-navy hover:text-primary cursor-pointer'  // parent — navigable
-            : 'text-primary cursor-default'                         // active current
+          ? 'text-brand-navy hover:text-primary cursor-pointer'  // parent — navigable
+          : 'text-primary cursor-default'                         // active current
           }`}
       >
         {selectedUserName || 'User Details'}
@@ -767,7 +767,11 @@ export default function App() {
 
         {/* Scrollable content */}
         <main className="flex-1 overflow-y-auto p-4 lg:p-4 xl:p-5 2xl:p-6 ">
-          <Suspense fallback={<div>Loading dashboard...</div>}>
+          <Suspense fallback={
+            <div className="flex items-center justify-center h-full">
+              <Loader2 className="animate-spin w-6 h-6 text-gray-500" />
+            </div>
+          }>
             {activeTab === 'dashboard' && <Dashboard />}
           </Suspense>
 

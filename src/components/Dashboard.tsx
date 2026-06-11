@@ -127,7 +127,7 @@ export default function Dashboard() {
           <div className="bg-white rounded-lg shadow-sm p-5 xl:p-6 2xl:p-7 transition-transform duration-200 relative overflow-hidden">
             <div className="flex items-start justify-between">
               <p className="text-xs xl:text-[13px] font-semibold tracking-widest text-gray-400 uppercase">Active</p>
-              <span className="w-10 h-10 xl:w-11 xl:h-11 2xl:w-12 2xl:h-12 rounded-lg bg-primary/20 flex items-center justify-center shrink-0">
+              <span className="w-10 h-10 xl:w-11 xl:h-11 2xl:w-12 2xl:h-12 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
                 <CheckCircle className="w-5 h-5 xl:w-5.5 xl:h-5.5 2xl:w-6 2xl:h-6 text-primary" />
               </span>
             </div>
@@ -193,7 +193,7 @@ export default function Dashboard() {
               <p className="text-3xl xl:text-4xl 2xl:text-4xl font-bold text-white">{formatCurrency(totalValue)}</p>
               <p className="text-xs xl:text-[13px] text-primary mt-1">Combined contract worth</p>
             </div>
-            <span className="c rounded-lg bg-primary/20 flex items-center justify-center shrink-0">
+            <span className="w-10 h-10 xl:w-11 xl:h-11 2xl:w-12 2xl:h-12 rounded-lg bg-primary/20 flex items-center justify-center shrink-0">
               <DollarSign className="w-5 h-5 xl:w-5.5 xl:h-5.5 2xl:w-6 2xl:h-6 text-primary" />
             </span>
             <div className="absolute bottom-0 left-0 w-full h-1 bg-primary rounded-b-xl" />
@@ -226,7 +226,7 @@ export default function Dashboard() {
                         <span className="text-sm xl:text-[15px] 2xl:text-base text-gray-700 font-medium">{dept.name}</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <div className="flex-1 h-2 xl:h-2.5 bg-gray-200 rounded-full overflow-hidden">
+                        <div className="flex-1 h-2 xl:h-2.5 bg-gray-100 rounded-full overflow-hidden">
                           <div
                             className="h-full rounded-full transition-all duration-500"
                             style={{ width: `${barWidth}%`, backgroundColor: color }}

@@ -115,8 +115,8 @@ export function CustomSelect({
                                 onClick={() => handleSelect(option.key)}
                                 className={`
                                     px-4 py-2 cursor-pointer select-none transition-colors duration-100
-                                    hover:bg-primary hover:text-white
-                                    ${isSelected ? '' : 'text-gray-700'}
+                                    hover:bg-primary hover:text-white 
+                                    ${isSelected ? 'text-primary font-medium' : 'text-gray-700'}
                                 `}
                             >
                                 {option.label}
