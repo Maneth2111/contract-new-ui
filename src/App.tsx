@@ -288,7 +288,6 @@ export default function App() {
       closeContractDetails();
     }
   };
-
   // ── Breadcrumb segments for the contracts tab ─────────────────────────────
   const contractBreadcrumbs = (() => {
     if (activeTab !== 'contracts' || selectedContractId === null) return null;
@@ -297,7 +296,7 @@ export default function App() {
       <button
         type="button"
         onClick={closeContractDetails}
-        className="text-primary hover:text-primary/80 cursor-pointer font-medium transition-colors"
+        className="text-brand-navy hover:text-primary cursor-pointer font-medium transition-colors text-sm 2xl:text-lg sm:text-base"
       >
         Contract Management
       </button>
@@ -307,9 +306,9 @@ export default function App() {
       <button
         type="button"
         onClick={activeContractFormMode !== 'view' ? () => contractDetailActionsRef.current.exitFormMode() : undefined}
-        className={`font-medium transition-colors ${activeContractFormMode !== 'view'
-            ? 'text-primary hover:text-primary/80 cursor-pointer'
-            : 'text-brand-navy cursor-default'
+        className={`font-medium transition-colors text-sm 2xl:text-lg sm:text-base ${activeContractFormMode !== 'view'
+            ? 'text-brand-navy hover:text-primary cursor-pointer'  // parent — navigable
+            : 'text-primary cursor-default'                         // active current
           }`}
       >
         {selectedContractTitle || 'Contract Details'}
@@ -324,14 +323,14 @@ export default function App() {
           : null;
 
     return (
-      <div className="flex items-center gap-1.5 flex-wrap">
+      <div className="flex items-center gap-1 sm:gap-1.5 flex-wrap min-w-0">
         {root}
-        <ChevronRight className="w-5 h-5 text-gray-400 shrink-0" />
+        <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 shrink-0" />
         {details}
         {modeLabel && (
           <>
-            <ChevronRight className="w-5 h-5 text-gray-400 shrink-0" />
-            <span className="font-medium text-primary">{modeLabel}</span>
+            <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 shrink-0" />
+            <span className="font-medium text-primary text-sm sm:text-base">{modeLabel}</span>
           </>
         )}
       </div>
@@ -346,7 +345,7 @@ export default function App() {
       <button
         type="button"
         onClick={closeUserDetails}
-        className="text-primary hover:text-primary/80 cursor-pointer font-medium transition-colors"
+        className="text-brand-navy hover:text-primary cursor-pointer 2xl:text-lg  font-medium transition-colors text-sm sm:text-base"
       >
         User Management
       </button>
@@ -356,9 +355,9 @@ export default function App() {
       <button
         type="button"
         onClick={activeUserFormMode !== 'view' ? () => userDetailActionsRef.current.exitFormMode() : undefined}
-        className={`font-medium transition-colors ${activeUserFormMode !== 'view'
-            ? 'text-primary hover:text-primary/80 cursor-pointer'
-            : 'text-brand-navy cursor-default'
+        className={`font-medium transition-colors 2xl:text-lg  text-sm sm:text-base ${activeUserFormMode !== 'view'
+            ? 'text-brand-navy hover:text-primary cursor-pointer'  // parent — navigable
+            : 'text-primary cursor-default'                         // active current
           }`}
       >
         {selectedUserName || 'User Details'}
@@ -368,14 +367,14 @@ export default function App() {
     const modeLabel = activeUserFormMode === 'edit' ? 'Edit' : null;
 
     return (
-      <div className="flex items-center gap-1.5 flex-wrap">
+      <div className="flex items-center gap-1 sm:gap-1.5 flex-wrap min-w-0">
         {root}
-        <ChevronRight className="w-5 h-5 text-gray-400 shrink-0" />
+        <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 shrink-0" />
         {details}
         {modeLabel && (
           <>
-            <ChevronRight className="w-5 h-5 text-gray-400 shrink-0" />
-            <span className="font-medium text-brand-navy">{modeLabel}</span>
+            <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 shrink-0" />
+            <span className="font-medium text-primary text-sm sm:text-base">{modeLabel}</span>
           </>
         )}
       </div>
@@ -564,26 +563,29 @@ export default function App() {
 
       {/* ── Sidebar ── */}
       <aside className={`
-        fixed inset-y-0 left-0 z-40 w-60 xl:w-64 2xl:w-72 flex flex-col bg-white border-r border-primary/30 shadow-sm shadow-primary/10
+        fixed inset-y-0 left-0 z-40 xl:w-64 2xl:w-72 lg:w-54 md:w-70 w-70 flex flex-col bg-white border-r border-primary/30 shadow-sm shadow-primary/10
         transition-transform duration-300 ease-in-out
         ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
         lg:relative lg:translate-x-0 lg:z-auto lg:shrink-0
       `}>
 
         {/* Logo / Brand */}
-        <div className="flex items-center gap-3 px-5 py-5 xl:px-6 xl:py-5 2xl:px-7 2xl:py-6 border-b border-primary/20">
+        <div className="flex items-center gap-3 px-3 py-5 xl:px-6 xl:py-5 2xl:px-7 2xl:py-6 border-b border-primary/20">
           <img src="/color.png" alt="Chokchey Finance" className="w-9 h-9 xl:w-10 xl:h-10 2xl:w-11 2xl:h-11 object-contain shrink-0" />
           <div className="min-w-0 flex-1">
-            <p className="text-brand-navy text-sm xl:text-[15px] 2xl:text-base mb-1 font-medium leading-tight truncate">Contract Management</p>
-            <p className="text-primary text-xs xl:text-[13px] 2xl:text-sm leading-tight truncate">CHOKCHEY Finance Plc.</p>
+            <div className='flex justify-between items-center'>
+              <p className="text-brand-navy text-sm xl:text-[15px] 2xl:text-base mb-1 font-medium leading-tight ">Contract Management</p>
+              <button
+                type="button"
+                onClick={() => setSidebarOpen(false)}
+                className="lg:hidden p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors cursor-pointer shrink-0"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <p className="text-primary text-xs xl:text-[13px] 2xl:text-sm leading-tight">CHOKCHEY Finance Plc.</p>
           </div>
-          <button
-            type="button"
-            onClick={() => setSidebarOpen(false)}
-            className="lg:hidden p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors cursor-pointer shrink-0"
-          >
-            <X className="w-4 h-4" />
-          </button>
+
         </div>
 
         {/* Nav links */}
@@ -648,8 +650,8 @@ export default function App() {
               setSidebarOpen(false);
             }}
             className={`w-full flex items-center gap-3 px-3 py-2.5 xl:py-3 2xl:px-4 2xl:py-3 rounded-lg text-sm xl:text-[15px] 2xl:text-base transition-all cursor-pointer disabled:opacity-50 disabled:cursor-default ${activeTab === 'users' && userDetailsSource === 'profile'
-                ? 'bg-primary text-white shadow-sm shadow-primary/30'
-                : 'text-brand-navy hover:bg-[#e0f7fa] hover:text-primary'
+              ? 'bg-primary text-white shadow-sm shadow-primary/30'
+              : 'text-brand-navy hover:bg-[#e0f7fa] hover:text-primary'
               }`}
           >
             <UserIcon className="w-4 h-4 xl:w-4.5 xl:h-4.5 2xl:w-5 2xl:h-5 shrink-0" />
@@ -662,8 +664,8 @@ export default function App() {
               <button
                 onClick={() => navTo('users')}
                 className={`w-full flex items-center gap-3 px-3 py-2.5 xl:py-3 2xl:px-4 2xl:py-3 rounded-lg text-sm xl:text-[15px] 2xl:text-base transition-all cursor-pointer ${activeTab === 'users' && userDetailsSource !== 'profile'
-                    ? 'bg-primary text-white shadow-sm shadow-primary/30'
-                    : 'text-brand-navy hover:bg-[#e0f7fa] hover:text-primary'
+                  ? 'bg-primary text-white shadow-sm shadow-primary/30'
+                  : 'text-brand-navy hover:bg-[#e0f7fa] hover:text-primary'
                   }`}
               >
                 <Users className="w-4 h-4 xl:w-4.5 xl:h-4.5 2xl:w-5 2xl:h-5 shrink-0" />
@@ -716,38 +718,38 @@ export default function App() {
       <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
 
         {/* Top bar */}
-        <header className="shrink-0 bg-white border-b border-primary/20 px-4 sm:px-8 xl:px-10 2xl:px-12 py-3.5 xl:py-4 2xl:py- flex items-center gap-4">
+        <header className="shrink-0 bg-white border-b border-primary/20 px-3 sm:px-4 xl:px-5 2xl:px-6 py-3 sm:py-3.5 xl:py-4 2xl:py-4.5 flex flex-wrap items-center gap-x-2 gap-y-2 sm:gap-x-3 xl:gap-x-4 sm:flex-nowrap">
           {/* Hamburger — mobile/tablet only */}
           <button
             type="button"
             onClick={() => setSidebarOpen(true)}
-            className="lg:hidden p-2 rounded-lg text-brand-navy hover:bg-[#e0f7fa] hover:text-primary transition-colors cursor-pointer shrink-0"
+            className="lg:hidden p-1.5 sm:p-2 rounded-lg text-brand-navy hover:bg-[#e0f7fa] hover:text-primary transition-colors cursor-pointer shrink-0"
           >
             <Menu className="w-5 h-5" />
           </button>
 
           {/* Title / breadcrumb area */}
           <div className="flex-1 min-w-0">
-            <div className="flex flex-col gap-1 min-w-0">
+            <div className="flex flex-col gap-0.5 min-w-0">
               {activeBreadcrumb ? (
                 <>
-                  <div className="text-lg xl:text-xl 2xl:text-2xl font-semibold leading-tight">
+                  <div className="text-brand-navy text-sm sm:text-base lg:text-lg xl:text-xl 2xl:text-2xl font-semibold leading-tight  min-w-0">
                     {activeBreadcrumb}
                   </div>
-                  <p className="text-gray-600 text-sm xl:text-[15px] 2xl:text-base truncate">
+                  <p className="text-gray-500 text-xs sm:text-sm xl:text-[15px] 2xl:text-base truncate">
                     {currentDate}
                   </p>
                 </>
               ) : (
                 <>
-                  <h1 className="text-brand-navy text-lg xl:text-xl 2xl:text-2xl font-semibold leading-tight truncate">
+                  <h1 className="text-brand-navy text-sm sm:text-base lg:text-lg xl:text-xl 2xl:text-2xl font-semibold leading-tight ">
                     {activeTab === 'dashboard' && 'Dashboard'}
                     {activeTab === 'contracts' && 'Contract Management'}
                     {activeTab === 'notifications' && 'Notifications'}
                     {activeTab === 'reports' && 'Reports'}
                     {activeTab === 'users' && (userDetailsSource === 'profile' ? 'My Profile' : 'User Management')}
                   </h1>
-                  <p className="text-gray-600 text-sm xl:text-[15px] 2xl:text-base truncate">
+                  <p className="text-gray-500 text-xs sm:text-sm xl:text-[15px] 2xl:text-base truncate">
                     {currentDate}
                   </p>
                 </>
@@ -755,12 +757,16 @@ export default function App() {
             </div>
           </div>
 
-          {/* Action buttons */}
-          {activeTopBarActions}
+          {/* Action buttons — full width row on mobile when breadcrumb is active */}
+          {activeTopBarActions && (
+            <div className={`shrink-0 flex items-center gap-2 ${activeBreadcrumb ? 'w-full sm:w-auto justify-end' : ''}`}>
+              {activeTopBarActions}
+            </div>
+          )}
         </header>
 
         {/* Scrollable content */}
-        <main className="flex-1 overflow-y-auto px-4 sm:px-8 xl:px-10 2xl:px-12 py-6 xl:py-7 2xl:py-8">
+        <main className="flex-1 overflow-y-auto p-4 lg:p-4 xl:p-5 2xl:p-6 ">
           <Suspense fallback={<div>Loading dashboard...</div>}>
             {activeTab === 'dashboard' && <Dashboard />}
           </Suspense>
