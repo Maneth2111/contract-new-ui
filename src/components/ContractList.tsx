@@ -180,7 +180,7 @@ export function ContractList({
 
   // ── Render ────────────────────────────────────────────────────────────────
   return (
-    <div className="space-y-6 xl:space-y-7 2xl:space-y-8">
+    <div className="space-y-6 lg:space-y-2 xl:space-y-7 2xl:space-y-8 ">
 
       {/* Notification summary cards */}
       <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 gap-4 xl:gap-5 2xl:gap-6">
@@ -315,12 +315,12 @@ export function ContractList({
             <thead className={tableTheadClass}>
               <tr>
                 <SortableTableHead label="Contract ID" columnKey="id" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="w-fit" />
-                <SortableTableHead label="Title" columnKey="title" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="w-40 xl:w-48 2xl:w-56" />
+                <SortableTableHead label="Title" columnKey="title" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="w-40  lg:max-w-40  xl:w-48 2xl:w-56" />
                 <SortableTableHead label="Department" columnKey="department" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="w-40 xl:w-48" />
-                <SortableTableHead label="Person In Charge" columnKey="personInCharge" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="w-35 xl:w-40" />
-                <SortableTableHead label="Partner" columnKey="partnerName" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="w-36 xl:w-40" />
-                <SortableTableHead label="Expiry" columnKey="expiryDate" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="w-28 xl:w-32" />
-                <SortableTableHead label="Days Left" columnKey="daysRemaining" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="w-24 xl:w-28" />
+                <SortableTableHead label="Person In Charge" columnKey="personInCharge" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="w-35 lg:max-w-40 xl:w-40" />
+                <SortableTableHead label="Partner" columnKey="partnerName" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="w-36 xl:w-40 lg:max-w-40" />
+                <SortableTableHead label="Expiry" columnKey="expiryDate" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="w-28 lg:max-w-18 xl:w-32" />
+                <SortableTableHead label="Days Left" columnKey="daysRemaining" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="w-24 lg:max-w-18 xl:w-28" />
                 <SortableTableHead label="Status" columnKey="status" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="w-fit" />
                 <SortableTableHead label="Total Contract Value" columnKey="contractValue" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="w-35 xl:w-44 2xl:w-48" />
                 <th className="w-fit text-white font-medium text-center">Action</th>
@@ -344,11 +344,11 @@ export function ContractList({
                       onClick={() => contractPermission.viewDocuments && handleViewContractDetails(contract)}
                       className={`relative transition-all cursor-pointer ${isDeleting ? 'opacity-40 pointer-events-none' : ''}`}
                     >
-                      <td className="relative whitespace-nowrap lg:max-w-0 text-primary font-medium" title={contract.id}>
+                      <td className="relative whitespace-nowrap lg:max-w-0 text-primary font-medium " title={contract.id}>
                         <span className="text-primary">{contract.id}</span>
                       </td>
-                      <td className="whitespace-nowrap lg:truncate lg:max-w-0" title={contract.title}>
-                        <div className="flex items-center gap-1 min-w-0">
+                      <td className="whitespace-nowrap lg:truncate lg:max-w-0 " title={contract.title}>
+                        <div className="flex items-center gap-1 min-w-0 ">
                           <span className="whitespace-nowrap lg:truncate">{contract.title}</span>
                         </div>
                       </td>

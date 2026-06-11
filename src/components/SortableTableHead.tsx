@@ -9,6 +9,7 @@ interface SortableTableHeadProps {
   onSort: (key: string) => void
   className?: string
   align?: 'left' | 'center' | 'right'
+  minWidth?: string
 }
 
 export function SortableTableHead ({

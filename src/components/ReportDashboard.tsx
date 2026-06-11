@@ -22,7 +22,7 @@ import {
   type ContractStatus,
 } from '../data/mockData'; // adjust path to wherever you placed the mock data file
 import { CustomSelect } from './ui/CustomSelect';
-import { listStatusTextClass } from '../utils/contractListMappers';
+import { listStatusBadgeClass, listStatusTextClass } from '../utils/contractListMappers';
 
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -418,7 +418,7 @@ export function ReportDashboard({
       {/* Report Preview */}
       <div className="bg-white rounded-lg shadow-sm  p-6">
         <div className="mb-6 pb-6 border-b border-gray-200">
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4">
 
             {/* Total Contracts */}
             <div className="bg-white p-4 sm:p-5 rounded-lg shadow-sm hover:shadow-sm     transition-transform duration-200">
@@ -433,14 +433,14 @@ export function ReportDashboard({
                   </p>
                 </div>
 
-                <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-blue-100">
+                <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-blue-50">
                   <FileText className="w-5 h-5 sm:w-6 sm:h-6 text-blue-500" />
                 </div>
               </div>
             </div>
 
             {/* Total Value */}
-            <div className="bg-white p-4 sm:p-5 rounded-lg shadow-sm hover:shadow-sm    transition-transform duration-200">
+            <div className="bg-white p-4 sm:p-5 rounded-lg shadow-sm hover:shadow-sm  transition-transform duration-200">
               <div className="flex items-center justify-between">
                 <div className="min-w-0">
                   <p className="text-xs sm:text-sm text-gray-600">
@@ -452,14 +452,14 @@ export function ReportDashboard({
                   </p>
                 </div>
 
-                <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-green-100">
+                <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-green-50">
                   <DollarSign className="w-5 h-5 sm:w-6 sm:h-6 text-green-500" />
                 </div>
               </div>
             </div>
 
             {/* Active */}
-            <div className="bg-white p-4 sm:p-5 rounded-lg shadow-sm hover:shadow-sm    transition-transform duration-200">
+            <div className="bg-white p-4 sm:p-5 rounded-lg shadow-sm hover:shadow-sm transition-transform duration-200">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-xs sm:text-sm text-gray-600">
@@ -471,14 +471,14 @@ export function ReportDashboard({
                   </p>
                 </div>
 
-                <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-green-100">
+                <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-green-50">
                   <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-green-500" />
                 </div>
               </div>
             </div>
 
             {/* Expiring Soon */}
-            <div className="bg-white p-4 sm:p-5 rounded-lg shadow-sm hover:shadow-sm     transition-transform duration-200">
+            <div className="bg-white p-4 sm:p-5 rounded-lg shadow-sm hover:shadow-sm transition-transform duration-200">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-xs sm:text-sm text-gray-600">
@@ -490,7 +490,7 @@ export function ReportDashboard({
                   </p>
                 </div>
 
-                <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-orange-100">
+                <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-orange-50">
                   <AlertCircle className="w-5 h-5 sm:w-6 sm:h-6 text-orange-500" />
                 </div>
               </div>
@@ -506,25 +506,25 @@ export function ReportDashboard({
             sortedContracts.length > 10 ? 'overflow-y-auto max-h-[70vh] lg:overflow-y-hidden' : '',
           ].join(' ').trim() || undefined}
         >
-          <table className={`w-full min-w-max text-sm rounded-t-lg overflow-hidden [&_th]:px-2 [&_th]:py-5 [&_th]:whitespace-nowrap [&_td]:px-2 [&_td]:py-3.5 ${tableRowHover}`}>
+          <table className={`w-full min-w-max text-sm xl:text-[15px] 2xl:text-base rounded-t-lg overflow-hidden [&_th]:px-2 [&_th]:py-5 xl:[&_th]:py-5 2xl:[&_th]:py-6 [&_th]:whitespace-nowrap [&_td]:px-2 [&_td]:py-3.5 xl:[&_td]:py-4 2xl:[&_td]:py-4.5 ${tableRowHover}`}>
             <thead className={tableTheadClass}>
               <tr>
-                <SortableTableHead label="Contract ID" columnKey="id" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="w-fit" />
-                <SortableTableHead label="Title" columnKey="title" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="w-40" />
-                <SortableTableHead label="Department" columnKey="department" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="w-38" />
-                <SortableTableHead label="Person In Charge" columnKey="personInCharge" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="w-26" />
-                <SortableTableHead label="Partner" columnKey="partnerName" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="w-32" />
-                <SortableTableHead label="Effective" columnKey="effectiveDate" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="w-28" />
-                <SortableTableHead label="Expiry" columnKey="expiryDate" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="w-28" />
-                <SortableTableHead label="Days Left" columnKey="daysRemaining" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="w-15" />
-                <SortableTableHead label="Status" columnKey="status" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="w-fit" align="center" />
-                <SortableTableHead label="Total Contract Value" columnKey="contractValue" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="w-fit" />
+                <SortableTableHead label="Contract ID" columnKey="id" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="w-28 xl:w-32" />
+                <SortableTableHead label="Title" columnKey="title" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="w-40 lg:max-w-40 xl:w-48 2xl:w-56" />
+                <SortableTableHead label="Department" columnKey="department" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="w-40 xl:w-48" />
+                <SortableTableHead label="Person In Charge" columnKey="personInCharge" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="w-35 lg:max-w-40 xl:w-40" />
+                <SortableTableHead label="Partner" columnKey="partnerName" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="w-36 xl:w-40 lg:max-w-40" />
+                <SortableTableHead label="Effective" columnKey="effectiveDate" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="w-28 xl:w-32" />
+                <SortableTableHead label="Expiry" columnKey="expiryDate" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="w-28 lg:max-w-18 xl:w-32" />
+                <SortableTableHead label="Days Left" columnKey="daysRemaining" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="w-24 lg:max-w-18 xl:w-28" />
+                <SortableTableHead label="Status" columnKey="status" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="w-28 xl:w-32" align="center" />
+                <SortableTableHead label="Total Contract Value" columnKey="contractValue" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="w-35 xl:w-44 2xl:w-48" />
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-300">
               {sortedContracts.length === 0 ? (
-                <tr data-empty className='h-28'>
-                  <td colSpan={10} className="px-4 py-8 text-center text-gray-500">
+                <tr data-empty className="h-28">
+                  <td colSpan={10} className="px-4 py-8 text-center text-gray-500 xl:text-[15px]">
                     No contracts found
                   </td>
                 </tr>
@@ -532,9 +532,13 @@ export function ReportDashboard({
                 sortedContracts.map((contract) => {
                   const daysRemaining = calculateDaysRemaining(contract.expiryDate);
                   return (
-                    <tr key={contract.id} onClick={() => onSelectContract?.(contract)} className="relative transition-all hover:bg-primary cursor-pointer">
+                    <tr
+                      key={contract.id}
+                      onClick={() => onSelectContract?.(contract)}
+                      className="relative transition-all cursor-pointer"
+                    >
                       <td className="relative whitespace-nowrap lg:max-w-0 text-primary font-medium" title={contract.contractCode}>
-                        <span className='text-primary'> {contract.contractCode}</span>
+                        <span className="text-primary">{contract.contractCode}</span>
                       </td>
                       <td className="whitespace-nowrap lg:truncate lg:max-w-0" title={contract.title}>
                         <div className="flex items-center gap-1 min-w-0">
@@ -542,40 +546,64 @@ export function ReportDashboard({
                         </div>
                       </td>
                       <td className="whitespace-nowrap lg:truncate lg:max-w-0" title={contract.department}>
-                        <div className="flex items-center gap-1 min-w-0">
-                          <span className="whitespace-nowrap lg:truncate">{contract.department}</span>
-                        </div>
+                        {(() => {
+                          const name = contract.department ?? '';
+                          const colorMap: Record<string, string> = {
+                            'IT Department': 'bg-pink-100 text-pink-700',
+                            'Legal and Compliance': 'bg-primary/20 text-primary',
+                            'Admin and Marketing': 'bg-purple-100 text-purple-700',
+                          };
+                          const color = colorMap[name] ?? 'bg-gray-100 text-gray-600';
+                          return (
+                            <span className={`inline-block px-2.5 py-1 rounded-md text-xs xl:text-[13px] font-medium ${color}`}>
+                              {name}
+                            </span>
+                          );
+                        })()}
                       </td>
                       <td className="whitespace-nowrap lg:truncate lg:max-w-0" title={contract.personInCharge}>
-                        <div className="flex items-center gap-1 min-w-0">
-                          <span className="whitespace-nowrap lg:truncate">{contract.personInCharge}</span>
-                        </div>
+                        {contract.personInCharge}
                       </td>
                       <td className="whitespace-nowrap lg:truncate lg:max-w-0" title={contract.partnerName}>
-                        <div className="flex items-center gap-1 min-w-0">
-                          <span className="whitespace-nowrap lg:truncate">
-                            {contract.partnerName.includes(',')
-                              ? `${contract.partnerName.split(',')[0].trim()}`
-                              : contract.partnerName}
-                          </span>
-                        </div>
+                        {contract.partnerName}
                       </td>
                       <td className="whitespace-nowrap">{formatDate(contract.effectiveDate)}</td>
                       <td className="whitespace-nowrap">{formatDate(contract.expiryDate)}</td>
                       <td className="whitespace-nowrap">
-                        <span className={`${listStatusTextClass(contract.status)}`}>
-                          {daysRemaining} days
-                        </span>
+                        {(() => {
+                          const days = calculateDaysRemaining(contract.expiryDate);
+                          const maxDays = Math.max(...sortedContracts.map(c => calculateDaysRemaining(c.expiryDate)));
+
+                          let textColor = 'text-green-600';
+                          let barColor = 'bg-green-600';
+                          if (days < 0) { textColor = 'text-red-600'; barColor = 'bg-red-500'; }
+                          else if (days <= 30) { textColor = 'text-red-500'; barColor = 'bg-red-400'; }
+                          else if (days <= 60) { textColor = 'text-orange-500'; barColor = 'bg-orange-400'; }
+                          else if (days <= 90) { textColor = 'text-yellow-600'; barColor = 'bg-yellow-400'; }
+
+                          const barWidth = days < 0 ? 100 : maxDays > 0 ? Math.round((days / maxDays) * 100) : 0;
+
+                          return (
+                            <div className="flex flex-col gap-1 min-w-18">
+                              <span className={`text-sm xl:text-[15px] font-semibold ${textColor}`}>
+                                {days < 0 ? `${Math.abs(days)} overdue` : `${days} days`}
+                              </span>
+                              <div className="h-1 xl:h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
+                                <div className={`h-full rounded-full ${barColor}`} style={{ width: `${barWidth}%` }} />
+                              </div>
+                            </div>
+                          );
+                        })()}
                       </td>
-                      <td className="whitespace-nowrap text-left">
+                      <td className="whitespace-nowrap text-center">
                         <span
-                          className={`inline-block px-1.5 py-0.5 rounded-full text-xs whitespace-nowrap ${getStatusColor(contract.status)}`}
+                          className={`inline-block px-1.5 py-0.5 rounded-full text-xs xl:text-[13px] whitespace-nowrap ${listStatusBadgeClass(contract.status)}`}
                           title={contract.status}
                         >
                           {contract.status}
                         </span>
                       </td>
-                      <td className="whitespace-nowrap truncate max-w-0 text-center" title={formatCurrency(contract.contractValue)}>
+                      <td className="whitespace-nowrap lg:truncate lg:max-w-0 text-center" title={formatCurrency(contract.contractValue)}>
                         {formatCurrency(contract.contractValue)}
                       </td>
                     </tr>
@@ -585,31 +613,31 @@ export function ReportDashboard({
             </tbody>
           </table>
         </div>
-        
-      {/* Results count + pagination */}
-      <div className="flex flex-col sm:flex-row justify-between items-center gap-3 px-4 py-3 border-t border-gray-100">
-        <div className="text-gray-600 text-sm sm:text-base whitespace-nowrap">
-          Showing {sortedContracts.length} of {total} contracts
+
+        {/* Results count + pagination */}
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-3 px-4 py-3 border-t border-gray-100">
+          <div className="text-gray-600 text-sm sm:text-base whitespace-nowrap">
+            Showing {sortedContracts.length} of {total} contracts
+          </div>
+          <div className="flex items-center gap-3">
+            {total > 10 && (
+              <select
+                value={pagination.size}
+                onChange={(e) => { setSize(Number(e.target.value)); goToPage(1); }}
+                className="px-2 py-1.5 sm:py-2 border border-gray-300 rounded-lg text-sm bg-white cursor-pointer"
+              >
+                {[10, 20, 50].map((s) => (
+                  <option key={s} value={s}>Show {s}</option>
+                ))}
+              </select>
+            )}
+            <PaginationBar
+              currentPage={pagination.page}
+              totalPages={totalPages}
+              onPageChange={goToPage}
+            />
+          </div>
         </div>
-        <div className="flex items-center gap-3">
-          {total > 10 && (
-            <select
-              value={pagination.size}
-              onChange={(e) => { setSize(Number(e.target.value)); goToPage(1); }}
-              className="px-2 py-1.5 sm:py-2 border border-gray-300 rounded-lg text-sm bg-white cursor-pointer"
-            >
-              {[10, 20, 50].map((s) => (
-                <option key={s} value={s}>Show {s}</option>
-              ))}
-            </select>
-          )}
-          <PaginationBar
-            currentPage={pagination.page}
-            totalPages={totalPages}
-            onPageChange={goToPage}
-          />
-        </div>
-      </div>
       </div>
 
     </div>

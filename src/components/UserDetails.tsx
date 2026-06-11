@@ -713,14 +713,6 @@ export function UserDetails({
           <div className="px-4 sm:px-6 pt-4 pb-4 max-w-350 mx-auto w-full">
             <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-4 items-center">
               <div className="flex items-start gap-6 min-w-0">
-                <button
-                  type="button"
-                  onClick={() => { if (isFormActive) { exitFormMode(); return; } onClose(); }}
-                  className="shrink-0 flex items-center justify-center w-10 h-10 rounded-lg text-gray-700 hover:bg-gray-100 cursor-pointer"
-                  aria-label="Back"
-                >
-                  ←
-                </button>
                 <div className="min-w-0 flex-1">
                   {isFormActive ? (
                     <>

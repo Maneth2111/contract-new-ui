@@ -198,8 +198,8 @@ export function UserManagement({ currentUser, userPermission, onSelectUser, onRe
   return (
     <div className="space-y-6">
       {/* Summary cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="bg-white p-6 rounded-lg shadow-md  transition-transform duration-200">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="bg-white p-6 rounded-lg shadow-sm  transition-transform duration-200">
           <div className="flex items-center gap-3">
             <span><Users className="w-7 h-7" /></span>
             <div>
@@ -208,7 +208,7 @@ export function UserManagement({ currentUser, userPermission, onSelectUser, onRe
             </div>
           </div>
         </div>
-        <div className="bg-white p-6 rounded-lg shadow-md  transition-transform duration-200">
+        <div className="bg-white p-6 rounded-lg shadow-sm  transition-transform duration-200">
           <div className="flex items-center gap-3">
             <span><Users className="w-7 h-7" /></span>
             <div>
@@ -217,7 +217,7 @@ export function UserManagement({ currentUser, userPermission, onSelectUser, onRe
             </div>
           </div>
         </div>
-        <div className="bg-white p-6 rounded-lg shadow-md  transition-transform duration-200">
+        <div className="bg-white p-6 rounded-lg shadow-sm  transition-transform duration-200">
           <div className="flex items-center gap-3">
             <span><Users className="w-7 h-7 text-red-600" /></span>
             <div>
@@ -226,7 +226,7 @@ export function UserManagement({ currentUser, userPermission, onSelectUser, onRe
             </div>
           </div>
         </div>
-        <div className="bg-white p-6 rounded-lg shadow-md  transition-transform duration-200">
+        <div className="bg-white p-6 rounded-lg shadow-sm  transition-transform duration-200">
           <div className="flex items-center gap-3">
             <span><Users className="w-7 h-7" /></span>
             <div>
@@ -238,8 +238,8 @@ export function UserManagement({ currentUser, userPermission, onSelectUser, onRe
       </div>
 
       {/* Filters */}
-      <div className="bg-white p-4 rounded-lg shadow-md">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="bg-white p-4 rounded-lg shadow-sm">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* Search */}
           <div>
             <label className="block text-gray-700 mb-2 font-medium">Search Users</label>
@@ -298,7 +298,7 @@ export function UserManagement({ currentUser, userPermission, onSelectUser, onRe
       </div>
 
       {/* User Table */}
-      <div className="bg-white rounded-lg shadow-md">
+      <div className="bg-white rounded-lg shadow-sm">
         <div
           className={[
             'overflow-x-auto',
@@ -308,11 +308,11 @@ export function UserManagement({ currentUser, userPermission, onSelectUser, onRe
           <table className={`w-full min-w-max text-sm rounded-t-lg overflow-hidden [&_th]:px-4 [&_th]:py-5 [&_th]:whitespace-nowrap [&_td]:px-4 [&_td]:py-3 ${tableRowHover}`}>
             <thead className={tableTheadClass}>
               <tr>
-                <SortableTableHead label="Employee ID" columnKey="employeeId" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="w-10" />
+                <SortableTableHead label="Employee ID" columnKey="employeeId" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="w-20" />
                 <SortableTableHead label="Full Name" columnKey="fullName" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="w-34" />
                 <SortableTableHead label="Email" columnKey="email" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="w-56" />
                 <SortableTableHead label="Department" columnKey="department" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="w-44" />
-                <SortableTableHead label="Role" columnKey="role" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="w-44" />
+                <SortableTableHead label="Role" columnKey="role" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="w-40" />
                 <SortableTableHead label="Status" columnKey="status" sortKey={sortKey} sortDirection={sortDirection} onSort={toggleSort} className="w-12" />
                 <th className="w-28 text-left text-white font-medium">Actions</th>
               </tr>
@@ -337,8 +337,8 @@ export function UserManagement({ currentUser, userPermission, onSelectUser, onRe
 
                   >
 
-                    <td className="relative">
-                      <span className='text-right ml-5 text-primary font-medium'>
+                    <td className="relative whitespace-nowrap">
+                      <span className='text-right text-primary font-medium '>
                         {user.employeeId}
                       </span>
                     </td>
@@ -390,31 +390,32 @@ export function UserManagement({ currentUser, userPermission, onSelectUser, onRe
                 ))
               )}
             </tbody>
-            {/* Results count + pagination */}
-            <div className="flex flex-col sm:flex-row justify-between items-center gap-3 px-4 py-3 border-t border-gray-100">
-              <div className="text-gray-600 text-sm sm:text-base whitespace-nowrap">
-                Showing {sortedUsers.length} of {total} users
-              </div>
-              <div className="flex items-center gap-3">
-                {total > 10 && (
-                  <select
-                    value={pagination.size}
-                    onChange={(e) => { setSize(Number(e.target.value)); goToPage(1); }}
-                    className="px-2 py-1.5 sm:py-2 border border-gray-300 rounded-lg text-sm bg-white cursor-pointer"
-                  >
-                    {[10, 20, 50].map((s) => (
-                      <option key={s} value={s}>Show {s}</option>
-                    ))}
-                  </select>
-                )}
-                <PaginationBar
-                  currentPage={pagination.page}
-                  totalPages={totalPages}
-                  onPageChange={goToPage}
-                />
-              </div>
-            </div>
+
           </table>
+          {/* Results count + pagination */}
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-3 px-4 py-3 border-t border-gray-100">
+            <div className="text-gray-600 text-sm sm:text-base whitespace-nowrap">
+              Showing {sortedUsers.length} of {total} users
+            </div>
+            <div className="flex items-center gap-3">
+              {total > 10 && (
+                <select
+                  value={pagination.size}
+                  onChange={(e) => { setSize(Number(e.target.value)); goToPage(1); }}
+                  className="px-2 py-1.5 sm:py-2 border border-gray-300 rounded-lg text-sm bg-white cursor-pointer"
+                >
+                  {[10, 20, 50].map((s) => (
+                    <option key={s} value={s}>Show {s}</option>
+                  ))}
+                </select>
+              )}
+              <PaginationBar
+                currentPage={pagination.page}
+                totalPages={totalPages}
+                onPageChange={goToPage}
+              />
+            </div>
+          </div>
         </div>
       </div>
 
